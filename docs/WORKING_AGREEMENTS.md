@@ -47,6 +47,8 @@ repo for changes before acting. Last updated: 13 Nov 2026.
 | 13 Nov | No-show stock is not resold (window already ended); it becomes leftovers for the food-bank offer | Fixes a contradiction in the first workflow diagram |
 | 13 Nov | Local setup: Laragon/Herd on Windows | Owner's choice |
 | 13 Nov | Mockup approvals: clickable canvas + PNGs | Owner's choice |
+| 13 Nov | Fonts are bundled with the app (`@fontsource` npm packages), not linked from Google Fonts | Same fonts, but the demo works with no internet |
+| 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
 
 ## Current status
 
@@ -56,12 +58,13 @@ repo for changes before acting. Last updated: 13 Nov 2026.
 | First-draft mockups (green style) | ✅ done, superseded by style C |
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
-| Build plan (`docs/BUILD_PLAN.md`) | ✅ written, waiting for owner's "go" |
-| Laravel prototype | ❌ not started (Stage 0 next) |
+| Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) next |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
 
+- Run the README "Run it locally" steps once on the Windows machine (about 10 min) and report any error.
 - Confirm the business rules above with the team.
 - Optional: send real photos of campus food to replace the drawn ones.
 - Decide whether the repo should stay public (it is public now).
@@ -77,4 +80,6 @@ repo for changes before acting. Last updated: 13 Nov 2026.
 1. ✅ Owner approved the style C screens (asked for food pictures, now added).
 2. ✅ Build plan written: `docs/BUILD_PLAN.md`. Stages 0–4 (marked **F**) are the foundation and go to
    the strongest model (Fable); stages 5–8 (**A**) follow those patterns and suit any model.
-3. ⏳ Owner opens a new session on Fable, attaches the repo, and says "go" → start Stage 0.
+3. ✅ Stage 0 done: Laravel app set up, tests pass on SQLite and MySQL (see `docs/PROJECT_NOTES.md`).
+4. ⏳ Owner runs the README "Run it locally" steps on Windows and reports what happens.
+5. ⏳ Stage 1: database, models, demo data.

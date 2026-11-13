@@ -1,6 +1,6 @@
 # FoodLoop · build plan
 
-Status: ⏳ waiting for the owner's "go" · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
+Status: ✅ approved by the owner 13 Nov 2026 · Stage 0 done, Stage 1 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
 
 **Who does what.** Stages marked **F** are the hard, foundational ones: run them on the strongest model
 (Fable). Stages marked **A** follow patterns that F stages set up, so any model can do them by copying
@@ -91,7 +91,7 @@ transaction, so controllers never change status or stock directly.
 
 ## 6. Stages
 
-### Stage 0 · Project setup · F
+### Stage 0 · Project setup · F · ✅ done 13 Nov 2026
 
 **Inputs:** this file §2, `docs/WORKING_AGREEMENTS.md`.
 
