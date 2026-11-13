@@ -12,10 +12,22 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style directions A–D | ✅ | Same canvas, page "Style directions" |
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
-| Database + routes plan | ❌ | — |
-| Laravel prototype | ❌ | — |
+| Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
+| Laravel prototype | ❌ Stage 0 next | — |
 
 ---
+
+## 13 Nov 2026 · Build plan and session instructions
+
+- **What:** `docs/BUILD_PLAN.md` (stack, business rules with config keys, data model, reservation state
+  machine, 9 stages with inputs and "done when") and `CLAUDE.md` (what every new session reads first).
+- **Why:** the owner is switching to Fable for a limited trial. Stages 0–4 hold the hard, foundational
+  work (reservation engine with row locking, scheduler jobs, roles, design-system components, one full
+  reference slice), so later models extend patterns instead of inventing them. New sessions read the
+  repo docs instead of this long chat, which saves usage.
+- **Correction:** the first workflow said no-show stock goes back on sale; it can't (window already over).
+  It now becomes leftovers for the food-bank offer. Whiteboard updated to match.
+- **Tested:** n/a (planning). Business rules still need the team's confirmation.
 
 ## 13 Nov 2026 · Food pictures added; repo set up
 
