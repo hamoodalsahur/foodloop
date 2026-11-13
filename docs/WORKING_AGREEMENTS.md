@@ -1,0 +1,76 @@
+# FoodLoop · working agreements
+
+How the owner and Claude work on FoodLoop. Read this at the start of every session, then check the
+repo for changes before acting. Last updated: 13 Nov 2026.
+
+## Project facts
+
+| | |
+|---|---|
+| Project and goal | FoodLoop: students reserve discounted surplus food from nearby sellers and collect it themselves |
+| Type | ENT600 Technology Entrepreneurship group assignment (NPD report + 5-minute pitch); responsive web app |
+| Repository | `hamoodalsahur/foodloop` on GitHub, branch `main` (public) |
+| Owner's computer | Windows, PowerShell, Laragon or Herd for PHP/MySQL |
+| Stack | Laravel (PHP) + MySQL; Blade views styled to the approved mockups |
+| Mockups | Design canvas "FoodLoop UI Mockups" (claude.ai artifact) + checked PNG exports |
+| Workflow diagram | Whiteboard "FoodLoop System Workflow" (claude.ai artifact) |
+| Notes file | `docs/PROJECT_NOTES.md` |
+| Who writes what | Claude designs, builds, tests and keeps notes/evidence. The team (or another AI) writes the report from the notes |
+| Deadlines | Report 19 Nov 2026 · pitch Week 9, 22–26 Nov 2026 |
+| Hard requirements | Follow the ENT600 NPD template; group of 5–6; 2D prototype evidence (screens) |
+
+## Rules from the workflow guide that apply
+
+- Owner decides; Claude recommends. Casual, short messages, outcome first.
+- Visual work: mockups of every state (normal, empty, error, success, phone width) approved before building.
+- Sizeable work: plan first, build after a "yes".
+- Commits: short, in the owner's voice, **no co-author or session trailers**. Stage only what belongs.
+- Never commit secrets (`.env`); keep `.env.example`.
+- Every feature has tests; UI checked in a real browser with screenshots.
+- Demo data is labelled as demo data and never presented as real results.
+- Owner's manual tasks: ≤ 10 minutes, exact PowerShell commands, realistic examples.
+
+## Decisions (with reasons)
+
+| Date | Decision | Why |
+|---|---|---|
+| 13 Nov | Web app (no IoT), customer collects food; no delivery | Cheaper to build; keeps the focus on surplus food, not logistics |
+| 13 Nov | Focus on building the system first; the report waits | Owner's call |
+| 13 Nov | Visual style C "Bold", palette forest `#0E2A20`, marigold `#FFB800`, cream `#FAF6EE`; Space Grotesk headings, Inter body | Owner picked C; Claude replaced the original tomato-red palette (owner asked for a better one) with colours that read as food + sustainability |
+| 13 Nov | Business rules: 15-min grace then auto-release; 3 no-shows = 7-day reservation limit; free cancel until 30 min before the window | Proposed by Claude; ⚠️ team still to confirm |
+| 13 Nov | Halal status is a required listing field (JAKIM certified / Muslim-owned / not halal) | Essential for Malaysian users |
+| 13 Nov | Leftovers can be offered to a partner food bank ("sell-then-donate loop") | Differentiates FoodLoop from Value Food / ReMeal |
+| 13 Nov | GitHub repo `hamoodalsahur/foodloop` (created public) | Owner's choice |
+| 13 Nov | Food pictures: drawn illustrations as stand-ins for seller photos | Owner wanted pictures; no licence issues; real photos can replace them |
+| 13 Nov | Local setup: Laragon/Herd on Windows | Owner's choice |
+| 13 Nov | Mockup approvals: clickable canvas + PNGs | Owner's choice |
+
+## Current status
+
+| Item | Status |
+|---|---|
+| System workflow whiteboard | ✅ done |
+| First-draft mockups (green style) | ✅ done, superseded by style C |
+| Style directions A–D | ✅ done; C chosen |
+| Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
+| Database + routes plan | ❌ not started |
+| Laravel prototype | ❌ not started |
+| Concept testing with students | ❌ not started |
+
+## Owner still needs to
+
+- Confirm the business rules above with the team.
+- Optional: send real photos of campus food to replace the drawn ones.
+- Decide whether the repo should stay public (it is public now).
+- Name a real food bank partner (placeholder for now).
+
+## Pending questions
+
+- Which campus/area is the pilot location?
+- Does the lecturer accept interface screenshots as the "2D prototype"?
+
+## Next steps
+
+1. ✅ Owner approved the style C screens (asked for food pictures, now added).
+2. Claude writes the database + routes plan (plan template, wait for "yes").
+3. Claude builds the Laravel prototype: seller posts → student reserves → code → collected.
