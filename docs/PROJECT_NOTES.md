@@ -13,9 +13,32 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | ❌ Stage 0 next | — |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 next | repo root; setup steps in `README.md` |
 
 ---
+
+## 13 Nov 2026 · Stage 0 · Project setup
+
+- **What:** Laravel 13.42 app at the repo root (PHP 8.3+). Fortify 1.42 for sign-in, Tailwind 4 +
+  Alpine 3 through Vite 8, Pest 4 for tests. `config/foodloop.php` holds the §3 rule values;
+  time zone is Asia/Kuala_Lumpur; `.env.example` is set up for MySQL with comments. The style C colours
+  and fonts are Tailwind tokens in `resources/css/app.css`. A temporary home page (`/`) in style C replaces
+  Laravel's welcome page until the real screens arrive. README has the Windows setup steps.
+- **Choices made on the way (and why):**
+  - *Fonts ship with the app.* Space Grotesk and Inter come from the `@fontsource` npm packages instead of
+    a Google Fonts link. Same fonts, but they load with no internet (safer for the pitch demo).
+  - *Fortify has no screens yet.* `views` is off and only registration + login/logout are on. Stage 4 adds
+    our own login/register screens and turns on password reset (its email link needs a screen to land on).
+    Two-factor and passkeys are not used; their migrations were removed.
+  - *Two test configs.* `phpunit.xml` = SQLite in memory (fast). `phpunit.mysql.xml` = same tests on the
+    MySQL database `foodloop_test`.
+- **Tested:** 10 tests, 32 assertions (home page loads and carries the demo-data note; every §3 value and
+  the time zone; register, duplicate email, login, wrong password, logout). Passed on SQLite in memory and
+  on MySQL 8.0.46. `npm run build` succeeds. Home page opened in Chrome at 390 px and 1280 px: status 200,
+  no console errors, no failed requests, both fonts loaded, nothing wider than the screen, the "How it
+  works" tabs switch (Alpine works). Screenshots: `docs/screenshots/stage0-home-*.png`.
+- **Not tested:** the Windows/Laragon setup steps in README. They are the standard Laravel commands and
+  were run on Linux in the build environment, not on the owner's machine. Owner to run them and report.
 
 ## 13 Nov 2026 · Build plan and session instructions
 
