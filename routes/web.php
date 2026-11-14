@@ -5,6 +5,7 @@ use App\Http\Controllers\DealController;
 use App\Http\Controllers\DevPreviewController;
 use App\Http\Controllers\ImpactController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 /*
 | Who can open what:
 |
-|   everyone ............ /  (the deals), /listings/{id}, /login, /register
+|   everyone ............ /  (the deals), /map, /listings/{id}, /login, /register
 |   guests .............. /sell (shop sign-up)
 |   customers only ...... reserving, /orders/...
 |   sellers only ........ /seller/...
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DealController::class, 'index'])->name('deals.index');
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
+Route::get('/map', MapController::class)->name('map');
 
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::post('/listings/{listing}/reservations', [ReservationController::class, 'store'])
