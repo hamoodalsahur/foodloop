@@ -1,7 +1,7 @@
 # FoodLoop · working agreements
 
 How the owner and Claude work on FoodLoop. Read this at the start of every session, then check the
-repo for changes before acting. Last updated: 14 Nov 2026.
+repo for changes before acting. Last updated: 14 Nov 2026 (Stage 5).
 
 ## Project facts
 
@@ -65,6 +65,8 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | 14 Nov | Reservations close when the pickup window **opens**, not when it ends | Team decision on the Stage 4 question; matches the mockup's "Reservations close in" |
 | 14 Nov | "Halal only" stays as built: hides only "not halal" (certified and Muslim-owned both show) | Team: certified-only filter is too much hassle |
 | 14 Nov | Fable trial work ends after Stage 4; Stages 5–8 are built in the owner's main chat | Owner's call |
+| 14 Nov | Once anyone has reserved, a listing's price, portions, pickup time and halal status are locked; name, photo, description and pausing stay editable | Owner's decision: students keep the deal they booked |
+| 14 Nov | Shops sign up on their own "Sell on FoodLoop" page (`/sell`) | Owner's decision: clearer than a role choice on the student sign-up |
 
 ## Current status
 
@@ -75,7 +77,7 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov · Stage 5 (seller flow) next, built in the owner's main chat (not Fable) |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov · Stage 5 (seller flow) ✅ done 14 Nov · Stage 6 (impact page) next |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
@@ -83,7 +85,7 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 - Run the README "Run it locally" steps once on the Windows machine (about 10 min) and report any error.
 - Confirm the business rules above with the team (the 4 questions from Stage 2 are answered and built).
 - Open the design-system pages once (README → "See the design system") and say if anything looks off.
-- Walk through README → "Try the student flow" once on the Windows machine and say if anything looks off.
+- Walk through README → "Try the student flow" and "Try the seller flow" once on the Windows machine and say if anything looks off.
 - Optional: send real photos of campus food to replace the drawn ones.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).
@@ -105,7 +107,9 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 7. ✅ Owner's four rule decisions built (changed-my-mind 5 min, max 3 per customer per listing, refunds, blocked customers lose waiting reservations).
 8. ✅ Stage 3 done: roles, policies, layouts, design system, `/dev/components`, `docs/UI_GUIDE.md` (251 tests on MySQL).
 9. ✅ Stage 4 done: the student flow end to end (368 tests on MySQL, walked through in Chrome at phone and desktop width).
-10. ⏳ Stage 5: the seller flow (register a shop, create and manage listings, check pickup codes, donations). Plan first, then build.
+10. ✅ Stage 5 done: the seller flow (420 tests on SQLite, checked in Chromium at phone and desktop width).
+11. ⏳ Owner walks through README → "Try the seller flow" on Windows.
+12. ⏳ Stage 6: the impact page.
 
 ## Commit roles (14 Nov)
 

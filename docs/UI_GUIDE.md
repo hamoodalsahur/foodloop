@@ -268,6 +268,15 @@ The round back button on detail pages. `label` is read out by screen readers. `o
 A labelled field. It shows the validation error for its `name` by itself and fills the old value back in
 after a failed submit (never for passwords).
 
+### `x-form.select` · `x-form.textarea`
+
+```blade
+<x-form.select name="category" label="Category" :options="['bakery' => 'Bakery', 'meals' => 'Meals']" :value="$listing->category?->value" />
+<x-form.textarea name="description" label="What customers might get" :value="$listing->description" rows="3" />
+```
+
+Same as `x-form.input`: label, error and old value built in.
+
 ### `x-empty-state`
 
 ```blade

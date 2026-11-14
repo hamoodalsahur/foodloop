@@ -5,12 +5,14 @@ use App\Http\Controllers\DevPreviewController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\Seller;
 use Illuminate\Support\Facades\Route;
 
 /*
 | Who can open what:
 |
 |   everyone ............ /  (the deals), /listings/{id}, /login, /register
+|   guests .............. /sell (shop sign-up)
 |   customers only ...... reserving, /orders/...
 |   sellers only ........ /seller/...
 |   admins only ......... /admin/...
@@ -36,8 +38,32 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::delete('/orders/{reservation}', [OrderController::class, 'destroy'])->name('orders.destroy');
 });
 
+// "Sell on FoodLoop": a shop's own sign-up page (signed-in people get sent home).
+Route::middleware('guest')->group(function () {
+    Route::get('/sell', [Seller\SignUpController::class, 'create'])->name('seller.sign-up');
+    Route::post('/sell', [Seller\SignUpController::class, 'store'])->middleware('throttle:10,1')->name('seller.sign-up.store');
+});
+
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
-    Route::view('/', 'areas.seller')->name('dashboard');
+    Route::get('/', Seller\DashboardController::class)->name('dashboard');
+
+    Route::get('/listings', [Seller\ListingController::class, 'index'])->name('listings.index');
+    Route::get('/listings/new', [Seller\ListingController::class, 'create'])->name('listings.create');
+    Route::post('/listings', [Seller\ListingController::class, 'store'])->name('listings.store');
+    Route::get('/listings/{listing}/edit', [Seller\ListingController::class, 'edit'])->name('listings.edit');
+    Route::put('/listings/{listing}', [Seller\ListingController::class, 'update'])->name('listings.update');
+    Route::post('/listings/{listing}/publish', [Seller\ListingController::class, 'publish'])->name('listings.publish');
+    Route::post('/listings/{listing}/pause', [Seller\ListingController::class, 'pause'])->name('listings.pause');
+    Route::delete('/listings/{listing}', [Seller\ListingController::class, 'destroy'])->name('listings.destroy');
+    Route::post('/listings/{listing}/donation', [Seller\ListingController::class, 'offerLeftovers'])->name('listings.donation');
+
+    Route::get('/pickups', [Seller\PickupController::class, 'index'])->name('pickups.index');
+    Route::post('/pickups/collect', [Seller\PickupController::class, 'collect'])->middleware('throttle:30,1')->name('pickups.collect');
+
+    Route::get('/donations', Seller\DonationController::class)->name('donations.index');
+
+    Route::get('/profile', [Seller\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [Seller\ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
