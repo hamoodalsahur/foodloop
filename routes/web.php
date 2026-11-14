@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\DealController;
 use App\Http\Controllers\DevPreviewController;
+use App\Http\Controllers\ImpactController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
@@ -38,6 +39,8 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{reservation}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{reservation}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+    Route::get('/impact', ImpactController::class)->name('impact');
 
     Route::post('/listings/{listing}/reports', [ReportController::class, 'store'])
         ->middleware('throttle:10,1')
