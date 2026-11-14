@@ -170,6 +170,15 @@
             </div>
         </section>
 
+        <section id="week-bars" class="{{ $section }}">
+            <h2 class="{{ $name }}">x-week-bars</h2>
+            <x-card class="mt-4 max-w-sm">
+                <x-week-bars class="mt-8" :weeks="collect([1, 2, 4, 2, 3, 2])->map(fn ($meals, $i) => [
+                    'label' => 'W'.($i + 1), 'dates' => 'sample week '.($i + 1), 'meals' => $meals, 'current' => $i === 5,
+                ])" />
+            </x-card>
+        </section>
+
         <section id="notice" class="{{ $section }}">
             <h2 class="{{ $name }}">x-notice</h2>
             <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">

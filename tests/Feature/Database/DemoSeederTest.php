@@ -1,9 +1,11 @@
 <?php
 
+use App\Enums\DonationStatus;
 use App\Enums\HalalStatus;
 use App\Enums\ReservationStatus;
 use App\Enums\SellerStatus;
 use App\Enums\UserRole;
+use App\Models\Donation;
 use App\Models\FoodBankPartner;
 use App\Models\Listing;
 use App\Models\Report;
@@ -107,7 +109,7 @@ it('matches the pickups table on the seller mockup', function () {
 });
 
 it('gives every seeded reservation a fixed pickup code, so the demo is the same every time', function () {
-    $tonight = ['4721', '3390', '6208', '1185', '9052', '2846', '5173', '7730', '6412', '8059'];
+    $tonight = ['4721', '3390', '6208', '1185', '9052', '2846', '5173', '7730', '6412', '8059', '2468'];
     $ainasHistory = array_map(strval(...), range(1000, 1011));
 
     expect(Reservation::pluck('pickup_code')->sort()->values()->all())
@@ -184,6 +186,33 @@ it('keeps real-looking details as obvious placeholders', function () {
             ->and($shop->phone)->toBe('[PHONE]')
             ->and($shop->address)->toBe('[SHOP ADDRESS]');
     });
+});
+
+it('has a pickup that can be handed over right away, for the live demo', function () {
+    $ainas = Reservation::firstWhere('pickup_code', '2468');
+
+    expect($ainas->customer->email)->toBe('aina@foodloop.test')
+        ->and($ainas->listing->seller->business_name)->toBe('Daily Grind Café')
+        ->and($ainas->listing->pickup_start->isPast())->toBeTrue()
+        ->and($ainas->listing->pickup_end->isFuture())->toBeTrue();
+
+    // The seller types the code and it works, with no waiting for a pickup window.
+    $collected = reservations()->collect($ainas->listing->seller, '2468');
+
+    expect($collected->status)->toBe(ReservationStatus::Collected);
+});
+
+it('has food-bank donations, so the donation numbers are not all zero', function () {
+    $donations = Donation::with('listing.seller', 'partner')->get();
+
+    expect($donations)->toHaveCount(3)
+        ->and($donations->pluck('listing.seller.business_name')->unique()->all())->toBe(['Roti Lane Bakery'])
+        ->and($donations->pluck('partner.name')->unique()->all())->toBe(['[FOOD BANK PARTNER NAME]'])
+        ->and($donations->where('status', DonationStatus::Collected)->sum('quantity'))->toBe(8)
+        ->and($donations->where('status', DonationStatus::Offered)->sum('quantity'))->toBe(1);
+
+    // Never more than was actually left over.
+    $donations->each(fn ($donation) => expect($donation->quantity)->toBeLessThanOrEqual($donation->listing->leftovers()));
 });
 
 it('does nothing when the demo data is already there', function () {
