@@ -71,10 +71,13 @@ describe('customer layout', function () {
             ->assertDontSee('Log in');
     });
 
-    it('greys out menu items whose page is not built yet instead of linking nowhere', function () {
+    it('links all four menu items now that every page exists', function () {
         $this->blade('<x-layouts.customer active="deals">Hi</x-layouts.customer>')
             ->assertSee('href="'.route('deals.index').'"', false)
-            ->assertSee('Map<span class="sr-only"> (coming soon)</span>', false)
+            ->assertSee('href="'.route('map').'"', false)
+            ->assertSee('href="'.route('orders.index').'"', false)
+            ->assertSee('href="'.route('impact').'"', false)
+            ->assertDontSee('(coming soon)')
             ->assertDontSee('href="#"', false);
     });
 

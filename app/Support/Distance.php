@@ -46,6 +46,27 @@ class Distance
         return self::between($origin['lat'], $origin['lng'], $seller->lat, $seller->lng);
     }
 
+    /**
+     * How far east and north of "you are here" a shop is, in km (negative =
+     * west / south). Used to place shops on the simplified map. Null when the
+     * shop has no coordinates.
+     *
+     * @return array{east: float, north: float}|null
+     */
+    public static function offsetTo(Seller $seller): ?array
+    {
+        if ($seller->lat === null || $seller->lng === null) {
+            return null;
+        }
+
+        $origin = self::origin();
+
+        return [
+            'east' => self::between($origin['lat'], $origin['lng'], $origin['lat'], $seller->lng) * ($seller->lng < $origin['lng'] ? -1 : 1),
+            'north' => self::between($origin['lat'], $origin['lng'], $seller->lat, $origin['lng']) * ($seller->lat < $origin['lat'] ? -1 : 1),
+        ];
+    }
+
     /** "0.4 km", "12 km"; null stays null so views can leave it out. */
     public static function label(?float $km): ?string
     {
