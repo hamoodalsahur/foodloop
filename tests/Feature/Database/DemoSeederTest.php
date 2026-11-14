@@ -180,6 +180,10 @@ it('copies the demo food pictures and points every listing at one that exists', 
     );
 });
 
+it('uses the drawn pictures when no real photos were provided', function () {
+    expect(Listing::firstWhere('title', 'Curry puffs × 4')->photo_path)->toBe('listings/demo/curry-puffs.svg');
+});
+
 it('keeps real-looking details as obvious placeholders', function () {
     Seller::where('status', SellerStatus::Approved)->get()->each(function (Seller $shop) {
         expect($shop->ssm_no)->toBe('[SSM NO.]')

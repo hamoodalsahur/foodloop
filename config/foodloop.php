@@ -43,6 +43,12 @@ return [
     // certificate on file.
     'halal_statuses' => ['certified', 'muslim_owned', 'not_halal'],
 
+    // Where the demo seeder finds its food pictures. Drawn pictures (*.svg)
+    // are in this folder; a real photo with the same name in its "real"
+    // subfolder (real/curry-puffs.jpg) is used instead when it exists.
+    // See docs/demo-food/real/README.md.
+    'demo_photo_dir' => base_path('docs/demo-food'),
+
     // Where "you are here" is. DEMO VALUE: a made-up point that the demo shops
     // are placed around, until the team picks the pilot campus. Distances on
     // the deals page ("0.4 km") are measured from here.
