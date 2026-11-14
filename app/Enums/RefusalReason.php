@@ -39,7 +39,7 @@ enum RefusalReason: string
             self::SellerNotApproved => 'This seller isn’t taking reservations right now.',
             self::SoldOut => 'Sold out. Someone just took the last one.',
             self::ListingNotLive => 'This listing isn’t available right now.',
-            self::WindowEnded => 'The pickup window for this listing has ended.',
+            self::WindowEnded => 'Reservations for this listing closed when its pickup window opened.',
             self::InvalidQuantity => 'Choose at least 1.',
             self::OverMaxQuantity => 'You can reserve up to '.config('foodloop.max_qty_per_listing').' of each listing.',
             self::OverListingLimit => 'You already have some of this listing. The limit is '.config('foodloop.max_qty_per_listing').' per person.',

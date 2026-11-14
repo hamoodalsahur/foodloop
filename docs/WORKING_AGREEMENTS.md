@@ -62,6 +62,9 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | 14 Nov | Left out of the prototype: deal alerts, "Notify me next time", password reset | In the mockups but not in the build plan |
 | 14 Nov | Every screen is built from the components and rules in `docs/UI_GUIDE.md`; colours by name, money through the helper, 44 px touch targets, no emoji | Keeps later stages (and other models) on the approved style |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
+| 14 Nov | Reservations close when the pickup window **opens**, not when it ends | Team decision on the Stage 4 question; matches the mockup's "Reservations close in" |
+| 14 Nov | "Halal only" stays as built: hides only "not halal" (certified and Muslim-owned both show) | Team: certified-only filter is too much hassle |
+| 14 Nov | Fable trial work ends after Stage 4; Stages 5–8 are built in the owner's main chat | Owner's call |
 
 ## Current status
 
@@ -72,7 +75,7 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov (on `fable-work`, waiting for the writer) · Stage 5 (seller flow) next |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov · Stage 5 (seller flow) next, built in the owner's main chat (not Fable) |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
@@ -81,7 +84,6 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 - Confirm the business rules above with the team (the 4 questions from Stage 2 are answered and built).
 - Open the design-system pages once (README → "See the design system") and say if anything looks off.
 - Walk through README → "Try the student flow" once on the Windows machine and say if anything looks off.
-- Ask the team the two questions in the Stage 4 entry of `docs/PROJECT_NOTES.md`: should reserving stop when the pickup window opens (now: when it ends), and should "Halal only" mean certified only (now: everything except "not halal")?
 - Optional: send real photos of campus food to replace the drawn ones.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).

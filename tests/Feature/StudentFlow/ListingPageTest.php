@@ -42,7 +42,7 @@ describe('an open listing', function () {
             ->assertSeeInOrder([
                 'Back to deals', 'Surprise Bundle', 'Example of a typical bundle',
                 '60% off', 'You pay RM8', 'instead of RM20',
-                'Reservations close in', '02:42:00',
+                'Reservations close in', '00:42:00',
                 'Bakery Surprise Bundle', 'Roti Lane Bakery', '0.6 km', 'verified seller',
                 'Pickup', '7–9 PM', 'Left', '3 of 5', 'Halal', 'Certified', 'Contains', 'Egg, milk, wheat',
                 '4–6 of today’s unsold breads, buns and pastries.',
@@ -50,7 +50,7 @@ describe('an open listing', function () {
     });
 
     it('starts the live countdown from the seconds left until reservations close', function () {
-        $this->get($this->url)->assertSee('x-data="countdown(9720, true)"', false);
+        $this->get($this->url)->assertSee('x-data="countdown(2520, true)"', false);
     });
 
     it('says the day when pickup is not today, and "Not stated" without allergens', function () {
@@ -128,8 +128,8 @@ describe('who sees which reserve button', function () {
 describe('sold out (mockup c07)', function () {
     beforeEach(function () {
         $this->listing->update(['quantity_available' => 0, 'status' => 'sold_out']);
-        dealAt(0.4, ['title' => 'Curry puffs × 4', 'pickup_end' => now()->addMinutes(18)]);
-        dealAt(0.9, ['title' => 'Iced latte', 'pickup_end' => now()->addMinutes(33)]);
+        dealAt(0.4, ['title' => 'Curry puffs × 4', 'pickup_start' => now()->addMinutes(18)]);
+        dealAt(0.9, ['title' => 'Iced latte', 'pickup_start' => now()->addMinutes(33)]);
     });
 
     it('says sold out and suggests what is still available, soonest first', function () {
@@ -155,6 +155,15 @@ it('shows an ended listing as ended, with other deals', function () {
     $this->get($this->url)
         ->assertOk()
         ->assertSeeInOrder(['Pickup window ended at 9 PM', 'Ended', 'Still available nearby', 'Nothing else right now'])
+        ->assertDontSee('Reserve for');
+});
+
+it('shows "Closed" once pickup has started: no new reservations, but not ended yet (team decision, 14 Nov)', function () {
+    $this->travelTo('2026-11-16 19:00:30');
+
+    $this->get($this->url)
+        ->assertOk()
+        ->assertSeeInOrder(['Pickup started at 7 PM', 'no new reservations', 'Closed', 'Still available nearby'])
         ->assertDontSee('Reserve for');
 });
 

@@ -74,7 +74,7 @@ it('blocks the customer for 7 days at the third strike and restarts the count', 
         ->and($customer->blocked_until->equalTo(now()->addDays(7)))->toBeTrue()
         ->and($customer->isBlocked())->toBeTrue();
 
-    $later = Listing::factory()->window(60, 60 * 24 * 10)->create();
+    $later = Listing::factory()->window(60 * 24 * 10, 60 * 24 * 11)->create();
 
     expectRefusal(
         fn () => reservations()->reserve($customer, $later, 1, PaymentMethod::PayNow),

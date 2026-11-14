@@ -88,7 +88,7 @@ describe('x-deal-row', function () {
     beforeEach(function () {
         $this->listing = Listing::factory()
             ->for(Seller::factory()->approved()->state(['business_name' => 'Mak Long’s Kuih']))
-            ->window(-60, 18)
+            ->window(18, 90)
             ->create(['title' => 'Curry puffs × 4', 'price_sen' => 300, 'original_price_sen' => 600]);
     });
 
@@ -107,7 +107,7 @@ describe('x-deal-row', function () {
         $soon = $this->blade('<x-deal-row :listing="$listing" />', ['listing' => $this->listing]);
         $soon->assertSee('rounded-md bg-marigold', false);
 
-        $later = Listing::factory()->window(-60, 90)->create();
+        $later = Listing::factory()->window(90, 150)->create();
         $this->blade('<x-deal-row :listing="$listing" />', ['listing' => $later])
             ->assertSee('1h 30m left')
             ->assertDontSee('rounded-md bg-marigold', false);

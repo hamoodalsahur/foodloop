@@ -1,6 +1,6 @@
 {{--
     One listing (mockups c02 and c07). Everyone can open it.
-    $state is 'open' (can be reserved), 'sold_out' or 'ended'.
+    $state is 'open' (can be reserved), 'sold_out', 'closed' (pickup has started, no new reservations) or 'ended'.
     Data comes from App\Http\Controllers\ListingController.
 --}}
 @php
@@ -42,11 +42,13 @@
                 <p class="text-sm font-bold">
                     @if ($state === 'sold_out')
                         All {{ $listing->quantity_total }} rescued
+                    @elseif ($state === 'closed')
+                        Pickup started at {{ PickupWindow::time($listing->pickup_start) }} · no new reservations
                     @else
                         Pickup window ended {{ PickupWindow::day($listing->pickup_end) === 'Today' ? 'at '.PickupWindow::time($listing->pickup_end) : PickupWindow::day($listing->pickup_end) }}
                     @endif
                 </p>
-                <p class="font-display text-6xl font-bold leading-none tracking-tight">{{ $state === 'sold_out' ? 'Sold out' : 'Ended' }}</p>
+                <p class="font-display text-6xl font-bold leading-none tracking-tight">{{ match ($state) { 'sold_out' => 'Sold out', 'closed' => 'Closed', default => 'Ended' } }}</p>
             </div>
         @endif
     </div>
@@ -201,7 +203,7 @@
             <div class="mt-auto space-y-3 pt-6">
                 <x-button size="lg" variant="outline" :href="route('deals.index')">See all deals</x-button>
                 {{-- Looks like the reserve button, but there is nothing to press. --}}
-                <p class="flex min-h-14 items-center justify-center rounded-2xl bg-line font-semibold text-muted">{{ $state === 'sold_out' ? 'Sold out' : 'Ended' }}</p>
+                <p class="flex min-h-14 items-center justify-center rounded-2xl bg-line font-semibold text-muted">{{ match ($state) { 'sold_out' => 'Sold out', 'closed' => 'Closed', default => 'Ended' } }}</p>
             </div>
         @endif
     </div>

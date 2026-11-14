@@ -17,6 +17,22 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 
 ---
 
+
+## 14 Nov 2026 · Reservations now close when pickup opens
+
+- **What:** the team answered the two Stage 4 questions. (1) Reserving stops when the pickup window
+  **opens** (was: when it ends). One place decides it, `Listing::reservationsCloseAt()`, used by the
+  reservation service, the deals list (sorting, "min left", "closing within the hour") and the listing
+  page countdown. A live listing whose pickup has started shows a new **"Closed"** state ("Pickup started
+  at 7:00 PM · no new reservations"). Cancelling a reservation still puts stock back on sale only before
+  pickup opens. (2) "Halal only" stays as built.
+- **Demo data:** the curry puffs, latte and nasi ayam windows now start 20, 35 and 60 minutes after
+  seeding, so the deals page still matches the mockup order and times; Hafiz's latte pickup is now
+  waiting instead of collected (it couldn't be collected before the window opens). The sandwich pack's
+  pickup has started, so it no longer shows on the deals page.
+- **Tested:** 366 passed, 2 skipped on SQLite (the MySQL-only race test was not run here). Tests changed
+  to the new rule: reserving 1 minute before opening works and is refused once it opens; the late
+  "changed my mind" case now reserves 10 minutes before opening; deals sort and count by opening time.
 ## 14 Nov 2026 · Stage 4 · The student flow, end to end
 
 - **What:** a student can now go from the deals page to a pickup code.

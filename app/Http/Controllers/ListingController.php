@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ListingStatus;
 use App\Models\Listing;
 use App\Models\Reservation;
 use App\Queries\DealsQuery;
@@ -43,6 +44,7 @@ class ListingController extends Controller
             'state' => match (true) {
                 $open => 'open',
                 $listing->quantity_available < 1 && $listing->pickup_end->isFuture() => 'sold_out',
+                $listing->status === ListingStatus::Live && $listing->pickup_end->isFuture() => 'closed',
                 default => 'ended',
             },
             'held' => $held,

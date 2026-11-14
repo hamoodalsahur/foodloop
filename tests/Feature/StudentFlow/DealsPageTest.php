@@ -25,9 +25,9 @@ it('is open to everyone and says clearly that this is demo data with simulated p
 });
 
 it('lists deals closing soonest first, with shop, distance, time left and price', function () {
-    dealAt(0.9, ['title' => 'Iced latte', 'price_sen' => 450, 'original_price_sen' => 900, 'pickup_end' => now()->addMinutes(33)], 'Daily Grind Café');
-    dealAt(0.4, ['title' => 'Curry puffs × 4', 'price_sen' => 300, 'original_price_sen' => 600, 'pickup_end' => now()->addMinutes(18)], 'Mak Long’s Kuih');
-    dealAt(0.3, ['title' => 'Nasi ayam set', 'pickup_end' => now()->addMinutes(58)]);
+    dealAt(0.9, ['title' => 'Iced latte', 'price_sen' => 450, 'original_price_sen' => 900, 'pickup_start' => now()->addMinutes(33)], 'Daily Grind Café');
+    dealAt(0.4, ['title' => 'Curry puffs × 4', 'price_sen' => 300, 'original_price_sen' => 600, 'pickup_start' => now()->addMinutes(18)], 'Mak Long’s Kuih');
+    dealAt(0.3, ['title' => 'Nasi ayam set', 'pickup_start' => now()->addMinutes(58)]);
 
     $this->get('/')
         ->assertSeeInOrder(['18 min left', 'Curry puffs × 4', 'Mak Long’s Kuih', '0.4 km', 'RM3', '33 min left', 'Iced latte', 'Daily Grind Café', '0.9 km', 'RM4.50', 'Nasi ayam set'])
@@ -57,9 +57,9 @@ it('only shows deals that can be reserved right now', function () {
 
 describe('sorting', function () {
     beforeEach(function () {
-        dealAt(1.5, ['title' => 'Far cheap new', 'price_sen' => 200, 'pickup_end' => now()->addMinutes(90), 'published_at' => now()->subMinutes(5)]);
-        dealAt(0.2, ['title' => 'Near pricey old', 'price_sen' => 900, 'pickup_end' => now()->addMinutes(60), 'published_at' => now()->subHours(5)]);
-        dealAt(0.8, ['title' => 'Middle closing', 'price_sen' => 500, 'pickup_end' => now()->addMinutes(20), 'published_at' => now()->subHours(2)]);
+        dealAt(1.5, ['title' => 'Far cheap new', 'price_sen' => 200, 'pickup_start' => now()->addMinutes(90), 'published_at' => now()->subMinutes(5)]);
+        dealAt(0.2, ['title' => 'Near pricey old', 'price_sen' => 900, 'pickup_start' => now()->addMinutes(60), 'published_at' => now()->subHours(5)]);
+        dealAt(0.8, ['title' => 'Middle closing', 'price_sen' => 500, 'pickup_start' => now()->addMinutes(20), 'published_at' => now()->subHours(2)]);
     });
 
     it('orders the list by the chosen tab', function (string $query, array $order) {
@@ -150,18 +150,18 @@ describe('the tiles and the strip', function () {
     });
 
     it('says how many deals close within the hour', function () {
-        dealAt(0.4, ['pickup_end' => now()->addMinutes(18)]);
-        dealAt(0.4, ['pickup_end' => now()->addMinutes(60)]);
-        dealAt(0.4, ['pickup_end' => now()->addMinutes(61)]);
+        dealAt(0.4, ['pickup_start' => now()->addMinutes(18)]);
+        dealAt(0.4, ['pickup_start' => now()->addMinutes(60)]);
+        dealAt(0.4, ['pickup_start' => now()->addMinutes(61)]);
 
         $this->get('/')->assertSee('2 deals close within the hour');
     });
 
     it('uses the singular for one deal, and a calm line when nothing is closing', function () {
-        $deal = dealAt(0.4, ['pickup_end' => now()->addMinutes(18)]);
+        $deal = dealAt(0.4, ['pickup_start' => now()->addMinutes(18)]);
         $this->get('/')->assertSee('1 deal closes within the hour');
 
-        $deal->update(['pickup_end' => now()->addHours(3)]);
+        $deal->update(['pickup_start' => now()->addHours(2)]);
         $this->get('/')->assertSee('Quiet right now');
     });
 });
