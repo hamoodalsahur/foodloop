@@ -2,11 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Enums\DonationStatus;
 use App\Enums\HalalStatus;
 use App\Enums\ListingCategory;
 use App\Enums\ListingStatus;
 use App\Enums\ListingType;
 use App\Enums\ReportReason;
+use App\Models\Donation;
 use App\Models\FoodBankPartner;
 use App\Models\Listing;
 use App\Models\Report;
@@ -330,8 +332,9 @@ class DemoSeeder extends Seeder
             'nasiayam' => $this->listing($shops, 'nasiayam', [
                 ...$window(60, 120), 'quantity_total' => 4, 'quantity_available' => 2,
             ]),
+            // Pickup is open right now, so this is the one a seller can hand over in a live demo.
             'sandwich' => $this->listing($shops, 'sandwich', [
-                ...$window(-25, 95), 'quantity_total' => 5, 'quantity_available' => 4,
+                ...$window(-25, 95), 'quantity_total' => 5, 'quantity_available' => 3,
             ]),
             // The flash deal that sold out and ended an hour ago, so it is closed.
             'croissants' => $this->listing($shops, 'croissants', [
@@ -366,6 +369,9 @@ class DemoSeeder extends Seeder
         ]);
         $croissants->noShow()->create(['customer_id' => $customers['daniel']->id, 'pickup_code' => '9052']);
 
+        // Daniel's uncollected croissants were offered to the food bank when the listing closed.
+        $this->donate($listings['croissants'], 1, DonationStatus::Offered, $this->now->subMinutes(40));
+
         // The other shops' listings: every portion that is no longer
         // available belongs to a reservation, so the stock numbers add up.
         Reservation::factory()->for($listings['puffs'])->create([
@@ -380,10 +386,28 @@ class DemoSeeder extends Seeder
         Reservation::factory()->for($listings['nasiayam'])->create([
             'customer_id' => $customers['hafiz']->id, 'pickup_code' => '6412', 'quantity' => 2,
         ]);
+        // FOR THE PITCH DEMO: Aina is "at the counter" of Daily Grind Café with
+        // code 2468. The pickup window is open, so the seller can type the code
+        // and mark it collected straight away (docs/DEMO_SCRIPT.md).
+        Reservation::factory()->for($listings['sandwich'])->create([
+            'customer_id' => $customers['aina']->id, 'pickup_code' => '2468',
+        ]);
         // Mei Ling collected this one and then reported it (see the report in run()).
         Reservation::factory()->for($listings['sandwich'])->collected()->create([
             'customer_id' => $customers['meiling']->id, 'pickup_code' => '8059',
             'collected_at' => $this->now->subMinutes(10),
+        ]);
+    }
+
+    /** Leftovers of a closed listing that went to the placeholder food bank partner. */
+    private function donate(Listing $listing, int $quantity, DonationStatus $status, CarbonImmutable $when): void
+    {
+        Donation::factory()->for($listing)->create([
+            'food_bank_partner_id' => FoodBankPartner::query()->value('id'),
+            'quantity' => $quantity,
+            'status' => $status,
+            'created_at' => $when,
+            'updated_at' => $when,
         ]);
     }
 
@@ -429,6 +453,11 @@ class DemoSeeder extends Seeder
                 'closed_at' => $windowEnd,
                 'created_at' => $collectedAt->subHours(4),
             ]);
+
+            // Two of the older bakery bundles had leftovers that the food bank collected.
+            if ($product === 'bundle' && in_array($weeksAgo, [1, 2], true)) {
+                $this->donate($listing, 5 - $portions, DonationStatus::Collected, $windowEnd);
+            }
 
             Reservation::factory()->for($listing)->paidNow()->collected()->create([
                 'customer_id' => $aina->id,

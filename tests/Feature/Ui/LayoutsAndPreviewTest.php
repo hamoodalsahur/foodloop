@@ -18,7 +18,7 @@ describe('developer preview pages', function () {
             ->assertOk()
             ->assertSeeInOrder([
                 'x-button', 'x-card', 'x-tag', 'x-status-pill', 'x-price-box', 'x-food-photo',
-                'x-deal-row', 'x-stat-tile', 'x-spec-grid', 'x-notice', 'x-countdown', 'x-back-link', 'x-form.input',
+                'x-deal-row', 'x-stat-tile', 'x-spec-grid', 'x-week-bars', 'x-notice', 'x-countdown', 'x-back-link', 'x-form.input',
                 'x-empty-state', 'x-error-state',
             ])
             ->assertSee('sample data')

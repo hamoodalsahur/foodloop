@@ -229,6 +229,17 @@ The two-column box of facts on a listing. An odd last item spans the full width.
 `size`: `sm` (48 px), `md` (80 px, default), `hero` (full width). Without a path it shows a plate
 placeholder. Give `alt=""` when the title is written right next to the picture.
 
+### `x-week-bars`
+
+```blade
+<x-week-bars :weeks="$weeks" unit="meal" />
+```
+
+The small bar chart on the impact page: one bar per week, oldest first. `weeks` is a list of
+`['label' => 'W1', 'dates' => '9–15 Nov', 'meals' => 4, 'current' => false]` (see
+`App\Queries\CustomerImpact::weeks()`). Every bar shows its number, the current week is marigold and also
+says "This week", the dates appear on hover or keyboard focus, and screen readers get a table.
+
 ### `x-notice`
 
 ```blade

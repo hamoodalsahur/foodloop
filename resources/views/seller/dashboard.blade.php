@@ -53,7 +53,7 @@
                         <x-food-photo :path="$listing->photo_path" alt="" size="sm" />
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <a href="{{ route('seller.listings.edit', $listing) }}" class="font-bold underline-offset-4 hover:underline">{{ $listing->title }}</a>
+                                <a href="{{ route('seller.listings.edit', $listing) }}" class="inline-flex min-h-11 items-center font-bold underline-offset-4 hover:underline">{{ $listing->title }}</a>
                                 @include('seller.partials.listing-status', ['listing' => $listing])
                             </div>
                             <p class="mt-0.5 text-sm text-muted">
