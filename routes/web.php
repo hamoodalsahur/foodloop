@@ -1,25 +1,39 @@
 <?php
 
+use App\Http\Controllers\DealController;
 use App\Http\Controllers\DevPreviewController;
+use App\Http\Controllers\ListingController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 
 /*
 | Who can open what:
 |
-|   everyone ............ /                (later: deals, listing pages)
-|   customers only ...... /orders          (later: impact, reservations)
+|   everyone ............ /  (the deals), /listings/{id}, /login, /register
+|   customers only ...... reserving, /orders/...
 |   sellers only ........ /seller/...
 |   admins only ......... /admin/...
 |
 | `auth` sends guests to /login; `role:x` gives everyone else a 403.
 | On top of this, the policies in app/Policies decide what a signed-in person
 | may do with one particular listing or reservation (only their own).
+|
+| The login, register and logout routes come from Laravel Fortify
+| (app/Providers/FortifyServiceProvider.php).
 */
 
-Route::view('/', 'home')->name('home');
+Route::get('/', [DealController::class, 'index'])->name('deals.index');
+Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
 
 Route::middleware(['auth', 'role:customer'])->group(function () {
-    Route::view('/orders', 'areas.orders')->name('orders.index');
+    Route::post('/listings/{listing}/reservations', [ReservationController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('reservations.store');
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{reservation}', [OrderController::class, 'show'])->name('orders.show');
+    Route::delete('/orders/{reservation}', [OrderController::class, 'destroy'])->name('orders.destroy');
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {

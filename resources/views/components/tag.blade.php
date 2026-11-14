@@ -4,14 +4,16 @@
     <x-tag>Surprise Bundle</x-tag>            forest (default)
     <x-tag variant="marigold">On</x-tag>
     <x-tag variant="outline">Flash Deal</x-tag>
+    <x-tag variant="cream">Cancelled</x-tag>      (outline, for forest backgrounds)
 --}}
-@props(['variant' => 'forest']) {{-- forest | marigold | outline --}}
+@props(['variant' => 'forest']) {{-- forest | marigold | outline | cream --}}
 
 @php
     $variants = [
         'forest' => 'bg-forest text-cream',
         'marigold' => 'bg-marigold text-forest',
         'outline' => 'border border-forest text-forest',
+        'cream' => 'border border-cream text-cream', // outline for dark (forest) backgrounds
     ];
 @endphp
 

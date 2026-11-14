@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Enums\ListingStatus;
 use App\Models\Listing;
 use App\Models\User;
 
@@ -22,10 +21,14 @@ class ListingPolicy
         return true;
     }
 
-    /** Live listings are public; anything else only for its shop and admins. */
+    /**
+     * Published listings (live, sold out, closed) are public, so an old link
+     * shows "sold out" or "ended" instead of an error. Drafts and paused
+     * listings are only for their shop and admins.
+     */
     public function view(?User $user, Listing $listing): bool
     {
-        return $listing->status === ListingStatus::Live
+        return $listing->isPublished()
             || $user?->isAdmin()
             || $this->owns($user, $listing);
     }

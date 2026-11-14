@@ -1,6 +1,6 @@
 # FoodLoop · build plan
 
-Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–3 done, Stage 4 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
+Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–4 done, Stage 5 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
 
 **Who does what.** Stages marked **F** are the hard, foundational ones: run them on the strongest model
 (Fable). Stages marked **A** follow patterns that F stages set up, so any model can do them by copying
@@ -154,7 +154,7 @@ transaction, so controllers never change status or stock directly.
 - **Done when:** a components demo page (`/dev/components`, local only) shows every component; role
   access tests pass.
 
-### Stage 4 · Student flow, end to end · F (the reference slice)
+### Stage 4 · Student flow, end to end · F (the reference slice) · ✅ done 14 Nov 2026
 
 **Inputs:** `c01`–`c07` mockups, `docs/UI_GUIDE.md`.
 

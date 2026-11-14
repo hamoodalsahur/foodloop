@@ -57,6 +57,9 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | 14 Nov | Max 3 portions per customer per listing (not just per reservation) | Owner's decision: closes the loophole of reserving twice |
 | 14 Nov | A cancelled pay-now reservation becomes "refunded (simulated)"; no-shows are not refunded | Owner's decision |
 | 14 Nov | When a customer gets blocked, their waiting reservations are cancelled and the food goes back on sale | Owner's decision |
+| 14 Nov | Every page follows route → controller → form request → service → Blade → feature test (`docs/UI_GUIDE.md`, "How to add a page") | One pattern for the later stages to copy |
+| 14 Nov | Distances are measured from a made-up "you are here" point in `config/foodloop.php` until the pilot campus is chosen | The pilot location is still an open question |
+| 14 Nov | Left out of the prototype: deal alerts, "Notify me next time", password reset | In the mockups but not in the build plan |
 | 14 Nov | Every screen is built from the components and rules in `docs/UI_GUIDE.md`; colours by name, money through the helper, 44 px touch targets, no emoji | Keeps later stages (and other models) on the approved style |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
 
@@ -69,7 +72,7 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov (on `fable-work`, waiting for the writer) · Stage 4 (student flow) next |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov (on `fable-work`, waiting for the writer) · Stage 5 (seller flow) next |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
@@ -77,6 +80,8 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 - Run the README "Run it locally" steps once on the Windows machine (about 10 min) and report any error.
 - Confirm the business rules above with the team (the 4 questions from Stage 2 are answered and built).
 - Open the design-system pages once (README → "See the design system") and say if anything looks off.
+- Walk through README → "Try the student flow" once on the Windows machine and say if anything looks off.
+- Ask the team the two questions in the Stage 4 entry of `docs/PROJECT_NOTES.md`: should reserving stop when the pickup window opens (now: when it ends), and should "Halal only" mean certified only (now: everything except "not halal")?
 - Optional: send real photos of campus food to replace the drawn ones.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).
@@ -97,7 +102,8 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 6. ✅ Stage 2 done: reservation engine (151 tests on MySQL incl. a real race for the last item).
 7. ✅ Owner's four rule decisions built (changed-my-mind 5 min, max 3 per customer per listing, refunds, blocked customers lose waiting reservations).
 8. ✅ Stage 3 done: roles, policies, layouts, design system, `/dev/components`, `docs/UI_GUIDE.md` (251 tests on MySQL).
-9. ⏳ Stage 4: the student flow end to end (deals, listing, reserve, orders, cancel, login screens). Plan first, then build.
+9. ✅ Stage 4 done: the student flow end to end (368 tests on MySQL, walked through in Chrome at phone and desktop width).
+10. ⏳ Stage 5: the seller flow (register a shop, create and manage listings, check pickup codes, donations). Plan first, then build.
 
 ## Commit roles (14 Nov)
 

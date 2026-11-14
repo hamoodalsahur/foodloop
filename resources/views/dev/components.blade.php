@@ -98,6 +98,7 @@
                 <x-tag>Sold out</x-tag>
                 <x-tag variant="marigold">On</x-tag>
                 <x-tag variant="outline">Flash Deal</x-tag>
+                <span class="rounded-xl bg-forest p-2"><x-tag variant="cream">Cancelled</x-tag></span>
             </div>
         </section>
 
@@ -169,6 +170,41 @@
             </div>
         </section>
 
+        <section id="notice" class="{{ $section }}">
+            <h2 class="{{ $name }}">x-notice</h2>
+            <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                <x-notice>Free cancellation until <strong>6:30 PM</strong>. After that it counts as a no-show.</x-notice>
+                <x-notice variant="danger">Sold out. Someone just took the last one.</x-notice>
+                <x-notice variant="success">Reservation cancelled. No strike, and the food is back on sale.</x-notice>
+            </div>
+        </section>
+
+        <section id="countdown" class="{{ $section }}">
+            <h2 class="{{ $name }}">x-countdown</h2>
+            <div class="mt-4 max-w-sm rounded-3xl bg-forest px-5 py-4 text-cream">
+                <div class="flex items-center justify-between gap-4">
+                    <p class="text-sm text-mist">Reservations close in</p>
+                    <x-countdown :until="now()->addMinutes(42)->addSeconds(10)" :reload="false" class="text-2xl" />
+                </div>
+            </div>
+        </section>
+
+        <section id="back-link" class="{{ $section }}">
+            <h2 class="{{ $name }}">x-back-link</h2>
+            <div class="mt-4 flex items-center gap-4">
+                <x-back-link href="#back-link" label="Back to deals" />
+                <div class="rounded-2xl bg-forest p-3"><x-back-link href="#back-link" label="Back to orders" on="forest" /></div>
+            </div>
+        </section>
+
+        <section id="form-input" class="{{ $section }}">
+            <h2 class="{{ $name }}">x-form.input</h2>
+            <div class="mt-4 grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-2">
+                <x-form.input name="sample_email" label="Email" type="email" value="aina@foodloop.test" />
+                <x-form.input name="sample_password" label="Password" type="password" hint="At least 8 characters." />
+            </div>
+        </section>
+
         <section id="empty-state" class="{{ $section }}">
             <h2 class="{{ $name }}">x-empty-state</h2>
             <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -177,6 +213,12 @@
                     <x-button variant="outline" href="#empty-state">Search within 5 km</x-button>
                 </x-empty-state>
                 <x-empty-state title="No pickups yet today" />
+            </div>
+            <div class="mt-6 max-w-sm">
+                <p class="text-sm text-muted">With <code class="font-mono font-bold">page</code>, for when the whole page is empty:</p>
+                <x-empty-state page title="All gone nearby." message="Everything within 2 km has been rescued. Try a wider area, or check back later.">
+                    <x-button size="lg" href="#empty-state">Search within 5 km</x-button>
+                </x-empty-state>
             </div>
         </section>
 
@@ -187,6 +229,12 @@
                 <x-error-state title="We couldn’t load your orders"
                                message="Check your connection and try again. Your reservations are safe."
                                retry-url="#error-state" />
+            </div>
+            <div class="mt-6 max-w-sm">
+                <p class="text-sm text-muted">With <code class="font-mono font-bold">page</code>, for when the whole page failed:</p>
+                <x-error-state page title="Couldn’t load deals." message="Check your connection and try again." retry-url="#error-state">
+                    <x-button size="lg" variant="outline" href="#error-state">Show my pickup code</x-button>
+                </x-error-state>
             </div>
         </section>
     </main>

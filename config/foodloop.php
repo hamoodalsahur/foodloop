@@ -43,6 +43,19 @@ return [
     // certificate on file.
     'halal_statuses' => ['certified', 'muslim_owned', 'not_halal'],
 
+    // Where "you are here" is. DEMO VALUE: a made-up point that the demo shops
+    // are placed around, until the team picks the pilot campus. Distances on
+    // the deals page ("0.4 km") are measured from here.
+    'demo_origin' => ['lat' => 3.0690, 'lng' => 101.5040],
+
+    // The distance filter on the deals page: the choices in km, and the one
+    // used when the customer hasn't picked. "Any distance" is always offered too.
+    'distance_choices_km' => [2, 5],
+    'default_distance_km' => 2,
+
+    // A deal counts as "closing within the hour" for the strip on the deals page.
+    'closing_soon_minutes' => 60,
+
     // Payments are simulated only (no gateway).
     'payment_methods' => ['pay_now', 'pay_at_pickup'],
 

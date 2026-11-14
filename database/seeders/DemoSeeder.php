@@ -33,11 +33,6 @@ class DemoSeeder extends Seeder
     /** Every demo account signs in with this password. */
     public const PASSWORD = 'password';
 
-    /** A made-up "you are here" point; shop coordinates are offsets from it. */
-    private const ORIGIN_LAT = 3.0690;
-
-    private const ORIGIN_LNG = 101.5040;
-
     /** Roughly one kilometre in degrees at this latitude. */
     private const KM = 0.009;
 
@@ -179,7 +174,8 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * A shop with its seller account, placed $km away from the origin point
+     * A shop with its seller account, placed $km away from the made-up "you
+     * are here" point (config foodloop.demo_origin)
      * in the compass direction $bearing (0 = north, 90 = east).
      *
      * @param  array<string, mixed>  $extra
@@ -195,8 +191,8 @@ class DemoSeeder extends Seeder
             'ssm_no' => '[SSM NO.]',
             'phone' => '[PHONE]',
             'address' => '[SHOP ADDRESS]',
-            'lat' => round(self::ORIGIN_LAT + cos(deg2rad($bearing)) * $km * self::KM, 7),
-            'lng' => round(self::ORIGIN_LNG + sin(deg2rad($bearing)) * $km * self::KM, 7),
+            'lat' => round(config('foodloop.demo_origin.lat') + cos(deg2rad($bearing)) * $km * self::KM, 7),
+            'lng' => round(config('foodloop.demo_origin.lng') + sin(deg2rad($bearing)) * $km * self::KM, 7),
             'halal_claim' => HalalStatus::MuslimOwned,
             ...$extra,
         ]);
@@ -309,25 +305,30 @@ class DemoSeeder extends Seeder
      */
     private function tonightsListings(array $shops): array
     {
+        // Count from the last 5-minute mark, so pickup times read like real
+        // ones ("4:55–6:55 PM", not "4:53–6:53 PM"). The "min left" numbers on
+        // the deals page are therefore up to 5 minutes less than written here.
+        $slot = $this->now->subMinutes($this->now->minute % 5);
+
         $window = fn (int $start, int $end) => [
-            'pickup_start' => $this->now->addMinutes($start),
-            'pickup_end' => $this->now->addMinutes($end),
-            'published_at' => $this->now->subHours(4),
+            'pickup_start' => $slot->addMinutes($start),
+            'pickup_end' => $slot->addMinutes($end),
+            'published_at' => $slot->subHours(4),
         ];
 
         return [
             'puffs' => $this->listing($shops, 'puffs', [
-                ...$window(-60, 18), 'quantity_total' => 6, 'quantity_available' => 4,
+                ...$window(-60, 20), 'quantity_total' => 6, 'quantity_available' => 4,
             ]),
             'latte' => $this->listing($shops, 'latte', [
-                ...$window(-45, 33), 'quantity_total' => 8, 'quantity_available' => 5,
+                ...$window(-45, 35), 'quantity_total' => 8, 'quantity_available' => 5,
             ]),
-            // Pickup window opens in 42 minutes and lasts two hours; 3 of 5 left.
+            // Pickup window opens in about 45 minutes and lasts two hours; 3 of 5 left.
             'bundle' => $this->listing($shops, 'bundle', [
-                ...$window(42, 162), 'quantity_total' => 5, 'quantity_available' => 3, 'offer_leftovers' => true,
+                ...$window(45, 165), 'quantity_total' => 5, 'quantity_available' => 3, 'offer_leftovers' => true,
             ]),
             'nasiayam' => $this->listing($shops, 'nasiayam', [
-                ...$window(-30, 58), 'quantity_total' => 4, 'quantity_available' => 2,
+                ...$window(-30, 60), 'quantity_total' => 4, 'quantity_available' => 2,
             ]),
             'sandwich' => $this->listing($shops, 'sandwich', [
                 ...$window(-25, 95), 'quantity_total' => 5, 'quantity_available' => 4,
@@ -335,7 +336,7 @@ class DemoSeeder extends Seeder
             // The flash deal that sold out and ended an hour ago, so it is closed.
             'croissants' => $this->listing($shops, 'croissants', [
                 ...$window(-180, -60), 'quantity_total' => 4, 'quantity_available' => 0,
-                'status' => ListingStatus::Closed, 'closed_at' => $this->now->subMinutes(60),
+                'status' => ListingStatus::Closed, 'closed_at' => $slot->subMinutes(60),
             ]),
         ];
     }

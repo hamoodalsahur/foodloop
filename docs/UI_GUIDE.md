@@ -50,7 +50,9 @@ Defined once in `resources/css/app.css` (`@theme`). Each name works with every T
 | `muted` | `cream` / `white` / `line` | 6.1 / 6.5 / 4.9 |
 | `mist` | `forest` | 8.1 |
 | `marigold` | `forest` | 8.8 |
-| `danger` | `cream` / `danger-soft` | 6.1 / 5.7 |
+| `danger` | `cream` / `white` / `danger-soft` | 6.1 / 6.6 / 5.7 |
+| `white` | `danger` | 6.6 |
+| `muted` | `marigold-soft` | 5.4 |
 
 **Never:** `marigold` text on a light background (1.6), `muted` text on `marigold` (3.8), `mist` on anything
 but `forest`.
@@ -87,8 +89,23 @@ into the header.
 
 - `active`: `deals`, `map`, `orders` or `impact` (marks the current page).
 - `notice` slot: optional dark strip under the header.
-- A menu link stays `#` until its page exists; the layout looks routes up by name (`home`, `map`,
-  `orders.index`, `impact`, `login`).
+- `:header="false"`: no logo bar, for detail pages that start with a picture or a dark block
+  (the listing page, the "You're booked" page). Give those an `<x-back-link>`.
+- `:nav="false"`: no bottom navigation, for pages with their own big button at the bottom.
+- `flush`: no side padding; the page adds its own `px-5` where it wants it.
+- A menu item is greyed out ("coming soon") until its page exists; the layout looks routes up by name
+  (`deals.index`, `map`, `orders.index`, `impact`). Adding a route with that name switches the link on.
+- It shows the flash message `session('status')` in a green-dark notice, and a red "You're offline" strip
+  when the phone loses its connection. You get both for free.
+
+### Log in and register: `<x-layouts.auth>`
+
+```blade
+<x-layouts.auth title="Log in">
+    <x-slot:intro>Good food is waiting. Log in to reserve it.</x-slot:intro>
+    <form method="POST" action="{{ route('login.store') }}" class="space-y-4">…</form>
+</x-layouts.auth>
+```
 
 ### Seller pages: `<x-layouts.seller>` · Admin pages: `<x-layouts.admin>`
 
@@ -176,7 +193,7 @@ at 35 minutes or less (`App\Support\TimeLeft`). With nothing left it says "Sold 
 ```
 
 Small uppercase label for deal types, "Sold out", on/off. `variant`: `forest` (default), `marigold`,
-`outline`.
+`outline`, and `cream` (an outline for forest backgrounds).
 
 ### `x-stat-tile`
 
@@ -212,6 +229,45 @@ The two-column box of facts on a listing. An odd last item spans the full width.
 `size`: `sm` (48 px), `md` (80 px, default), `hero` (full width). Without a path it shows a plate
 placeholder. Give `alt=""` when the title is written right next to the picture.
 
+### `x-notice`
+
+```blade
+<x-notice>Free cancellation until <strong>6:30 PM</strong>. After that it counts as a no-show.</x-notice>
+<x-notice variant="danger">{{ $message }}</x-notice>
+<x-notice variant="success">{{ session('status') }}</x-notice>
+```
+
+A short message in a soft box. `info` (soft marigold, default) for a rule to know, `danger` for something
+that went wrong or was refused, `success` for a confirmation.
+
+### `x-countdown`
+
+```blade
+<x-countdown :until="$listing->pickup_end" class="text-2xl" />
+```
+
+A live `00:42:10` clock. The server prints the starting value, Alpine ticks it down, and the page reloads
+once when it reaches zero so it can show what comes next. Add `:reload="false"` to stop that.
+
+### `x-back-link`
+
+```blade
+<x-back-link :href="route('deals.index')" label="Back to deals" />
+<x-back-link :href="route('orders.index')" label="Back to orders" on="forest" />
+```
+
+The round back button on detail pages. `label` is read out by screen readers. `on="forest"` for dark headers.
+
+### `x-form.input`
+
+```blade
+<x-form.input name="email" label="Email" type="email" autocomplete="username" required />
+<x-form.input name="password" label="Password" type="password" hint="At least 8 characters." />
+```
+
+A labelled field. It shows the validation error for its `name` by itself and fills the old value back in
+after a failed submit (never for passwords).
+
 ### `x-empty-state`
 
 ```blade
@@ -221,7 +277,14 @@ placeholder. Give `alt=""` when the title is written right next to the picture.
 </x-empty-state>
 ```
 
-For any list with nothing in it. Say what is empty, why, and offer one next step.
+For any list with nothing in it. Say what is empty, why, and offer one next step. Add `page` for the big
+left-aligned version when the whole page is empty (mockup c05):
+
+```blade
+<x-empty-state page title="All gone nearby." message="Everything within 2 km has been rescued.">
+    <x-button size="lg" href="…">Search within 5 km</x-button>
+</x-empty-state>
+```
 
 ### `x-error-state`
 
@@ -232,6 +295,7 @@ For any list with nothing in it. Say what is empty, why, and offer one next step
 ```
 
 For anything that failed to load. Always has **Try again** (reloads the page, or goes to `retry-url`).
+Add `page` for the big version when the whole page failed (mockup c06).
 
 ## Patterns
 
@@ -240,13 +304,68 @@ For anything that failed to load. Always has **Try again** (reloads the page, or
 - **Tables:** a real `<table>` from `md:` up, a stack of small cards below that
   (see `resources/views/dev/layout-dashboard.blade.php`).
 - **Forms:** inputs are `min-h-11 rounded-xl border-2 border-forest bg-cream px-3`, each with a `<label>`.
-- **Refusals:** when the reservation engine says no, show `$exception->reason->label()`; the sentences are
-  written in `App\Enums\RefusalReason`.
+- **Refusals:** when the reservation engine says no, show `$exception->reason->label()` in an
+  `x-notice variant="danger"`; the sentences are written in `App\Enums\RefusalReason`.
 - **Who sees what:** wrap role areas in `Route::middleware(['auth', 'role:seller'])` and check single
   records with the policies: `Gate::authorize('update', $listing)` in controllers, `@can('publish', $listing)`
   in views.
 - **Words:** plain and short. "Sold out. Someone just took the last one." beats "Insufficient inventory".
 - **Demo data** is always called demo or sample data on the page that shows it.
+
+## How to add a page
+
+Every page in FoodLoop is built the same way. Copy the student flow from Stage 4; it has one of
+everything.
+
+| Step | What | Example to copy |
+|---|---|---|
+| 1 | **Route** in `routes/web.php`, inside the group for who may open it | `Route::get('/orders', …)` in the `auth` + `role:customer` group |
+| 2 | **Controller**: fetch what the page needs, return a view. No business rules here | `app/Http/Controllers/OrderController.php` |
+| 3 | **Form request** (only for forms): check the input and who is asking | `app/Http/Requests/StoreReservationRequest.php` |
+| 4 | **Service**: the business rules live here and nowhere else | `app/Services/ReservationService.php` |
+| 5 | **Blade page** made from a layout and the components above | `resources/views/orders/show.blade.php` |
+| 6 | **Feature test**: what the page shows, and who may not open it | `tests/Feature/StudentFlow/ReserveAndOrdersTest.php` |
+
+The form pattern in full (`app/Http/Controllers/ReservationController.php`):
+
+```php
+public function store(StoreReservationRequest $request, Listing $listing, ReservationService $reservations): RedirectResponse
+{
+    try {
+        $reservation = $reservations->reserve($request->user(), $listing, $request->integer('quantity'), $request->paymentMethod());
+    } catch (ReservationRefused $refused) {
+        // The service said no: go back to the form and show why.
+        return redirect()->route('listings.show', $listing)->withInput()
+            ->withErrors(['reservation' => $refused->reason->label()]);
+    }
+
+    // It worked: go to the page that shows the result.
+    return redirect()->route('orders.show', $reservation);
+}
+```
+
+And on the page, next to the form:
+
+```blade
+@error('reservation')
+    <x-notice variant="danger">{{ $message }}</x-notice>
+@enderror
+```
+
+Rules of thumb:
+
+- **One record, one check.** `Gate::authorize('cancel', $reservation)` in the controller (policies are in
+  `app/Policies`). Use `abort_unless(Gate::allows('view', $listing), 404)` when the thing should look like
+  it doesn't exist.
+- **Lists that can fail or be empty** get both states: see `DealController` (it catches the database
+  error and shows `x-error-state page`) and `deals/index.blade.php` (`x-empty-state page`).
+- **Dates and distances** go through `App\Support\PickupWindow` ("Today 7–9 PM"), `App\Support\TimeLeft`
+  ("18 min left", "00:42:10") and `App\Support\Distance` ("0.4 km").
+- **Small interactions** (a stepper, a confirm step, a menu) use Alpine. Register anything reusable in
+  `resources/js/app.js`; make sure the page still works with JavaScript off.
+- **In tests,** time is frozen with `$this->travelTo('2026-11-16 18:18:00')`, and after the service changes
+  the signed-in user (a strike, a block) call `$this->actingAs($user->fresh())` before the next page: a
+  real browser reads the user fresh on every page, a test keeps the old copy.
 
 ## Before you call a screen done
 

@@ -21,6 +21,16 @@ enum HalalStatus: string
         };
     }
 
+    /** The short form for tight spaces such as the facts box on a listing. */
+    public function shortLabel(): string
+    {
+        return match ($this) {
+            self::Certified => 'Certified',
+            self::MuslimOwned => 'Muslim-owned',
+            self::NotHalal => 'Not halal',
+        };
+    }
+
     /**
      * All stored values, e.g. for validation rules.
      *

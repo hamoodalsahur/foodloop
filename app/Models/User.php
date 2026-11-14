@@ -78,6 +78,16 @@ class User extends Authenticatable
         return $this->role === UserRole::Admin;
     }
 
+    /** Where this account lands after signing in: deals, the seller area or the admin area. */
+    public function homeUrl(): string
+    {
+        return match ($this->role) {
+            UserRole::Seller => route('seller.dashboard'),
+            UserRole::Admin => route('admin.dashboard'),
+            default => route('deals.index'),
+        };
+    }
+
     /** Blocked from reserving right now (too many no-shows)? */
     public function isBlocked(): bool
     {
