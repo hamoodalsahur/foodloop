@@ -9,6 +9,7 @@ enum PaymentStatus: string
 {
     case SimulatedPaid = 'simulated_paid';
     case Unpaid = 'unpaid';
+    case Refunded = 'refunded';
 
     /** The text shown to people. */
     public function label(): string
@@ -16,6 +17,7 @@ enum PaymentStatus: string
         return match ($this) {
             self::SimulatedPaid => 'Paid (simulated)',
             self::Unpaid => 'Pay at pickup',
+            self::Refunded => 'Refunded (simulated)',
         };
     }
 

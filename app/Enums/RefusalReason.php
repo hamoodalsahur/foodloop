@@ -17,6 +17,7 @@ enum RefusalReason: string
     case WindowEnded = 'window_ended';
     case InvalidQuantity = 'invalid_quantity';
     case OverMaxQuantity = 'over_max_quantity';
+    case OverListingLimit = 'over_listing_limit';
     case NotEnoughStock = 'not_enough_stock';
 
     // cancel(), markNoShow()
@@ -40,7 +41,8 @@ enum RefusalReason: string
             self::ListingNotLive => 'This listing isn’t available right now.',
             self::WindowEnded => 'The pickup window for this listing has ended.',
             self::InvalidQuantity => 'Choose at least 1.',
-            self::OverMaxQuantity => 'You can reserve up to '.config('foodloop.max_qty_per_reservation').' per reservation.',
+            self::OverMaxQuantity => 'You can reserve up to '.config('foodloop.max_qty_per_listing').' of each listing.',
+            self::OverListingLimit => 'You already have some of this listing. The limit is '.config('foodloop.max_qty_per_listing').' per person.',
             self::NotEnoughStock => 'There aren’t that many left.',
             self::NotReserved => 'This reservation is already closed.',
             self::AlreadyExpired => 'The pickup time has passed, so this can’t be cancelled.',

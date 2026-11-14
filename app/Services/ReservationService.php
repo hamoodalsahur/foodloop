@@ -22,7 +22,7 @@ use RuntimeException;
  * the refusal message; they never touch status or stock themselves.
  *
  *   reserved ─ collect() ──▶ collected
- *      ├───── cancel() ───▶ cancelled (late = +1 strike), stock returned
+ *      ├───── cancel() ───▶ cancelled (late = +1 strike), stock returned, pay-now refunded
  *      └───── markNoShow() ▶ no_show (+1 strike), stock becomes leftovers
  *
  * Every method runs in a database transaction and locks the rows it reads
@@ -62,7 +62,11 @@ class ReservationService
             $this->refuseIf($listing->status !== ListingStatus::Live, RefusalReason::ListingNotLive);
             $this->refuseIf($listing->pickup_end->lessThanOrEqualTo($now), RefusalReason::WindowEnded);
             $this->refuseIf($quantity < 1, RefusalReason::InvalidQuantity);
-            $this->refuseIf($quantity > config('foodloop.max_qty_per_reservation'), RefusalReason::OverMaxQuantity);
+            $this->refuseIf($quantity > config('foodloop.max_qty_per_listing'), RefusalReason::OverMaxQuantity);
+            $this->refuseIf(
+                $quantity + $this->quantityHeld($customer, $listing) > config('foodloop.max_qty_per_listing'),
+                RefusalReason::OverListingLimit,
+            );
             $this->refuseIf($quantity > $listing->quantity_available, RefusalReason::NotEnoughStock);
 
             $listing->quantity_available -= $quantity;
@@ -93,47 +97,27 @@ class ReservationService
     }
 
     /**
-     * Cancel a reservation and put its portions back on sale. Free until
-     * `free_cancel_minutes` before the pickup window starts; after that it
-     * is a late cancel and counts as a no-show strike.
+     * Cancel a reservation and put its portions back on sale. A pay-now
+     * reservation is refunded (simulated).
+     *
+     * Free until `free_cancel_minutes` before the pickup window starts, and
+     * always free within `change_of_mind_minutes` of reserving. Any later
+     * and it is a late cancel, which counts as a no-show strike.
      *
      * @throws ReservationRefused
      */
     public function cancel(Reservation $reservation): Reservation
     {
-        return DB::transaction(function () use ($reservation) {
-            $listing = Listing::query()->lockForUpdate()->findOrFail($reservation->listing_id);
-            $seller = Seller::query()->findOrFail($listing->seller_id);
-            $reservation = Reservation::query()->lockForUpdate()->findOrFail($reservation->getKey());
-            $now = now();
+        [$reservation, $nowBlocked] = DB::transaction(
+            fn () => $this->cancelLocked($reservation, byCustomer: true),
+            self::ATTEMPTS,
+        );
 
-            $this->refuseIf($reservation->status !== ReservationStatus::Reserved, RefusalReason::NotReserved);
-            $this->refuseIf($now->greaterThan($reservation->expires_at), RefusalReason::AlreadyExpired);
+        if ($nowBlocked) {
+            $this->cancelWaitingReservationsOf($reservation->customer_id);
+        }
 
-            $late = $now->greaterThan($listing->freeCancelUntil());
-
-            $reservation->status = ReservationStatus::Cancelled;
-            $reservation->cancelled_at = $now;
-            $reservation->late_cancel = $late;
-            $reservation->save();
-
-            $listing->quantity_available += $reservation->quantity;
-
-            // A sold-out listing goes back on sale, if it still can be sold.
-            if ($listing->status === ListingStatus::SoldOut
-                && $listing->pickup_end->greaterThan($now)
-                && $seller->isApproved()) {
-                $listing->status = ListingStatus::Live;
-            }
-
-            $listing->save();
-
-            if ($late) {
-                $this->addStrike($reservation->customer_id, $now);
-            }
-
-            return $reservation;
-        }, self::ATTEMPTS);
+        return $reservation;
     }
 
     /**
@@ -179,7 +163,7 @@ class ReservationService
      */
     public function markNoShow(Reservation $reservation): Reservation
     {
-        return DB::transaction(function () use ($reservation) {
+        [$reservation, $nowBlocked] = DB::transaction(function () use ($reservation) {
             $reservation = Reservation::query()->lockForUpdate()->findOrFail($reservation->getKey());
             $now = now();
 
@@ -189,10 +173,60 @@ class ReservationService
             $reservation->status = ReservationStatus::NoShow;
             $reservation->save();
 
-            $this->addStrike($reservation->customer_id, $now);
-
-            return $reservation;
+            return [$reservation, $this->addStrike($reservation->customer_id, $now)];
         }, self::ATTEMPTS);
+
+        if ($nowBlocked) {
+            $this->cancelWaitingReservationsOf($reservation->customer_id);
+        }
+
+        return $reservation;
+    }
+
+    /**
+     * A blocked customer does not keep the reservations they already made:
+     * every one still waiting is cancelled, its portions go back on sale and
+     * pay-now ones are refunded (simulated). These cancels are not the
+     * customer's doing, so they are never "late" and add no strikes.
+     *
+     * Runs right after a block starts, and again from `reservations:expire`
+     * as a safety net. Returns how many were cancelled.
+     */
+    public function cancelWaitingReservationsOf(int $customerId): int
+    {
+        $cancelled = 0;
+
+        Reservation::query()
+            ->where('customer_id', $customerId)
+            ->where('status', ReservationStatus::Reserved)
+            ->orderBy('id')
+            ->get()
+            ->each(function (Reservation $reservation) use (&$cancelled) {
+                try {
+                    DB::transaction(fn () => $this->cancelLocked($reservation, byCustomer: false), self::ATTEMPTS);
+                    $cancelled++;
+                } catch (ReservationRefused) {
+                    // Collected a moment ago, or already past its grace
+                    // period (then it becomes a no-show instead).
+                }
+            });
+
+        return $cancelled;
+    }
+
+    /**
+     * Cancel the waiting reservations of every customer who is blocked right
+     * now. Normally there are none, because a block cancels them when it
+     * starts; this catches anything left behind. Safe to run again and again.
+     */
+    public function releaseBlockedCustomers(): int
+    {
+        return (int) Reservation::query()
+            ->where('status', ReservationStatus::Reserved)
+            ->whereHas('customer', fn ($query) => $query->where('blocked_until', '>', now()))
+            ->distinct()
+            ->pluck('customer_id')
+            ->sum(fn (int $customerId) => $this->cancelWaitingReservationsOf($customerId));
     }
 
     /**
@@ -222,29 +256,91 @@ class ReservationService
     }
 
     /**
+     * The cancel itself. Must run inside a transaction. `$byCustomer` false
+     * means the system is cancelling (customer got blocked): never late.
+     *
+     * @return array{0: Reservation, 1: bool} the reservation, and whether this cancel got the customer blocked
+     */
+    private function cancelLocked(Reservation $reservation, bool $byCustomer): array
+    {
+        $listing = Listing::query()->lockForUpdate()->findOrFail($reservation->listing_id);
+        $seller = Seller::query()->findOrFail($listing->seller_id);
+        $reservation = Reservation::query()->lockForUpdate()->findOrFail($reservation->getKey());
+        $now = now();
+
+        $this->refuseIf($reservation->status !== ReservationStatus::Reserved, RefusalReason::NotReserved);
+        $this->refuseIf($now->greaterThan($reservation->expires_at), RefusalReason::AlreadyExpired);
+
+        $changedMindUntil = $reservation->created_at->copy()->addMinutes(config('foodloop.change_of_mind_minutes'));
+
+        $late = $byCustomer
+            && $now->greaterThan($listing->freeCancelUntil())
+            && $now->greaterThan($changedMindUntil);
+
+        $reservation->status = ReservationStatus::Cancelled;
+        $reservation->cancelled_at = $now;
+        $reservation->late_cancel = $late;
+
+        if ($reservation->payment_status === PaymentStatus::SimulatedPaid) {
+            $reservation->payment_status = PaymentStatus::Refunded;
+        }
+
+        $reservation->save();
+
+        $listing->quantity_available += $reservation->quantity;
+
+        // A sold-out listing goes back on sale, if it still can be sold.
+        if ($listing->status === ListingStatus::SoldOut
+            && $listing->pickup_end->greaterThan($now)
+            && $seller->isApproved()) {
+            $listing->status = ListingStatus::Live;
+        }
+
+        $listing->save();
+
+        return [$reservation, $late && $this->addStrike($reservation->customer_id, $now)];
+    }
+
+    /**
+     * How many portions of this listing the customer already holds:
+     * everything they reserved on it that was not cancelled.
+     */
+    private function quantityHeld(User $customer, Listing $listing): int
+    {
+        return (int) Reservation::query()
+            ->where('customer_id', $customer->getKey())
+            ->where('listing_id', $listing->getKey())
+            ->where('status', '!=', ReservationStatus::Cancelled)
+            ->sum('quantity');
+    }
+
+    /**
      * One more strike. At `strikes_to_block` the user is blocked from
      * reserving for `block_days` and the count starts again from zero.
+     * Returns true when this strike started (or renewed) a block.
      */
-    private function addStrike(int $userId, Carbon $now): void
+    private function addStrike(int $userId, Carbon $now): bool
     {
         $user = User::query()->lockForUpdate()->findOrFail($userId);
 
         $strikes = $user->no_show_strikes + 1;
 
-        if ($strikes >= config('foodloop.strikes_to_block')) {
-            $blockedUntil = $now->copy()->addDays(config('foodloop.block_days'));
+        if ($strikes < config('foodloop.strikes_to_block')) {
+            $user->forceFill(['no_show_strikes' => $strikes])->save();
 
-            // Never shorten a block that is already running.
-            if ($user->blocked_until?->greaterThan($blockedUntil)) {
-                $blockedUntil = $user->blocked_until;
-            }
-
-            $user->forceFill(['no_show_strikes' => 0, 'blocked_until' => $blockedUntil])->save();
-
-            return;
+            return false;
         }
 
-        $user->forceFill(['no_show_strikes' => $strikes])->save();
+        $blockedUntil = $now->copy()->addDays(config('foodloop.block_days'));
+
+        // Never shorten a block that is already running.
+        if ($user->blocked_until?->greaterThan($blockedUntil)) {
+            $blockedUntil = $user->blocked_until;
+        }
+
+        $user->forceFill(['no_show_strikes' => 0, 'blocked_until' => $blockedUntil])->save();
+
+        return true;
     }
 
     /**

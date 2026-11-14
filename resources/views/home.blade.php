@@ -67,7 +67,7 @@
                     </div>
                     <div x-show="step === 2" x-cloak>
                         <p class="font-display text-6xl font-bold text-marigold">2</p>
-                        <p class="mt-3 font-display text-xl font-bold">Reserve up to {{ config('foodloop.max_qty_per_reservation') }} portions</p>
+                        <p class="mt-3 font-display text-xl font-bold">Reserve up to {{ config('foodloop.max_qty_per_listing') }} portions</p>
                         <p class="mt-2 text-sm text-cream/80">
                             Pay now or pay at pickup. Cancel for free until
                             {{ config('foodloop.free_cancel_minutes') }} minutes before the window starts.

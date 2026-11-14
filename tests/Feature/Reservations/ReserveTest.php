@@ -99,7 +99,7 @@ it('refuses a quantity that is not allowed', function (int $quantity, RefusalRea
 ]);
 
 it('reads the maximum quantity from config/foodloop.php', function () {
-    config(['foodloop.max_qty_per_reservation' => 5]);
+    config(['foodloop.max_qty_per_listing' => 5]);
     $listing = Listing::factory()->create(['quantity_total' => 10, 'quantity_available' => 10]);
 
     $reservation = reservations()->reserve(User::factory()->create(), $listing, 5, PaymentMethod::PayNow);
