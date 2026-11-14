@@ -59,4 +59,10 @@ return [
     // Payments are simulated only (no gateway).
     'payment_methods' => ['pay_now', 'pay_at_pickup'],
 
+    // Seller listing form (Stage 5). Allergens a seller can tick, the most
+    // portions one listing can offer, and the longest pickup window allowed.
+    'allergens' => ['egg', 'milk', 'wheat', 'nuts', 'soy', 'seafood'],
+    'max_portions_per_listing' => 50,
+    'max_window_hours' => 6,
+
 ];

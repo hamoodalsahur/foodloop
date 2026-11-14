@@ -13,10 +13,44 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 (student flow) ✅ · Stage 5 next | repo root; setup steps and demo accounts in `README.md` |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 (student flow) ✅ · Stage 5 (seller flow) ✅ · Stage 6 next | repo root; setup steps and demo accounts in `README.md` |
 
 ---
 
+## 14 Nov 2026 · Stage 5 · The seller side
+
+- **What:** a shop can now sign up, post food and hand it over.
+  - *Sell on FoodLoop* (`/sell`, owner's choice: its own page, linked from log in and register): the
+    person's account plus shop name, SSM number, phone, address and halal status. "Halal certified" needs
+    the JAKIM certificate (PDF/JPG/PNG, kept private, not on the public disk). The shop starts **waiting
+    for approval**: it can write drafts but nothing goes live until an admin approves it (Stage 7).
+  - *Dashboard* (`/seller`, mockup c08): Waiting for pickup, Reservations today, Sales this week (collected
+    orders), Rescued this month; the pickups table with **Check and collect** by code and **Mark collected**
+    on rows whose window is open; live listings with how many are reserved; the "Left over at closing?"
+    card with **Offer to food bank**.
+  - *Listings* (`/seller/listings`): grouped On the deals page / Paused / Drafts / Closed.
+  - *New and edit listing* (mockup c09): type, name, category, photo upload, description, normal and
+    FoodLoop price with the live discount, portions, pickup day and times, halal status, allergens,
+    "offer leftovers"; a live customer preview. Save draft, Publish, Pause, Delete draft.
+  - *Pickups* (today and coming days), *Donations*, *Shop profile*.
+- **Rules (owner's decisions today):** once anyone has reserved, the **price, portions, pickup time and
+  halal status are locked** (greyed out, and ignored by the server even if sent); name, photo,
+  description and pausing stay open. Cancelled reservations don't count, so if everyone cancels it
+  unlocks. Other rules enforced in code and tests: FoodLoop price below the normal price; up to 50
+  portions; a window up to 6 hours on one day; publishing needs a pickup that hasn't started (reservations
+  close when it opens); "Halal certified" only with an approved certificate; only drafts that were never
+  reserved can be deleted; closed listings can't be edited; leftovers (unsold + no-shows) can be offered
+  once, after every customer has collected or missed their pickup; a shop can only touch its own
+  listings and pickups (another shop's code gets "no reservation with that code").
+- **How:** `SellerListingService` holds the listing rules, `SaveListingRequest` checks the form,
+  `SellerOverview` gathers the dashboard numbers, policies decide who may touch what. Collecting still goes
+  through `ReservationService::collect`. New form components `x-form.select` and `x-form.textarea`.
+- **Browser check:** every seller page at 390 px and 1280 px in Chromium, no sideways scrolling. Fixed
+  while checking: the pickups table and the edit form pushed the phone page sideways; locked fields now
+  look locked; the new-listing form late in the evening suggested a window past midnight (now tomorrow
+  12–2 PM). On phones the pickups table scrolls sideways; the code box above it is the quick way in.
+- **Tested:** 420 passed, 2 skipped on SQLite (MySQL-only race test not run here). New: 53 seller tests,
+  including one that goes from a new listing to a student reserving to the seller collecting by code.
 
 ## 14 Nov 2026 · Reservations now close when pickup opens
 

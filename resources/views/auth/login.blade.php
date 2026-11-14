@@ -24,4 +24,9 @@
         New to FoodLoop?
         <a href="{{ route('register') }}" class="inline-flex min-h-11 items-center font-semibold text-forest underline underline-offset-4">Create an account</a>
     </p>
+
+    <p class="mt-2 text-center text-sm text-muted">
+        Run a café, bakery or food stall?
+        <a href="{{ route('seller.sign-up') }}" class="inline-flex min-h-11 items-center font-semibold text-forest underline underline-offset-4">Sell on FoodLoop</a>
+    </p>
 </x-layouts.auth>

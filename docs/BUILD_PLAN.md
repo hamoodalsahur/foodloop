@@ -1,6 +1,6 @@
 # FoodLoop · build plan
 
-Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–4 done, Stage 5 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
+Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–5 done, Stage 6 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
 
 **Who does what.** Stages marked **F** are the hard, foundational ones: run them on the strongest model
 (Fable). Stages marked **A** follow patterns that F stages set up, so any model can do them by copying
@@ -173,7 +173,7 @@ transaction, so controllers never change status or stock directly.
 
 *Stages below follow the patterns above. Any model can do them.*
 
-### Stage 5 · Seller pages · A
+### Stage 5 · Seller pages · A · ✅ done 14 Nov 2026
 
 **Inputs:** `c08`, `c09` mockups, UI guide, Stage 4 code as the example.
 

@@ -13,7 +13,7 @@ Built for the ENT600 Technology Entrepreneurship New Product Development (NPD) a
 |---|---|
 | System workflow and business rules | ✅ designed |
 | UI mockups (style C: forest, marigold, cream) | ✅ approved |
-| Laravel + MySQL prototype | 🚧 Stages 0–4 done: a student can sign up, browse deals, reserve and get a pickup code · Stage 5 (seller flow) next |
+| Laravel + MySQL prototype | 🚧 Stages 0–5 done: students browse, reserve and get a pickup code; shops post food and hand it over by code · Stage 6 (impact page) next |
 
 All shop names, prices and numbers in the mockups and in the app are **demo data**, not real offers or
 research results. Payments are simulated.
@@ -115,7 +115,7 @@ only; never use this data or this password on a real server.
 | Customer, 2 strikes | `jason@foodloop.test` | One more no-show and he is blocked |
 
 Log in at <http://localhost:8000/login>. Customers land on the deals, sellers on `/seller`, the admin on
-`/admin` (the seller and admin areas are still placeholders).
+`/admin` (the admin area is still a placeholder until Stage 7).
 
 ## Try the student flow
 
@@ -134,6 +134,25 @@ With `php artisan serve` running and the demo data seeded (about 2 minutes):
 To see the other states: reserve everything that's left of a deal and open it again (**Sold out**), open
 <http://localhost:8000/?category=groceries> (**All gone nearby**), or log in as `daniel@foodloop.test`
 (blocked: **You can't reserve until…**). Map and Impact in the menu are greyed out until Stage 6.
+
+## Try the seller flow
+
+With `php artisan serve` running and the demo data freshly seeded (about 3 minutes):
+
+1. Log in as `rotilane@foodloop.test` / `password`. You land on **Tonight**: the four number tiles, the
+   pickups table, live listings and the "Left over at closing?" card.
+2. Tap **New listing**, fill in a name and prices (FoodLoop price lower than the normal price), keep the
+   suggested pickup time and tap **Publish listing**. Open <http://localhost:8000> in a private window:
+   your listing is on the deals page.
+3. Back on the dashboard, Aina's code is **4721**. Her pickup window opens about 45 minutes after seeding;
+   before that the code check says the window hasn't opened yet, after it **Check and collect** hands it
+   over (or tap **Mark collected** on her row, which appears once the window opens).
+4. Open the Bakery Surprise Bundle under **Listings**: it has reservations, so the price, portions, pickup
+   time and halal status are greyed out. You can still change the name, photo and description, or pause it.
+5. On the dashboard, tap **Offer to food bank** next to a closed listing. **Donations** lists it.
+
+To sign up a new shop, log out and open <http://localhost:8000/sell>. The shop waits for approval: it can
+save drafts but **Publish** stays hidden until an admin approves it (admin pages come in Stage 7).
 
 ## See the design system
 
@@ -165,8 +184,8 @@ The same tests on MySQL, plus the race test where 8 requests go for the last ite
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 366 passed` for the quick run and
-`Tests: 368 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 420 passed` for the quick run and
+`Tests: 422 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout
