@@ -1,7 +1,7 @@
 # FoodLoop · working agreements
 
 How the owner and Claude work on FoodLoop. Read this at the start of every session, then check the
-repo for changes before acting. Last updated: 14 Nov 2026 (Stage 5).
+repo for changes before acting. Last updated: 15 Nov 2026 (prototype complete).
 
 ## Project facts
 
@@ -67,6 +67,7 @@ repo for changes before acting. Last updated: 14 Nov 2026 (Stage 5).
 | 14 Nov | Fable trial work ends after Stage 4; Stages 5–8 are built in the owner's main chat | Owner's call |
 | 14 Nov | Once anyone has reserved, a listing's price, portions, pickup time and halal status are locked; name, photo, description and pausing stay editable | Owner's decision: students keep the deal they booked |
 | 14 Nov | Shops sign up on their own "Sell on FoodLoop" page (`/sell`) | Owner's decision: clearer than a role choice on the student sign-up |
+| 14 Nov | Fable's calls in Stages 6–8 (⚠️ team to confirm): no "Ask for info" for admins; admin menu is Overview, Sellers, Reports, Customers; "Warn seller" is one click; suspending a shop keeps its reservations; the impact page says "Everyone on FoodLoop" (computed) instead of "Campus"; the map is a simplified drawing, not a street map; notifications text left out | Kept the prototype small; real maps need internet at the pitch |
 
 ## Current status
 
@@ -77,7 +78,7 @@ repo for changes before acting. Last updated: 14 Nov 2026 (Stage 5).
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov · Stage 5 (seller flow) ✅ done 14 Nov · Stage 6 (impact page) next |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov · Stage 4 (student flow) ✅ done 14 Nov · Stage 5 (seller flow) ✅ · Stage 6 (impact) ✅ · Stage 7 (admin) ✅ · map ✅ · Stage 8 (polish, demo script) ✅ · all on `main` 15 Nov |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
@@ -86,7 +87,8 @@ repo for changes before acting. Last updated: 14 Nov 2026 (Stage 5).
 - Confirm the business rules above with the team (the 4 questions from Stage 2 are answered and built).
 - Open the design-system pages once (README → "See the design system") and say if anything looks off.
 - Walk through README → "Try the student flow" and "Try the seller flow" once on the Windows machine and say if anything looks off.
-- Optional: send real photos of campus food to replace the drawn ones.
+- Optional: put real photos of campus food in `docs/demo-food/real/` (names in its README) and reseed.
+- Rehearse `docs/DEMO_SCRIPT.md` once on the Windows laptop.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).
 
@@ -109,7 +111,10 @@ repo for changes before acting. Last updated: 14 Nov 2026 (Stage 5).
 9. ✅ Stage 4 done: the student flow end to end (368 tests on MySQL, walked through in Chrome at phone and desktop width).
 10. ✅ Stage 5 done: the seller flow (420 tests on SQLite, checked in Chromium at phone and desktop width).
 11. ⏳ Owner walks through README → "Try the seller flow" on Windows.
-12. ⏳ Stage 6: the impact page.
+12. ✅ Stages 6, 7, map and 8 done by Fable, squashed into `main` 15 Nov (513 tests on SQLite, 515 on MySQL per Fable).
+13. ⏳ Owner rehearses `docs/DEMO_SCRIPT.md` once on the Windows laptop.
+14. ⏳ Team checks Fable's open decisions (below) and adds real food photos if wanted.
+15. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
 
 ## Commit roles (14 Nov)
 

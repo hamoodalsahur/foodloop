@@ -1,6 +1,6 @@
 # FoodLoop · build plan
 
-Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–5 done, Stage 6 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
+Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–8 done (prototype complete, 15 Nov) · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
 
 **Who does what.** Stages marked **F** are the hard, foundational ones: run them on the strongest model
 (Fable). Stages marked **A** follow patterns that F stages set up, so any model can do them by copying
@@ -183,16 +183,16 @@ transaction, so controllers never change status or stock directly.
 - "Offer to food bank" on closed listings with leftovers.
 - **Done when:** a seller can post, a student can reserve it, the seller collects it; feature tests pass.
 
-### Stage 6 · Impact page · A
+### Stage 6 · Impact page · A · ✅ done 14 Nov 2026
 
 **Inputs:** `c04` mockup. Computed numbers only (§4). Weekly bar chart from collected reservations.
 
-### Stage 7 · Admin · A
+### Stage 7 · Admin · A · ✅ done 14 Nov 2026
 
 **Inputs:** `c10` mockup. Approve or reject sellers (show halal certificate), reports (hide listing,
 warn seller, dismiss), customers with strikes or blocks, platform totals. Report button on the listing page.
 
-### Stage 8 · Polish and demo prep · A
+### Stage 8 · Polish and demo prep · A · ✅ done 14 Nov 2026 (notifications text left out)
 
 Map placeholder page, notifications text, phone-width pass on every page, seed data for the pitch demo,
 README final, a 2-minute demo script in `docs/DEMO_SCRIPT.md`.

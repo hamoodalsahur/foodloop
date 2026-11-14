@@ -13,7 +13,7 @@ Built for the ENT600 Technology Entrepreneurship New Product Development (NPD) a
 |---|---|
 | System workflow and business rules | ✅ designed |
 | UI mockups (style C: forest, marigold, cream) | ✅ approved |
-| Laravel + MySQL prototype | 🚧 Stages 0–5 done: students browse, reserve and get a pickup code; shops post food and hand it over by code · Stage 6 (impact page) next |
+| Laravel + MySQL prototype | ✅ Prototype complete (Stages 0–8): students reserve and see their impact, shops post food and hand it over by code, admins approve shops and handle reports · demo script in `docs/DEMO_SCRIPT.md` |
 
 All shop names, prices and numbers in the mockups and in the app are **demo data**, not real offers or
 research results. Payments are simulated.
@@ -115,7 +115,7 @@ only; never use this data or this password on a real server.
 | Customer, 2 strikes | `jason@foodloop.test` | One more no-show and he is blocked |
 
 Log in at <http://localhost:8000/login>. Customers land on the deals, sellers on `/seller`, the admin on
-`/admin` (the admin area is still a placeholder until Stage 7).
+`/admin`.
 
 ## Try the student flow
 
@@ -133,7 +133,7 @@ With `php artisan serve` running and the demo data seeded (about 2 minutes):
 
 To see the other states: reserve everything that's left of a deal and open it again (**Sold out**), open
 <http://localhost:8000/?category=groceries> (**All gone nearby**), or log in as `daniel@foodloop.test`
-(blocked: **You can't reserve until…**). Map and Impact in the menu are greyed out until Stage 6.
+(blocked: **You can't reserve until…**). As Aina, **Impact** in the menu shows her rescued meals and money saved; **Map** shows the shops with deals nearby (a simplified drawing, not a street map).
 
 ## Try the seller flow
 
@@ -152,7 +152,26 @@ With `php artisan serve` running and the demo data freshly seeded (about 3 minut
 5. On the dashboard, tap **Offer to food bank** next to a closed listing. **Donations** lists it.
 
 To sign up a new shop, log out and open <http://localhost:8000/sell>. The shop waits for approval: it can
-save drafts but **Publish** stays hidden until an admin approves it (admin pages come in Stage 7).
+save drafts but **Publish** stays hidden until an admin approves it.
+
+## Try the admin side
+
+Log in as `admin@foodloop.test` / `password` (about 2 minutes):
+
+1. **Overview** shows shops to approve, open reports, no-show limits and platform totals.
+2. **Sellers**: approve one of the shops waiting for approval (or reject it). For a shop that says it is
+   halal certified, open its certificate first.
+3. **Reports**: hide a reported listing, warn the seller, or dismiss the report. The seller sees the
+   warning on their dashboard.
+4. **Customers**: lift a no-show limit or clear strikes.
+
+Customers can report a listing from its page ("Something wrong? Report this listing").
+
+## Demo for the pitch
+
+`docs/DEMO_SCRIPT.md` is a 2-minute click-through (student reserves, seller hands over, impact, admin),
+with setup steps and what to do if something goes wrong. Reseed no more than 30 minutes before you
+present: the deals count down for real.
 
 ## See the design system
 
@@ -184,8 +203,8 @@ The same tests on MySQL, plus the race test where 8 requests go for the last ite
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 420 passed` for the quick run and
-`Tests: 422 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 513 passed` for the quick run and
+`Tests: 515 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout
@@ -207,7 +226,8 @@ every commit.
 | `docs/WORKING_AGREEMENTS.md` | Decisions, current status and next steps |
 | `docs/mockups/` | PNG screenshots of every approved screen |
 | `docs/screenshots/` | Screenshots of the real app, taken when each stage was checked |
-| `docs/demo-food/` | Drawn food pictures used as stand-ins for seller photos |
+| `docs/demo-food/` | Drawn food pictures used as stand-ins for seller photos; put real photos in `docs/demo-food/real/` (see its README) |
+| `docs/DEMO_SCRIPT.md` | The 2-minute pitch demo, step by step |
 
 ## Stack
 

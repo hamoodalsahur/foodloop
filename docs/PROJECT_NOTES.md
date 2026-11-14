@@ -13,9 +13,32 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 (student flow) ✅ · Stage 5 (seller flow) ✅ · Stage 6 next | repo root; setup steps and demo accounts in `README.md` |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 (student flow) ✅ · Stage 5 (seller flow) ✅ · Stages 6–8 (impact, admin, map, polish) ✅ | repo root; setup steps and demo accounts in `README.md` |
 
 ---
+
+## 14 Nov 2026 · Stages 6–8 · Impact, admin, map, demo prep (built by Fable)
+
+- **What:** built on the `fable-work` branch, squashed into `main` on 15 Nov, one commit per stage.
+  - *Admin* (mockup c10): overview tiles; approve, reject, suspend shops (approve is refused without an
+    SSM number, or for "certified" without a certificate; admins can open the private certificate);
+    reports (hide listing, warn seller, dismiss), with a "Report this listing" form for customers; lift
+    no-show limits or clear strikes. A hidden listing leaves the deals page, can't be republished, and its
+    waiting reservations are cancelled and refunded with no strike. The seller sees the takedown or warning
+    on their dashboard for two weeks.
+  - *Impact* (mockup c04): meals rescued, money saved, no-shows, a six-week bar chart, platform totals for
+    the month, latest pickups. Only collected reservations count. Aina's seeded numbers match the mockup
+    (14 meals, RM118, weeks 1-2-4-2-3-2).
+  - *Map:* a simplified drawing with distance rings and numbered shop pins, plus the list nearest first.
+    Not a street map (out of scope, and needs no internet at the pitch). Positions are demo data.
+  - *Polish:* every page at 390 and 1280 px for every role (29 pages), touch targets fixed; demo data made
+    pitch-ready (Aina has an open-window pickup, code 2468, at Daily Grind, and Roti Lane has donations);
+    `docs/DEMO_SCRIPT.md`; real photos can replace the drawn ones from `docs/demo-food/real/`.
+- **Decisions Fable made** are listed in `docs/WORKING_AGREEMENTS.md` for the team to confirm.
+- **Not done:** "notifications text" from the Stage 8 list (unclear what was meant; push/SMS are out of
+  scope). The demo script has not been rehearsed on the Windows laptop.
+- **Tested:** 513 passed, 2 skipped on SQLite (rerun when squashing into `main`); 515 passed on MySQL 8.0
+  (Fable's run). Demo data changed: run `php artisan migrate:fresh --seed`.
 
 ## 14 Nov 2026 · Stage 5 · The seller side
 
