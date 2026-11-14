@@ -87,3 +87,10 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 4. ⏳ Owner runs the README "Run it locally" steps on Windows and reports what happens.
 5. ✅ Stage 1 done: database, models, demo data (75 tests, SQLite + MySQL).
 6. ⏳ Stage 2: reservation engine (the hardest part). Plan first, then build.
+
+## Commit roles (14 Nov)
+
+Fable builds and pushes finished stages to the `fable-work` branch with notes in its commits; the
+owner's other Claude chat squashes them into `main` with one message in the owner's style. Details in
+`CLAUDE.md` → "Commits: two roles". Why: the owner wants Fable's trial spent only on development and
+the commit history written consistently in one voice.
