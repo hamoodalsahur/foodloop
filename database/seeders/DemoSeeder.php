@@ -117,11 +117,11 @@ class DemoSeeder extends Seeder
             'jason' => $this->user('Jason Lim', 'jason@foodloop.test'),
         ];
 
-        // The "No-show limits" box on the admin mockup.
-        $strikes = config('foodloop.strikes_to_block');
-        $customers['daniel']->forceFill(['no_show_strikes' => $strikes, 'blocked_until' => $this->now->addDays(5)])->save();
-        $customers['farah']->forceFill(['no_show_strikes' => $strikes, 'blocked_until' => $this->now->addDays(2)])->save();
-        $customers['jason']->forceFill(['no_show_strikes' => $strikes - 1])->save();
+        // The "No-show limits" box on the admin mockup. A block starts at the
+        // third strike and the count restarts at 0, as in ReservationService.
+        $customers['daniel']->forceFill(['no_show_strikes' => 0, 'blocked_until' => $this->now->addDays(5)])->save();
+        $customers['farah']->forceFill(['no_show_strikes' => 0, 'blocked_until' => $this->now->addDays(2)])->save();
+        $customers['jason']->forceFill(['no_show_strikes' => config('foodloop.strikes_to_block') - 1])->save();
 
         return $customers;
     }
@@ -332,10 +332,10 @@ class DemoSeeder extends Seeder
             'sandwich' => $this->listing($shops, 'sandwich', [
                 ...$window(-25, 95), 'quantity_total' => 5, 'quantity_available' => 4,
             ]),
-            // The flash deal that already ended, sold out.
+            // The flash deal that sold out and ended an hour ago, so it is closed.
             'croissants' => $this->listing($shops, 'croissants', [
                 ...$window(-180, -60), 'quantity_total' => 4, 'quantity_available' => 0,
-                'status' => ListingStatus::SoldOut,
+                'status' => ListingStatus::Closed, 'closed_at' => $this->now->subMinutes(60),
             ]),
         ];
     }

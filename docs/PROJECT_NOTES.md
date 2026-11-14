@@ -13,9 +13,62 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 next | repo root; setup steps and demo accounts in `README.md` |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 next | repo root; setup steps and demo accounts in `README.md` |
 
 ---
+
+## 14 Nov 2026 · Stage 2 · Reservation engine
+
+- **What:** `App\Services\ReservationService` with `reserve()`, `cancel()`, `collect(seller, code)`,
+  `markNoShow()` and `expireOverdue()`. It is the only code that changes a reservation's status or a
+  listing's stock. `App\Services\ListingCloser` closes finished listings and makes the food-bank offer.
+  Two commands, `reservations:expire` and `listings:close`, are scheduled every minute in
+  `routes/console.php` (run them locally with `php artisan schedule:work`). Every "no" has a reason code
+  and a ready-to-show sentence in `App\Enums\RefusalReason`.
+- **How overselling is prevented:** `reserve()` runs in a transaction and locks the listing row
+  (`lockForUpdate`) before it looks at the stock, so a second request waits and then sees the new number.
+  It also locks the shop row so two reservations at one shop can't get the same pickup code. Locks are
+  always taken in the same order (listing, seller, reservation, user) to avoid deadlocks.
+- **Rules as built (all values from `config/foodloop.php`):**
+  - Reserve is refused when: own listing, customer blocked, seller not approved, sold out, listing not
+    live, window ended, quantity below 1, above the max (3), or above what's left.
+  - Cancel is free up to and including 30 min before the window starts; later it is a late cancel
+    (+1 strike). Either way the portions go back on sale, and a sold-out listing becomes live again
+    (unless it is paused, closed, past its window, or the shop is no longer approved).
+  - Collect only finds codes of `reserved` reservations at that seller's own shop, from the window start
+    until the end of the grace period. Pay-at-pickup becomes paid (simulated) at that moment.
+  - No-show only after the grace period (window end + 15 min): +1 strike, portions are not resold.
+  - Third strike: blocked for 7 days from that moment and the count restarts at 0. A longer block that is
+    already running is never shortened.
+- **Choices made on the way (and why):**
+  - *Closing.* Every published listing becomes `closed` when its window ends, sold-out ones too (the
+    screens can still show "sold out" when nothing was left). Drafts are left alone.
+  - *The food-bank offer waits for the grace period.* Leftovers = unsold portions + no-shows, and the
+    no-shows are only known 15 min after the window. So the offer is created once no reservation on the
+    listing is still waiting. One offer per listing, to the first food bank partner.
+  - *Demo data follows the engine:* the two blocked demo customers now have 0 strikes (the count restarts
+    at a block), and the ended croissant deal is `closed` instead of `sold_out`.
+- **Questions for the team (built strictly to the written rules; say if you want them changed):**
+  1. Someone who reserves less than 30 min before the window (or during it) can never cancel for free;
+     any cancel is a strike. Do you want a short "changed my mind" allowance, e.g. 5 minutes?
+  2. "Max 3" is per reservation. Nothing stops one customer making two reservations on the same listing.
+     Should it be max 3 per customer per listing?
+  3. A cancelled pay-now reservation still says "paid (simulated)"; the data model has no "refunded".
+     Fine for a prototype with no real money, or add a refunded status?
+  4. A blocked customer keeps the reservations they already made. OK?
+- **Tested:** 151 tests on MySQL 8.0.46 (653 assertions), 149 + 2 skipped on SQLite. New in this stage:
+  every refusal; free cancel exactly at the cutoff and late one second after; collect at the first and
+  last allowed minute, too early, too late, another seller's code, a used code; no-show not before grace;
+  first, second and third strike; re-running both commands changes nothing; a whole evening run minute
+  by minute; the commands find nothing to do on fresh demo data.
+  - *Race test (MySQL only):* 8 separate PHP processes reserve the last item at the same instant: exactly
+    1 succeeds, 7 get "sold out". Same with 5 in stock and 2 each: 2 succeed, 1 portion left. To check the
+    test itself, the lock was removed once: all 8 "won" and the test failed; with the lock back it passes
+    (run 5 times).
+  - Pickup codes: with 9,999 of the 10,000 codes waiting at a shop, the next reservation gets the one
+    free code.
+- **Not tested:** on Windows. The race test starts PHP processes with Symfony Process, which supports
+  Windows, but it has only been run on Linux.
 
 ## 14 Nov 2026 · Stage 1 · Database, models, demo data
 

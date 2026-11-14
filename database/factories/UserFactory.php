@@ -55,11 +55,11 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => ['role' => UserRole::Admin]);
     }
 
-    /** Blocked from reserving after too many no-shows. */
+    /** Blocked from reserving after too many no-shows (the strike count restarts at 0). */
     public function blocked(int $days = 7): static
     {
         return $this->state(fn (array $attributes) => [
-            'no_show_strikes' => config('foodloop.strikes_to_block'),
+            'no_show_strikes' => 0,
             'blocked_until' => now()->addDays($days),
         ]);
     }

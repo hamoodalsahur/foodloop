@@ -13,7 +13,7 @@ Built for the ENT600 Technology Entrepreneurship New Product Development (NPD) a
 |---|---|
 | System workflow and business rules | ✅ designed |
 | UI mockups (style C: forest, marigold, cream) | ✅ approved |
-| Laravel + MySQL prototype | 🚧 Stages 0–1 done (setup, database, demo data) · Stage 2 (reservation engine) next |
+| Laravel + MySQL prototype | 🚧 Stages 0–2 done (setup, database, demo data, reservation engine) · Stage 3 (roles, layouts, design system) next |
 
 All shop names, prices and numbers in the mockups and in the app are **demo data**, not real offers or
 research results. Payments are simulated.
@@ -79,6 +79,16 @@ go to waste." card. Stop the server with `Ctrl + C`.
 
 While changing the design, also run `npm run dev` in a second terminal so style changes show immediately.
 
+**Keep the clock running.** Two jobs run every minute: one turns reservations that weren't collected into
+no-shows, the other closes listings whose pickup window is over and offers leftovers to the food bank.
+They only run while this command is open in its own terminal (leave it running during a demo):
+
+```
+php artisan schedule:work
+```
+
+Success looks like a new pair of lines every minute naming `reservations:expire` and `listings:close`.
+
 **Using Herd instead?** The same commands work, but free Herd has no MySQL, so you need Herd Pro's MySQL
 service or another MySQL 8 server. Put its user and password in `.env`.
 
@@ -101,7 +111,7 @@ only; never use this data or this password on a real server.
 | Seller, waiting for approval | `kedaikopisinar@foodloop.test` · `dapurbonda@foodloop.test` · `sweetcrumbs@foodloop.test` | Kedai Kopi Sinar · Dapur Bonda · Sweet Crumbs Bakehouse |
 | Customer | `aina@foodloop.test` | Aina Rahman: has a reservation tonight (code 4721) and 14 past pickups |
 | Customer | `hafiz@foodloop.test` · `priya@foodloop.test` · `meiling@foodloop.test` | Hafiz, Priya, Mei Ling: reservations today |
-| Customer, blocked | `daniel@foodloop.test` · `farah@foodloop.test` | 3 no-shows each, blocked for 5 and 2 more days |
+| Customer, blocked | `daniel@foodloop.test` · `farah@foodloop.test` | Blocked after 3 no-shows, for 5 and 2 more days |
 | Customer, 2 strikes | `jason@foodloop.test` | One more no-show and he is blocked |
 
 There are no sign-in screens yet (they arrive in Stage 4), so for now the accounts are used by the tests
@@ -109,19 +119,22 @@ and by the stages that follow.
 
 ## Run the tests
 
-Quick run on SQLite in memory (about 5 seconds):
+Quick run on SQLite in memory (about 10 seconds):
 
 ```
 php artisan test
 ```
 
-The same tests on MySQL (uses the `foodloop_test` database):
+The same tests on MySQL, plus the race test where 8 requests go for the last item at the same moment
+(about 30 seconds; uses the `foodloop_test` database, MySQL must be running):
 
 ```
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 75 passed`. Run both before every commit.
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 149 passed` for the quick run and
+`Tests: 151 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+every commit.
 
 ## Repo layout
 
@@ -129,6 +142,8 @@ Success looks like a list of green ticks ending in `Tests: 75 passed`. Run both 
 |---|---|
 | `app/`, `routes/`, `resources/`, `database/`, `tests/` | The Laravel app |
 | `app/Models/`, `app/Enums/` | The data: users, sellers, listings, reservations, reports, donations, and their allowed values |
+| `app/Services/ReservationService.php` | The reservation engine: reserve, cancel, collect by code, no-show, strikes. The only code that changes stock or a reservation's status |
+| `app/Services/ListingCloser.php`, `routes/console.php` | Closing finished listings, the food-bank offer, and the every-minute schedule |
 | `database/seeders/DemoSeeder.php` | The demo shops, people, listings and order history |
 | `config/foodloop.php` | The business rules as numbers (grace minutes, strikes, max quantity…). Change a rule here, nowhere else |
 | `resources/css/app.css` | The style C colours and fonts as Tailwind tokens (`bg-forest`, `text-marigold`, `bg-cream`, `font-display`) |

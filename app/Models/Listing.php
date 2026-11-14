@@ -6,6 +6,7 @@ use App\Enums\HalalStatus;
 use App\Enums\ListingCategory;
 use App\Enums\ListingStatus;
 use App\Enums\ListingType;
+use App\Enums\ReservationStatus;
 use App\Exceptions\BusinessRuleViolation;
 use App\Support\Money;
 use Database\Factories\ListingFactory;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 #[Fillable([
     'type', 'title', 'description', 'category', 'photo_path',
@@ -107,6 +109,22 @@ class Listing extends Model
     public function scopeLive(Builder $query): void
     {
         $query->where('status', ListingStatus::Live);
+    }
+
+    /** The last moment a reservation can be cancelled for free. */
+    public function freeCancelUntil(): Carbon
+    {
+        return $this->pickup_start->copy()->subMinutes(config('foodloop.free_cancel_minutes'));
+    }
+
+    /**
+     * Portions nobody collected: the unsold ones plus the no-shows (those are
+     * never put back on sale). Final once no reservation is still `reserved`.
+     */
+    public function leftovers(): int
+    {
+        return $this->quantity_available
+            + (int) $this->reservations()->where('status', ReservationStatus::NoShow)->sum('quantity');
     }
 
     /** "RM8" */
