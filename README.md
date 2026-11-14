@@ -25,19 +25,22 @@ about 10 minutes, mostly downloads.
 
 **0. Check your tools (1 min).** Start Laragon, click **Start All**, then click **Terminal** and run:
 
-```powershell
-php -v        # needs 8.3 or newer
-composer -V   # any 2.x
-node -v       # needs 20.19 or newer (22 is fine)
-mysql --version   # needs 8.x
+```
+php -v
+composer -V
+node -v
+mysql --version
 ```
 
-If PHP is older than 8.3, switch it in Laragon: Menu → PHP → Version. If a command is "not recognized",
-you are probably in plain PowerShell: use Laragon's **Terminal** button instead.
+You need PHP 8.3 or newer, Composer 2.x, Node 20.19 or newer (22 is fine) and MySQL 8.x. If PHP is older
+than 8.3, switch it in Laragon: Menu → PHP → Version. If a command is "not recognized", you are probably in
+plain PowerShell: use Laragon's **Terminal** button instead.
+
+Every command in this README works in Laragon's Terminal (which is a Command Prompt) and in PowerShell.
 
 **1. Get the code (1 min).**
 
-```powershell
+```
 cd C:\laragon\www
 git clone https://github.com/hamoodalsahur/foodloop.git
 cd foodloop
@@ -47,9 +50,9 @@ Already cloned? Run `git pull` inside the folder instead.
 
 **2. Install and set up (5–8 min).**
 
-```powershell
+```
 composer install
-Copy-Item .env.example .env
+copy .env.example .env
 php artisan key:generate
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS foodloop; CREATE DATABASE IF NOT EXISTS foodloop_test;"
 php artisan migrate:fresh --seed
@@ -64,7 +67,7 @@ command and put the password in `DB_PASSWORD` in `.env`.
 
 **3. Start it.**
 
-```powershell
+```
 php artisan serve
 ```
 
@@ -103,9 +106,16 @@ and by the stages that follow.
 
 ## Run the tests
 
-```powershell
-php artisan test                        # quick: SQLite in memory, about 5 seconds
-php artisan test -c phpunit.mysql.xml   # same tests on MySQL (uses the foodloop_test database)
+Quick run on SQLite in memory (about 5 seconds):
+
+```
+php artisan test
+```
+
+The same tests on MySQL (uses the `foodloop_test` database):
+
+```
+php artisan test -c phpunit.mysql.xml
 ```
 
 Success looks like a list of green ticks ending in `Tests: 75 passed`. Run both before every commit.
