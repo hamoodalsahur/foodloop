@@ -318,17 +318,17 @@ class DemoSeeder extends Seeder
 
         return [
             'puffs' => $this->listing($shops, 'puffs', [
-                ...$window(-60, 20), 'quantity_total' => 6, 'quantity_available' => 4,
+                ...$window(20, 80), 'quantity_total' => 6, 'quantity_available' => 4,
             ]),
             'latte' => $this->listing($shops, 'latte', [
-                ...$window(-45, 35), 'quantity_total' => 8, 'quantity_available' => 5,
+                ...$window(35, 95), 'quantity_total' => 8, 'quantity_available' => 5,
             ]),
             // Pickup window opens in about 45 minutes and lasts two hours; 3 of 5 left.
             'bundle' => $this->listing($shops, 'bundle', [
                 ...$window(45, 165), 'quantity_total' => 5, 'quantity_available' => 3, 'offer_leftovers' => true,
             ]),
             'nasiayam' => $this->listing($shops, 'nasiayam', [
-                ...$window(-30, 60), 'quantity_total' => 4, 'quantity_available' => 2,
+                ...$window(60, 120), 'quantity_total' => 4, 'quantity_available' => 2,
             ]),
             'sandwich' => $this->listing($shops, 'sandwich', [
                 ...$window(-25, 95), 'quantity_total' => 5, 'quantity_available' => 4,
@@ -374,9 +374,8 @@ class DemoSeeder extends Seeder
         Reservation::factory()->for($listings['latte'])->paidNow()->create([
             'customer_id' => $customers['jason']->id, 'pickup_code' => '5173', 'quantity' => 2,
         ]);
-        Reservation::factory()->for($listings['latte'])->collected()->create([
+        Reservation::factory()->for($listings['latte'])->create([
             'customer_id' => $customers['hafiz']->id, 'pickup_code' => '7730',
-            'collected_at' => $this->now->subMinutes(20),
         ]);
         Reservation::factory()->for($listings['nasiayam'])->create([
             'customer_id' => $customers['hafiz']->id, 'pickup_code' => '6412', 'quantity' => 2,

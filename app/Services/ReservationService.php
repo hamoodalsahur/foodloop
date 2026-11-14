@@ -60,7 +60,7 @@ class ReservationService
             $this->refuseIf(! $seller->isApproved(), RefusalReason::SellerNotApproved);
             $this->refuseIf($listing->status === ListingStatus::SoldOut, RefusalReason::SoldOut);
             $this->refuseIf($listing->status !== ListingStatus::Live, RefusalReason::ListingNotLive);
-            $this->refuseIf($listing->pickup_end->lessThanOrEqualTo($now), RefusalReason::WindowEnded);
+            $this->refuseIf($listing->reservationsCloseAt()->lessThanOrEqualTo($now), RefusalReason::WindowEnded);
             $this->refuseIf($quantity < 1, RefusalReason::InvalidQuantity);
             $this->refuseIf($quantity > config('foodloop.max_qty_per_listing'), RefusalReason::OverMaxQuantity);
             $this->refuseIf(
@@ -287,7 +287,7 @@ class ReservationService
 
         // A sold-out listing goes back on sale, if it still can be sold.
         if ($listing->status === ListingStatus::SoldOut
-            && $listing->pickup_end->greaterThan($now)
+            && $listing->reservationsCloseAt()->greaterThan($now)
             && $seller->isApproved()) {
             $listing->status = ListingStatus::Live;
         }

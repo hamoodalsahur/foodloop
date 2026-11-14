@@ -21,10 +21,11 @@ it('shows the mockup deals on the home page, soonest first, with their distances
         ->assertSeeInOrder([
             'Curry puffs × 4', 'Mak Long’s Kuih', '0.4 km', 'RM3',
             'Iced latte', 'Daily Grind Café', '0.9 km', 'RM4.50',
-            'Nasi ayam set (2 pax)', 'Kafe Seri Ilmu', '0.3 km', 'RM6.50',
-            'Sandwich &amp; pastry pack', 'RM9',
             'Bakery Surprise Bundle', 'Roti Lane Bakery', '0.6 km', 'RM8',
+            'Nasi ayam set (2 pax)', 'Kafe Seri Ilmu', '0.3 km', 'RM6.50',
         ], false)
+        // Its pickup has already started, so it takes no new reservations.
+        ->assertDontSee('Sandwich &amp; pastry pack', false)
         ->assertSeeInOrder(['Surprise Bundles', '3', 'left tonight'])
         ->assertDontSee('Butter croissants');
 });

@@ -21,8 +21,8 @@
             @if ($soldOut)
                 <x-tag>Sold out</x-tag>
             @else
-                <span @class(['rounded-md bg-marigold px-1.5' => $timeLeft::isUrgent($listing->pickup_end)])>
-                    {{ $timeLeft::label($listing->pickup_end) }}
+                <span @class(['rounded-md bg-marigold px-1.5' => $timeLeft::isUrgent($listing->reservationsCloseAt())])>
+                    {{ $timeLeft::label($listing->reservationsCloseAt()) }}
                 </span>
             @endif
         </p>

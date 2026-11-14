@@ -95,7 +95,7 @@ describe('reserving', function () {
         ],
         'pickup window has ended' => [
             fn ($test) => $test->travelTo('2026-11-16 21:00:01'),
-            'The pickup window for this listing has ended.',
+            'Reservations for this listing closed when its pickup window opened.',
         ],
         'not enough left' => [
             fn ($test) => $test->listing->update(['quantity_available' => 0]),
@@ -157,12 +157,12 @@ describe('the booked page', function () {
     });
 
     it('uses the 5-minute "changed my mind" time when someone reserves late', function () {
-        $this->travelTo('2026-11-16 19:30:00');
+        $this->travelTo('2026-11-16 18:50:00');
         ($this->reserve)(as: $late = User::factory()->create());
 
         $this->get(route('orders.show', $late->reservations()->sole()))
             ->assertSee('Free cancellation until')
-            ->assertSee('7:35 PM');
+            ->assertSee('6:55 PM');
     });
 
     it('follows the pickup through its steps', function (string $moment, string $label, string $clock) {

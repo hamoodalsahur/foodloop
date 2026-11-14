@@ -54,11 +54,11 @@ class DealsQuery
         $sorted = match ($filters->sort) {
             'nearest' => $listings->sortBy([
                 fn (Listing $a, Listing $b) => ($a->distanceKm ?? INF) <=> ($b->distanceKm ?? INF),
-                ['pickup_end', 'asc'],
+                ['pickup_start', 'asc'],
             ]),
-            'cheapest' => $listings->sortBy([['price_sen', 'asc'], ['pickup_end', 'asc']]),
+            'cheapest' => $listings->sortBy([['price_sen', 'asc'], ['pickup_start', 'asc']]),
             'new' => $listings->sortBy([['published_at', 'desc'], ['id', 'desc']]),
-            default => $listings->sortBy([['pickup_end', 'asc'], ['id', 'asc']]),
+            default => $listings->sortBy([['pickup_start', 'asc'], ['id', 'asc']]),
         };
 
         return $sorted->values();
@@ -88,6 +88,6 @@ class DealsQuery
     {
         $deadline = now()->addMinutes(config('foodloop.closing_soon_minutes'));
 
-        return $inRange->filter(fn (Listing $listing) => $listing->pickup_end->lessThanOrEqualTo($deadline))->count();
+        return $inRange->filter(fn (Listing $listing) => $listing->reservationsCloseAt()->lessThanOrEqualTo($deadline))->count();
     }
 }

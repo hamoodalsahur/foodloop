@@ -41,6 +41,7 @@ offer it to a partner food bank. Admins approve sellers and handle reports.
 | Rule | Value | Config key |
 |---|---|---|
 | Max quantity per customer per listing (across all their reservations on it that aren't cancelled) | 3 | `max_qty_per_listing` |
+| Reservations close | when the pickup window **opens** (team decision, 14 Nov) | `Listing::reservationsCloseAt()` |
 | Free cancellation until | 30 min before pickup window starts | `free_cancel_minutes` |
 | "Changed my mind": cancelling is always free within | 5 min of reserving | `change_of_mind_minutes` |
 | Late cancellation | counts as a no-show strike | |

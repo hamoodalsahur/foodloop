@@ -44,12 +44,19 @@ it('marks the listing sold out when the last portion goes', function () {
         ->and($listing->fresh()->status)->toBe(ListingStatus::SoldOut);
 });
 
-it('lets a customer reserve while the pickup window is already open', function () {
-    $listing = Listing::factory()->window(-30, 60)->create();
+it('stops taking reservations once the pickup window opens (team decision, 14 Nov)', function () {
+    $listing = Listing::factory()->window(1, 60)->create();
+    $customer = User::factory()->create();
 
-    $reservation = reservations()->reserve(User::factory()->create(), $listing, 1, PaymentMethod::PayNow);
+    expect(reservations()->reserve($customer, $listing, 1, PaymentMethod::PayNow)->status)
+        ->toBe(ReservationStatus::Reserved);
 
-    expect($reservation->status)->toBe(ReservationStatus::Reserved);
+    $this->travel(1)->minutes();
+
+    expectRefusal(
+        fn () => reservations()->reserve(User::factory()->create(), $listing->fresh(), 1, PaymentMethod::PayNow),
+        RefusalReason::WindowEnded,
+    );
 });
 
 it('refuses a listing that is not live', function (string $state, RefusalReason $reason) {
@@ -114,7 +121,7 @@ it('reads the maximum quantity from config/foodloop.php', function () {
 
 it('refuses a blocked customer, and lets them back in when the block is over', function () {
     $customer = User::factory()->blocked(days: 7)->create();
-    $listing = Listing::factory()->window(60, 60 * 24 * 10)->create();
+    $listing = Listing::factory()->window(60 * 24 * 10, 60 * 24 * 11)->create();
 
     expectRefusal(
         fn () => reservations()->reserve($customer, $listing, 1, PaymentMethod::PayNow),

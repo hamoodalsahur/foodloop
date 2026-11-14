@@ -39,8 +39,8 @@ describe('1. changed my mind: cancelling within 5 minutes of reserving is always
             ->and($this->customer->fresh()->no_show_strikes)->toBe(1);
     });
 
-    it('also works when reserving while the pickup window is already open', function () {
-        $listing = Listing::factory()->window(-30, 60)->create();
+    it('also works when reserving just before the pickup window opens', function () {
+        $listing = Listing::factory()->window(2, 60)->create();
         $reservation = reservations()->reserve($this->customer, $listing, 1, PaymentMethod::PayNow);
 
         $this->travel(3)->minutes();
