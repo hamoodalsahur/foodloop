@@ -35,6 +35,12 @@ class SellerFactory extends Factory
         ];
     }
 
+    /** Waiting for an admin (this is also the default). */
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => ['status' => SellerStatus::Pending, 'approved_at' => null]);
+    }
+
     public function approved(): static
     {
         return $this->state(fn (array $attributes) => [

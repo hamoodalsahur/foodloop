@@ -4,18 +4,39 @@
 @source '../../storage/framework/views/*.php';
 
 /*
- | FoodLoop style C "Bold" · the approved palette and fonts.
- | Use these as Tailwind classes: bg-forest, text-marigold, bg-cream, font-display…
- | Stage 3 builds the full design system on top of these tokens.
+ | FoodLoop style C "Bold" · the approved palette and fonts (docs/UI_GUIDE.md).
+ | Every colour below becomes a Tailwind class: bg-forest, text-muted,
+ | border-line, text-danger… Use these names, never raw hex codes, in views.
  */
 @theme {
-    --color-forest: #0e2a20;
-    --color-marigold: #ffb800;
-    --color-cream: #faf6ee;
+    /* The three brand colours */
+    --color-forest: #0e2a20; /* dark green: text, dark panels, primary buttons */
+    --color-marigold: #ffb800; /* yellow: highlights, urgency, call-to-action tiles */
+    --color-cream: #faf6ee; /* page background */
+
+    /* Supporting colours */
+    --color-muted: #55605a; /* secondary text on light backgrounds */
+    --color-line: #e6decc; /* hairlines and quiet borders */
+    --color-mist: #a8c2b6; /* secondary text on forest ("on-dark muted") */
+    --color-danger: #b42318; /* errors and no-shows */
+
+    /* Soft backgrounds for pills and notices */
+    --color-marigold-soft: #ffe7a3; /* "Reserved" pill */
+    --color-danger-soft: #fdecea; /* "No-show" pill, error panels */
 
     --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/*
+ | Keyboard focus is always visible: a marigold ring with a forest edge, so it
+ | shows on cream, white, forest and marigold backgrounds alike.
+ */
+:focus-visible {
+    outline: 3px solid var(--color-marigold);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-forest);
 }
 
 /* Hide Alpine elements until Alpine has started. */

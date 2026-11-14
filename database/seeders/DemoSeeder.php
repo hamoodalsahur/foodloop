@@ -433,6 +433,8 @@ class DemoSeeder extends Seeder
             Reservation::factory()->for($listing)->paidNow()->collected()->create([
                 'customer_id' => $aina->id,
                 'quantity' => $portions,
+                // Fixed codes (1000, 1001, …) so the demo data is the same every time.
+                'pickup_code' => (string) (1000 + $index),
                 'collected_at' => $collectedAt,
                 'created_at' => $collectedAt->subHours(2),
             ]);

@@ -13,9 +13,72 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 next | repo root; setup steps and demo accounts in `README.md` |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 next | repo root; setup steps and demo accounts in `README.md` |
 
 ---
+
+## 14 Nov 2026 · Stage 3 · Roles, policies, layouts and the design system
+
+- **What:**
+  - *Access.* `role:` middleware (`App\Http\Middleware\EnsureRole`) and three route groups in
+    `routes/web.php`: customers `/orders`, sellers `/seller`, admins `/admin`. Guests go to `/login`; the
+    wrong role gets a 403. Each area has a placeholder page until its stage builds the real one.
+  - *Policies* (`app/Policies`): a seller can update, delete, pause and publish only their own shop's
+    listings, and publish only when the shop is approved. Only the customer who made a reservation can
+    cancel it; only the shop it is for can collect it. Only admins review shops, moderate listings and
+    resolve reports. Only customer accounts reserve and report.
+  - *Design system.* All style C colours as Tailwind tokens (`resources/css/app.css`). Layouts:
+    `x-layouts.customer` (bottom nav on phones, header links on wide screens) and `x-layouts.dashboard`
+    with ready-made `x-layouts.seller` and `x-layouts.admin`. Components: `x-button`, `x-card`,
+    `x-price-box`, `x-deal-row`, `x-status-pill`, `x-stat-tile`, `x-empty-state`, `x-error-state`,
+    `x-spec-grid`, `x-food-photo`, plus `x-tag` (the small "Sold out" / "Surprise Bundle" label the
+    mockups use). `App\Support\TimeLeft` writes "18 min left".
+  - *Preview pages, local only:* `/dev/components`, `/dev/layouts/customer`, `/dev/layouts/dashboard`,
+    built from sample data in memory. `docs/UI_GUIDE.md` has the rules and one example of each component.
+- **Choices made on the way (and why):**
+  - *A seller who is not approved can still enter the seller area* (to prepare drafts) and sees a notice;
+    they just can't publish.
+  - *Deals count down to the end of the pickup window* and turn marigold at 35 min or less (in the mockup
+    18 and 33 min are highlighted, 42 is not).
+  - *Photos use a path relative to the site* (`/storage/...`), so they load whether the owner opens
+    `localhost:8000` or `foodloop.test`.
+  - *Guests are redirected to `/login`,* which only gets its screen in Stage 4. Until then a guest who
+    opens `/orders`, `/seller` or `/admin` in a browser lands on an error page. Expected for now.
+  - *The admin menu items* (Overview, Sellers, Listings, Reports, Customers) are a first guess; Stage 7
+    should match them to the admin mockup.
+- **Tested:** 251 tests on MySQL 8.0.46 (944 assertions), 249 + 2 skipped on SQLite. New: each area lets
+  the right role in, sends guests to login and gives the other roles a 403; every policy rule above;
+  each component's output; the layouts; the preview pages are 404 outside local; no view contains a hex
+  colour.
+  - *Browser (Chrome, 390 px and 1280 px):* the three preview pages and the three areas signed in as
+    real demo accounts (Aina, Roti Lane, the pending Kedai Kopi Sinar, the admin). No sideways scroll,
+    both fonts loaded, no broken pictures, every link and button at least 44 px tall. Compared with
+    mockups c01, c02 and c08. Two things found and fixed this way: a long deal title pushed the phone
+    page 327 px too wide, and the logo link was only 36 px tall.
+  - Contrast ratios for every allowed text/background pair are in `docs/UI_GUIDE.md` (lowest: 4.9).
+  - Screenshots: `docs/screenshots/stage3-*.png`.
+  - *One flaky test found and fixed.* "Matches the pickups table on the seller mockup" (from Stage 1)
+    failed once in about ten full MySQL runs and could not be reproduced. It had two weak spots: it relied
+    on the order MySQL happened to return rows in, and Aina's 12 older demo orders had random pickup codes
+    that could, rarely, equal one of the five codes the test looks for. Now the query is ordered and
+    every seeded pickup code is fixed (history: 1000 to 1011). Passed 4 full MySQL runs in a row after.
+- **Not tested:** on Windows; with a screen reader.
+
+## 14 Nov 2026 · Stage 2 follow-up · The owner's four rule decisions
+
+- The owner answered the four questions below (Stage 2 entry). Built as decided:
+  1. **Changed my mind:** cancelling within 5 minutes of reserving is always free
+     (`change_of_mind_minutes`).
+  2. **Max 3 per customer per listing,** counted across their reservations on it that aren't cancelled.
+     Config key renamed to `max_qty_per_listing`.
+  3. **Refunds:** cancelling a pay-now reservation sets payment to `refunded` (simulated).
+  4. **Blocked customers lose their waiting reservations:** when a block starts they are cancelled, the
+     portions go back on sale, and `reservations:expire` sweeps for any left behind.
+- **Three details Claude assumed and told the owner (no objection):** a late cancel is still refunded (the
+  strike is the penalty); a no-show who paid up front is not refunded; the automatic cancels at a block
+  are not "late" and add no strikes.
+- The rules table in `docs/BUILD_PLAN.md` §3 is updated. No database changes.
+- **Tested:** 22 new tests (`tests/Feature/Reservations/TeamDecisionsTest.php`), on SQLite and MySQL.
 
 ## 14 Nov 2026 · Stage 2 · Reservation engine
 
