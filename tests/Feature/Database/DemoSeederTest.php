@@ -144,7 +144,7 @@ it('sets the no-show limits from the admin mockup', function () {
     $jason = User::firstWhere('email', 'jason@foodloop.test');
 
     expect($daniel->isBlocked())->toBeTrue()
-        ->and($daniel->no_show_strikes)->toBe(3)
+        ->and($daniel->no_show_strikes)->toBe(0)
         ->and($farah->isBlocked())->toBeTrue()
         ->and($jason->isBlocked())->toBeFalse()
         ->and($jason->no_show_strikes)->toBe(2);

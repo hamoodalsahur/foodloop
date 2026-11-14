@@ -1,6 +1,6 @@
 # FoodLoop · build plan
 
-Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–1 done, Stage 2 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
+Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–2 done, Stage 3 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
 
 **Who does what.** Stages marked **F** are the hard, foundational ones: run them on the strongest model
 (Fable). Stages marked **A** follow patterns that F stages set up, so any model can do them by copying
@@ -113,7 +113,7 @@ transaction, so controllers never change status or stock directly.
 - **Done when:** `php artisan migrate:fresh --seed` works on SQLite and MySQL; model tests for
   relationships and money formatting pass.
 
-### Stage 2 · Reservation engine · F (the hardest part)
+### Stage 2 · Reservation engine · F (the hardest part) · ✅ done 14 Nov 2026
 
 **Inputs:** §3, §4, §5.
 

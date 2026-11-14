@@ -51,6 +51,8 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | 14 Nov | Money is written `RM8` or `RM4.50` (two decimals whenever there are sen) | The mockups mixed `RM4.5` and `RM6.50`; this is the normal way |
 | 14 Nov | Demo pickup times are relative to the moment of seeding; reseed right before a demo | The demo always shows deals closing soon |
 | 14 Nov | The halal-certificate rule and the approved-seller rule are checked inside the `Listing` model on every save | No page or script can skip them |
+| 14 Nov | Listings close when their pickup window ends; the food-bank offer is made after the 15-min grace, counting unsold portions plus no-shows | Only then is the number of leftovers final |
+| 14 Nov | At the third strike the block starts and the strike count restarts at 0 | As written in the build plan (Stage 2) |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
 
 ## Current status
@@ -62,13 +64,13 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) next |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov (on `fable-work`, waiting for the writer) · Stage 3 (roles, layouts, design system) next |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
 
 - Run the README "Run it locally" steps once on the Windows machine (about 10 min) and report any error.
-- Confirm the business rules above with the team.
+- Confirm the business rules above with the team, and answer the 4 questions in the Stage 2 entry of `docs/PROJECT_NOTES.md` (cancel right after a late reservation, max 3 per customer, refunds, blocked customers' existing reservations).
 - Optional: send real photos of campus food to replace the drawn ones.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).
@@ -86,7 +88,8 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 3. ✅ Stage 0 done: Laravel app set up, tests pass on SQLite and MySQL (see `docs/PROJECT_NOTES.md`).
 4. ⏳ Owner runs the README "Run it locally" steps on Windows and reports what happens.
 5. ✅ Stage 1 done: database, models, demo data (75 tests, SQLite + MySQL).
-6. ⏳ Stage 2: reservation engine (the hardest part). Plan first, then build.
+6. ✅ Stage 2 done: reservation engine (151 tests on MySQL incl. a real race for the last item).
+7. ⏳ Stage 3: roles, policies, layouts and the design system. Plan first, then build.
 
 ## Commit roles (14 Nov)
 

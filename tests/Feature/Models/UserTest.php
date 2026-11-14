@@ -45,7 +45,7 @@ it('treats a user as blocked only while blocked_until is in the future', functio
     $user = User::factory()->blocked(days: 7)->create();
 
     expect($user->isBlocked())->toBeTrue()
-        ->and($user->no_show_strikes)->toBe(config('foodloop.strikes_to_block'));
+        ->and($user->no_show_strikes)->toBe(0);
 
     $this->travel(8)->days();
 
