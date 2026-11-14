@@ -13,9 +13,47 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 next | repo root; setup steps in `README.md` |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 next | repo root; setup steps and demo accounts in `README.md` |
 
 ---
+
+## 14 Nov 2026 · Stage 1 · Database, models, demo data
+
+- **What:** 6 migrations for the §4 data model (users get `role`, `no_show_strikes`, `blocked_until`; new
+  tables `sellers`, `listings`, `reservations`, `reports`, `food_bank_partners`, `donations`). 12 enums in
+  `app/Enums/`, each with a `label()` for the screens. 7 models with relationships and casts, a factory for
+  each. `App\Support\Money` turns sen into text. `DemoSeeder` builds the mockup data; the demo accounts are
+  listed in README.
+- **Rules enforced in code already (with tests):**
+  - A listing can only be `certified` if its shop is approved, claims certification and has a certificate
+    file. Checked on every save in the `Listing` model, so no page can skip it.
+  - A listing can only go `live` if its shop is approved (pending, rejected and suspended are refused).
+  - Halal status is required on every listing (the database refuses an empty one).
+  - A sign-up can't set its own role, strikes or block: those fields are not fillable.
+- **Choices made on the way (and why):**
+  - *Money text:* whole ringgit shows as `RM8`, anything with sen as `RM4.50`. The mockup wrote `RM4.5` in
+    one place and `RM6.50` in another; two decimals is the normal way to write money.
+  - *Demo times move with the clock.* Pickup windows are set relative to the moment of seeding (bundle window
+    opens in 42 min, curry puffs close in 18 min, …), so the demo always has deals closing soon. Reseed
+    right before the pitch.
+  - *`ssm_no` can be empty,* because the admin mockup shows a shop with the SSM number "Missing".
+  - *Demo stock adds up:* every portion that is not available belongs to a reservation.
+- **Demo data that is NOT in the mockups (made up to fill gaps, all labelled demo):** the croissants'
+  original price (RM12), quantities for listings other than the bundle, allergens and descriptions other
+  than the bundle's, the customers' surnames, the halal status of three shops (set to Muslim-owned), and the
+  shop coordinates (offsets from a made-up point). Registration numbers, phones and addresses are left as
+  `[SSM NO.]`, `[PHONE]`, `[SHOP ADDRESS]`; the food bank is `[FOOD BANK PARTNER NAME]`.
+- **Mockup numbers the demo data does not reproduce:** the big totals ("12 deals close within the hour",
+  "8 bundles left", seller "RM312 this week", admin "48 live listings", "1,204 meals rescued") and the
+  Warung Pagi report (it shows a shop listed as certified without a certificate, which the rules now make
+  impossible to create). Aina's own numbers do match: 14 meals, RM118 saved, 1-2-4-2-3-2 per week.
+- **Tested:** 75 tests, 368 assertions, passing on SQLite in memory and on MySQL 8.0.46: relationships,
+  casts, money formatting, the rules above, enums in step with `config/foodloop.php`, and the seeded data
+  against the mockups (shops, prices, pickup codes, Aina's impact, no-show limits, photos exist, stock adds
+  up). The seeder is also tested at awkward times (Monday 00:05, Sunday 23:55, New Year's Day).
+  `php artisan migrate:fresh --seed` run on a SQLite file and on MySQL; rollback works; a demo photo loads
+  at `/storage/listings/demo/bakery-bundle.svg`. No screens changed, so no browser screenshots this stage.
+- **Not tested:** on Windows (same as Stage 0).
 
 ## 13 Nov 2026 · Stage 0 · Project setup
 

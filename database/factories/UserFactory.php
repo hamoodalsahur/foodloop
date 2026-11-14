@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -40,6 +41,26 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /** A seller account (create the shop with Seller::factory()). */
+    public function seller(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => UserRole::Seller]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => ['role' => UserRole::Admin]);
+    }
+
+    /** Blocked from reserving after too many no-shows. */
+    public function blocked(int $days = 7): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'no_show_strikes' => config('foodloop.strikes_to_block'),
+            'blocked_until' => now()->addDays($days),
         ]);
     }
 }
