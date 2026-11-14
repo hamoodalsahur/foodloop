@@ -37,7 +37,7 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | 13 Nov | Web app (no IoT), customer collects food; no delivery | Cheaper to build; keeps the focus on surplus food, not logistics |
 | 13 Nov | Focus on building the system first; the report waits | Owner's call |
 | 13 Nov | Visual style C "Bold", palette forest `#0E2A20`, marigold `#FFB800`, cream `#FAF6EE`; Space Grotesk headings, Inter body | Owner picked C; Claude replaced the original tomato-red palette (owner asked for a better one) with colours that read as food + sustainability |
-| 13 Nov | Business rules: 15-min grace then auto-release; 3 no-shows = 7-day reservation limit; free cancel until 30 min before the window | Proposed by Claude; ⚠️ team still to confirm |
+| 13 Nov | Business rules: 15-min grace then auto-release; 3 no-shows = 7-day reservation limit; free cancel until 30 min before the window | Proposed by Claude; ⚠️ team still to confirm (owner refined four of them on 14 Nov, below) |
 | 13 Nov | Halal status is a required listing field (JAKIM certified / Muslim-owned / not halal) | Essential for Malaysian users |
 | 13 Nov | Leftovers can be offered to a partner food bank ("sell-then-donate loop") | Differentiates FoodLoop from Value Food / ReMeal |
 | 13 Nov | GitHub repo `hamoodalsahur/foodloop` (created public) | Owner's choice |
@@ -53,6 +53,11 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | 14 Nov | The halal-certificate rule and the approved-seller rule are checked inside the `Listing` model on every save | No page or script can skip them |
 | 14 Nov | Listings close when their pickup window ends; the food-bank offer is made after the 15-min grace, counting unsold portions plus no-shows | Only then is the number of leftovers final |
 | 14 Nov | At the third strike the block starts and the strike count restarts at 0 | As written in the build plan (Stage 2) |
+| 14 Nov | Cancelling within 5 minutes of reserving is always free | Owner's decision: fair to someone who reserved late and changed their mind |
+| 14 Nov | Max 3 portions per customer per listing (not just per reservation) | Owner's decision: closes the loophole of reserving twice |
+| 14 Nov | A cancelled pay-now reservation becomes "refunded (simulated)"; no-shows are not refunded | Owner's decision |
+| 14 Nov | When a customer gets blocked, their waiting reservations are cancelled and the food goes back on sale | Owner's decision |
+| 14 Nov | Every screen is built from the components and rules in `docs/UI_GUIDE.md`; colours by name, money through the helper, 44 px touch targets, no emoji | Keeps later stages (and other models) on the approved style |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
 
 ## Current status
@@ -64,13 +69,14 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov (on `fable-work`, waiting for the writer) · Stage 3 (roles, layouts, design system) next |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) ✅ done 14 Nov · Stage 3 (roles, layouts, design system) ✅ done 14 Nov (on `fable-work`, waiting for the writer) · Stage 4 (student flow) next |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
 
 - Run the README "Run it locally" steps once on the Windows machine (about 10 min) and report any error.
-- Confirm the business rules above with the team, and answer the 4 questions in the Stage 2 entry of `docs/PROJECT_NOTES.md` (cancel right after a late reservation, max 3 per customer, refunds, blocked customers' existing reservations).
+- Confirm the business rules above with the team (the 4 questions from Stage 2 are answered and built).
+- Open the design-system pages once (README → "See the design system") and say if anything looks off.
 - Optional: send real photos of campus food to replace the drawn ones.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).
@@ -89,7 +95,9 @@ repo for changes before acting. Last updated: 14 Nov 2026.
 4. ⏳ Owner runs the README "Run it locally" steps on Windows and reports what happens.
 5. ✅ Stage 1 done: database, models, demo data (75 tests, SQLite + MySQL).
 6. ✅ Stage 2 done: reservation engine (151 tests on MySQL incl. a real race for the last item).
-7. ⏳ Stage 3: roles, policies, layouts and the design system. Plan first, then build.
+7. ✅ Owner's four rule decisions built (changed-my-mind 5 min, max 3 per customer per listing, refunds, blocked customers lose waiting reservations).
+8. ✅ Stage 3 done: roles, policies, layouts, design system, `/dev/components`, `docs/UI_GUIDE.md` (251 tests on MySQL).
+9. ⏳ Stage 4: the student flow end to end (deals, listing, reserve, orders, cancel, login screens). Plan first, then build.
 
 ## Commit roles (14 Nov)
 

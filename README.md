@@ -13,7 +13,7 @@ Built for the ENT600 Technology Entrepreneurship New Product Development (NPD) a
 |---|---|
 | System workflow and business rules | ✅ designed |
 | UI mockups (style C: forest, marigold, cream) | ✅ approved |
-| Laravel + MySQL prototype | 🚧 Stages 0–2 done (setup, database, demo data, reservation engine) · Stage 3 (roles, layouts, design system) next |
+| Laravel + MySQL prototype | 🚧 Stages 0–3 done (setup, database, demo data, reservation engine, roles, layouts and design system) · Stage 4 (student flow) next |
 
 All shop names, prices and numbers in the mockups and in the app are **demo data**, not real offers or
 research results. Payments are simulated.
@@ -117,6 +117,21 @@ only; never use this data or this password on a real server.
 There are no sign-in screens yet (they arrive in Stage 4), so for now the accounts are used by the tests
 and by the stages that follow.
 
+## See the design system
+
+While `php artisan serve` is running, these pages show the building blocks every screen is made of, with
+sample data. They only exist on your own machine (`APP_ENV=local`):
+
+| Address | What it shows |
+|---|---|
+| <http://localhost:8000/dev/components> | Every component: buttons, cards, price box, deal rows, status pills, empty and error states… |
+| <http://localhost:8000/dev/layouts/customer> | The phone-first customer layout with the bottom navigation |
+| <http://localhost:8000/dev/layouts/dashboard> | The seller/admin layout with the forest sidebar |
+
+Success looks like the pages in `docs/screenshots/stage3-*.png`. If the food pictures are grey plates, run
+`php artisan migrate:fresh --seed` and `php artisan storage:link` first. The rules for building screens are
+in `docs/UI_GUIDE.md`.
+
 ## Run the tests
 
 Quick run on SQLite in memory (about 10 seconds):
@@ -132,8 +147,8 @@ The same tests on MySQL, plus the race test where 8 requests go for the last ite
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 149 passed` for the quick run and
-`Tests: 151 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 249 passed` for the quick run and
+`Tests: 251 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout
@@ -143,6 +158,8 @@ every commit.
 | `app/`, `routes/`, `resources/`, `database/`, `tests/` | The Laravel app |
 | `app/Models/`, `app/Enums/` | The data: users, sellers, listings, reservations, reports, donations, and their allowed values |
 | `app/Services/ReservationService.php` | The reservation engine: reserve, cancel, collect by code, no-show, strikes. The only code that changes stock or a reservation's status |
+| `app/Policies/`, `app/Http/Middleware/EnsureRole.php`, `routes/web.php` | Who may open which area (customer, seller, admin) and who may touch which listing or reservation |
+| `resources/views/components/` | The design system: layouts and reusable components. Guide: `docs/UI_GUIDE.md` |
 | `app/Services/ListingCloser.php`, `routes/console.php` | Closing finished listings, the food-bank offer, and the every-minute schedule |
 | `database/seeders/DemoSeeder.php` | The demo shops, people, listings and order history |
 | `config/foodloop.php` | The business rules as numbers (grace minutes, strikes, max quantity…). Change a rule here, nowhere else |

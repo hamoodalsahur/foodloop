@@ -85,19 +85,33 @@ it('matches the bakery bundle on the listing mockup', function () {
 });
 
 it('matches the pickups table on the seller mockup', function () {
-    $pickups = Reservation::whereHas('listing.seller', fn ($q) => $q->where('business_name', 'Roti Lane Bakery'))
-        ->whereIn('pickup_code', ['4721', '3390', '6208', '1185', '9052'])
-        ->with('customer')
-        ->get()
-        ->mapWithKeys(fn (Reservation $r) => [$r->pickup_code => [$r->customer->name, $r->quantity, $r->status]]);
+    // Tonight's reservations at Roti Lane Bakery, in the order they were made
+    // (Aina's older, already collected orders are left out).
+    $aina = User::firstWhere('email', 'aina@foodloop.test');
 
-    expect($pickups->all())->toBe([
-        '4721' => ['Aina Rahman', 1, ReservationStatus::Reserved],
-        '3390' => ['Hafiz Mansor', 1, ReservationStatus::Reserved],
-        '6208' => ['Priya Selvam', 1, ReservationStatus::Collected],
-        '1185' => ['Mei Ling Tan', 2, ReservationStatus::Collected],
-        '9052' => ['Daniel Khoo', 1, ReservationStatus::NoShow],
+    $pickups = Reservation::whereHas('listing.seller', fn ($q) => $q->where('business_name', 'Roti Lane Bakery'))
+        ->where(fn ($q) => $q->where('customer_id', '!=', $aina->id)->orWhere('status', ReservationStatus::Reserved))
+        ->with('customer')
+        ->orderBy('id')
+        ->get()
+        ->map(fn (Reservation $r) => [$r->pickup_code, $r->customer->name, $r->quantity, $r->status])
+        ->all();
+
+    expect($pickups)->toBe([
+        ['4721', 'Aina Rahman', 1, ReservationStatus::Reserved],
+        ['3390', 'Hafiz Mansor', 1, ReservationStatus::Reserved],
+        ['6208', 'Priya Selvam', 1, ReservationStatus::Collected],
+        ['1185', 'Mei Ling Tan', 2, ReservationStatus::Collected],
+        ['9052', 'Daniel Khoo', 1, ReservationStatus::NoShow],
     ]);
+});
+
+it('gives every seeded reservation a fixed pickup code, so the demo is the same every time', function () {
+    $tonight = ['4721', '3390', '6208', '1185', '9052', '2846', '5173', '7730', '6412', '8059'];
+    $ainasHistory = array_map(strval(...), range(1000, 1011));
+
+    expect(Reservation::pluck('pickup_code')->sort()->values()->all())
+        ->toBe(collect([...$tonight, ...$ainasHistory])->sort()->values()->all());
 });
 
 it('keeps stock and reservations adding up on every listing', function () {
