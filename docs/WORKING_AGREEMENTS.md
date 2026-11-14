@@ -1,7 +1,7 @@
 # FoodLoop · working agreements
 
 How the owner and Claude work on FoodLoop. Read this at the start of every session, then check the
-repo for changes before acting. Last updated: 13 Nov 2026.
+repo for changes before acting. Last updated: 14 Nov 2026.
 
 ## Project facts
 
@@ -48,6 +48,9 @@ repo for changes before acting. Last updated: 13 Nov 2026.
 | 13 Nov | Local setup: Laragon/Herd on Windows | Owner's choice |
 | 13 Nov | Mockup approvals: clickable canvas + PNGs | Owner's choice |
 | 13 Nov | Fonts are bundled with the app (`@fontsource` npm packages), not linked from Google Fonts | Same fonts, but the demo works with no internet |
+| 14 Nov | Money is written `RM8` or `RM4.50` (two decimals whenever there are sen) | The mockups mixed `RM4.5` and `RM6.50`; this is the normal way |
+| 14 Nov | Demo pickup times are relative to the moment of seeding; reseed right before a demo | The demo always shows deals closing soon |
+| 14 Nov | The halal-certificate rule and the approved-seller rule are checked inside the `Listing` model on every save | No page or script can skip them |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
 
 ## Current status
@@ -59,7 +62,7 @@ repo for changes before acting. Last updated: 13 Nov 2026.
 | Style directions A–D | ✅ done; C chosen |
 | Style C: all screens + states | ✅ approved; food pictures added after owner's feedback |
 | Build plan (`docs/BUILD_PLAN.md`) | ✅ approved by owner (13 Nov) |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) next |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ done 13 Nov · Stage 1 (database, models, demo data) ✅ done 14 Nov · Stage 2 (reservation engine) next |
 | Concept testing with students | ❌ not started |
 
 ## Owner still needs to
@@ -82,4 +85,5 @@ repo for changes before acting. Last updated: 13 Nov 2026.
    the strongest model (Fable); stages 5–8 (**A**) follow those patterns and suit any model.
 3. ✅ Stage 0 done: Laravel app set up, tests pass on SQLite and MySQL (see `docs/PROJECT_NOTES.md`).
 4. ⏳ Owner runs the README "Run it locally" steps on Windows and reports what happens.
-5. ⏳ Stage 1: database, models, demo data.
+5. ✅ Stage 1 done: database, models, demo data (75 tests, SQLite + MySQL).
+6. ⏳ Stage 2: reservation engine (the hardest part). Plan first, then build.

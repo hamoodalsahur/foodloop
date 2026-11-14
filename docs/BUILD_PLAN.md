@@ -1,6 +1,6 @@
 # FoodLoop · build plan
 
-Status: ✅ approved by the owner 13 Nov 2026 · Stage 0 done, Stage 1 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
+Status: ✅ approved by the owner 13 Nov 2026 · Stages 0–1 done, Stage 2 next · Written 13 Nov 2026 by Claude (design lead) for the build sessions.
 
 **Who does what.** Stages marked **F** are the hard, foundational ones: run them on the strongest model
 (Fable). Stages marked **A** follow patterns that F stages set up, so any model can do them by copying
@@ -102,7 +102,7 @@ transaction, so controllers never change status or stock directly.
   looks like), and put them in README under "Run it locally".
 - **Done when:** `php artisan test` passes (example test), the app's home page loads locally, README has setup steps.
 
-### Stage 1 · Database, models, demo data · F
+### Stage 1 · Database, models, demo data · F · ✅ done 14 Nov 2026
 
 **Inputs:** §3, §4.
 
