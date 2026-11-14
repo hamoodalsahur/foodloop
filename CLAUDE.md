@@ -21,6 +21,8 @@ current task needs.
 - Stage only the files that belong. Never commit `.env` or secrets. **No Co-Authored-By or session trailers.**
 - After each stage: update `docs/PROJECT_NOTES.md` (what, why, how tested) and the status in
   `docs/WORKING_AGREEMENTS.md`, then hand over as below.
+- Demo data stays labelled as demo data. Never invent results.
+- At the end of a task, suggest the next step.
 
 ## Commits: two roles (owner's decision, 14 Nov)
 
@@ -43,8 +45,6 @@ the commit message that lands on `main`. The owner tells you which one you are; 
 the owner would notice, no prefixes like `feat:`, no full stop. Examples from the owner:
 "Prepared the dataset to grow to 15000 reviews" · "Fixed corporate demo stuck on loading" ·
 "Added postgres support and docker setup" · "Added logins so each account has its own review log".
-- Demo data stays labelled as demo data. Never invent results.
-- At the end of a task, suggest the next step.
 
 ## Reference
 
