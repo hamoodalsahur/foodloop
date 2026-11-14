@@ -8,7 +8,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('reservations:expire')]
-#[Description('Mark reservations that were not collected in time as no-shows (runs every minute)')]
+#[Description('Mark uncollected reservations as no-shows and release blocked customers\' reservations (runs every minute)')]
 class ExpireReservations extends Command
 {
     public function handle(ReservationService $reservations): int
@@ -16,6 +16,10 @@ class ExpireReservations extends Command
         $count = $reservations->expireOverdue();
 
         $this->info("Marked {$count} reservation(s) as no-show.");
+
+        if (($released = $reservations->releaseBlockedCustomers()) > 0) {
+            $this->info("Cancelled {$released} waiting reservation(s) of blocked customers.");
+        }
 
         return self::SUCCESS;
     }

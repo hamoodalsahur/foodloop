@@ -4,8 +4,9 @@
 // config/foodloop.php and this test together.
 
 it('keeps the business rule values in config/foodloop.php', function () {
-    expect(config('foodloop.max_qty_per_reservation'))->toBe(3)
+    expect(config('foodloop.max_qty_per_listing'))->toBe(3)
         ->and(config('foodloop.free_cancel_minutes'))->toBe(30)
+        ->and(config('foodloop.change_of_mind_minutes'))->toBe(5)
         ->and(config('foodloop.grace_minutes'))->toBe(15)
         ->and(config('foodloop.strikes_to_block'))->toBe(3)
         ->and(config('foodloop.block_days'))->toBe(7);

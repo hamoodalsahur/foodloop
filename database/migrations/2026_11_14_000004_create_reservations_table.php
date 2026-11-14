@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('total_sen');
             // pay_now, pay_at_pickup (App\Enums\PaymentMethod). Simulated only.
             $table->string('payment_method', 20);
-            // simulated_paid, unpaid (App\Enums\PaymentStatus)
+            // simulated_paid, unpaid, refunded (App\Enums\PaymentStatus)
             $table->string('payment_status', 20);
             // 4 digits the customer shows at pickup.
             $table->char('pickup_code', 4);

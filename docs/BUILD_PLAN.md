@@ -40,12 +40,15 @@ offer it to a partner food bank. Admins approve sellers and handle reports.
 
 | Rule | Value | Config key |
 |---|---|---|
-| Max quantity per reservation | 3 | `max_qty_per_reservation` |
+| Max quantity per customer per listing (across all their reservations on it that aren't cancelled) | 3 | `max_qty_per_listing` |
 | Free cancellation until | 30 min before pickup window starts | `free_cancel_minutes` |
+| "Changed my mind": cancelling is always free within | 5 min of reserving | `change_of_mind_minutes` |
 | Late cancellation | counts as a no-show strike | |
+| Cancelled pay-now reservation | payment becomes `refunded` (simulated); no-shows are not refunded | |
 | Grace after window ends | 15 min, then reservation becomes `no_show` | `grace_minutes` |
 | Strikes before block | 3 | `strikes_to_block` |
 | Block length | 7 days | `block_days` |
+| When a block starts | the customer's waiting reservations are cancelled (no extra strike, stock back on sale) | |
 | Halal status | required on every listing: `certified`, `muslim_owned`, `not_halal` | |
 | `certified` allowed only if | the seller has an approved halal certificate on file | |
 | Seller must be | `approved` by an admin before a listing can go live | |

@@ -16,12 +16,17 @@
 
 return [
 
-    // The most portions one reservation can hold.
-    'max_qty_per_reservation' => 3,
+    // The most portions one customer can hold of one listing, counted across
+    // all their reservations on it that are not cancelled.
+    'max_qty_per_listing' => 3,
 
     // A reservation can be cancelled for free until this many minutes before
     // the pickup window starts. Cancelling later counts as a no-show strike.
     'free_cancel_minutes' => 30,
+
+    // "Changed my mind": cancelling within this many minutes of reserving is
+    // always free, even after the cutoff above.
+    'change_of_mind_minutes' => 5,
 
     // Minutes after the pickup window ends before an uncollected reservation
     // becomes a no-show.
