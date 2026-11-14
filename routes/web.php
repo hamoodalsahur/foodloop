@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin;
 use App\Http\Controllers\DealController;
 use App\Http\Controllers\DevPreviewController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\Seller;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +38,10 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{reservation}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{reservation}', [OrderController::class, 'destroy'])->name('orders.destroy');
+
+    Route::post('/listings/{listing}/reports', [ReportController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('reports.store');
 });
 
 // "Sell on FoodLoop": a shop's own sign-up page (signed-in people get sent home).
@@ -67,7 +73,22 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::view('/', 'areas.admin')->name('dashboard');
+    Route::get('/', Admin\OverviewController::class)->name('dashboard');
+
+    Route::get('/sellers', [Admin\SellerController::class, 'index'])->name('sellers.index');
+    Route::post('/sellers/{seller}/approve', [Admin\SellerController::class, 'approve'])->name('sellers.approve');
+    Route::post('/sellers/{seller}/reject', [Admin\SellerController::class, 'reject'])->name('sellers.reject');
+    Route::post('/sellers/{seller}/suspend', [Admin\SellerController::class, 'suspend'])->name('sellers.suspend');
+    Route::get('/sellers/{seller}/certificate', [Admin\SellerController::class, 'certificate'])->name('sellers.certificate');
+
+    // Reports are handled per listing: one button deals with every open report on it.
+    Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/{listing}/hide', [Admin\ReportController::class, 'hide'])->name('reports.hide');
+    Route::post('/reports/{listing}/warn', [Admin\ReportController::class, 'warn'])->name('reports.warn');
+    Route::post('/reports/{listing}/dismiss', [Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
+
+    Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
+    Route::post('/customers/{user}/lift-limit', [Admin\CustomerController::class, 'liftLimit'])->name('customers.lift-limit');
 });
 
 /*

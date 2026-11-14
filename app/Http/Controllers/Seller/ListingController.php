@@ -35,6 +35,7 @@ class ListingController extends Controller
                 'On the deals page' => $all->whereIn('status', [ListingStatus::Live, ListingStatus::SoldOut])->sortBy('pickup_start'),
                 'Paused' => $all->where('status', ListingStatus::Paused),
                 'Drafts' => $all->where('status', ListingStatus::Draft),
+                'Taken down by FoodLoop' => $all->where('status', ListingStatus::Hidden),
                 'Closed' => $all->where('status', ListingStatus::Closed)->take(20),
             ],
         ]);

@@ -12,6 +12,8 @@ enum ListingStatus: string
     case Paused = 'paused';
     case SoldOut = 'sold_out';
     case Closed = 'closed';
+    // Taken off the deals page by an admin after a report. The seller can't bring it back.
+    case Hidden = 'hidden';
 
     /** The text shown to people. */
     public function label(): string
@@ -22,6 +24,7 @@ enum ListingStatus: string
             self::Paused => 'Paused',
             self::SoldOut => 'Sold out',
             self::Closed => 'Closed',
+            self::Hidden => 'Hidden by FoodLoop',
         };
     }
 

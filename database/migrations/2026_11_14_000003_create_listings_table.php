@@ -31,7 +31,7 @@ return new class extends Migration
             $table->json('allergens')->nullable();
             // Offer what's left to the partner food bank when the listing closes.
             $table->boolean('offer_leftovers')->default(false);
-            // draft, live, paused, sold_out, closed (App\Enums\ListingStatus)
+            // draft, live, paused, sold_out, closed, hidden (App\Enums\ListingStatus)
             $table->string('status', 20)->default('draft');
             $table->dateTime('published_at')->nullable();
             $table->dateTime('closed_at')->nullable();
