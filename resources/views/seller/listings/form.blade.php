@@ -12,7 +12,8 @@
 
     $isNew = ! $listing->exists;
     $status = $listing->status;
-    $closed = $status === ListingStatus::Closed;
+    // Closed listings and ones an admin took down can only be looked at.
+    $closed = in_array($status, [ListingStatus::Closed, ListingStatus::Hidden], true);
     $canPublish = $shop->isApproved();
     $title = $isNew ? 'New listing' : 'Edit listing';
 

@@ -25,6 +25,7 @@
     </x-slot:actions>
 
     @include('seller.partials.approval-notice')
+    @include('seller.partials.admin-messages', ['messages' => $adminMessages])
     @include('seller.partials.flash')
 
     <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">

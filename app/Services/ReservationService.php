@@ -215,6 +215,32 @@ class ReservationService
     }
 
     /**
+     * Cancel every waiting reservation on one listing, because the listing is
+     * being taken down (an admin hid it after a report). Like the block case:
+     * not the customer's doing, so never "late", no strikes, and pay-now ones
+     * are refunded (simulated). Returns how many were cancelled.
+     */
+    public function cancelWaitingReservationsOn(Listing $listing): int
+    {
+        $cancelled = 0;
+
+        $listing->reservations()
+            ->where('status', ReservationStatus::Reserved)
+            ->orderBy('id')
+            ->get()
+            ->each(function (Reservation $reservation) use (&$cancelled) {
+                try {
+                    DB::transaction(fn () => $this->cancelLocked($reservation, byCustomer: false), self::ATTEMPTS);
+                    $cancelled++;
+                } catch (ReservationRefused) {
+                    // Collected a moment ago or already past its grace period.
+                }
+            });
+
+        return $cancelled;
+    }
+
+    /**
      * Cancel the waiting reservations of every customer who is blocked right
      * now. Normally there are none, because a block cancels them when it
      * starts; this catches anything left behind. Safe to run again and again.

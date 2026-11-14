@@ -117,6 +117,6 @@ describe('dashboard layouts', function () {
         $this->actingAs(User::factory()->admin()->create());
 
         $this->blade('<x-layouts.admin title="Overview" active="overview">Hi</x-layouts.admin>')
-            ->assertSeeInOrder(['Admin', 'Overview', 'Sellers', 'Listings', 'Reports', 'Customers']);
+            ->assertSeeInOrder(['Admin', 'Overview', 'Sellers', 'Reports', 'Customers']);
     });
 });

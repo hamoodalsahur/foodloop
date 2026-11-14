@@ -7,6 +7,7 @@ use App\Enums\ListingStatus;
 use App\Enums\ReservationStatus;
 use App\Models\Donation;
 use App\Models\Listing;
+use App\Models\Report;
 use App\Models\Reservation;
 use App\Models\Seller;
 use Illuminate\Support\Collection;
@@ -111,5 +112,25 @@ class SellerOverview
         return (int) $this->donations()
             ->where('status', '!=', DonationStatus::Declined)
             ->sum('quantity');
+    }
+
+    /**
+     * What the admins did about reports on this shop's listings in the last
+     * two weeks (taken down, or a warning), newest first. One entry per
+     * listing and decision, however many customers reported it.
+     *
+     * @return Collection<int, Report>
+     */
+    public function adminMessages(): Collection
+    {
+        return Report::query()
+            ->whereNotNull('resolution')
+            ->where('resolved_at', '>=', now()->subDays(14))
+            ->whereHas('listing', fn ($query) => $query->where('seller_id', $this->seller->id))
+            ->with('listing')
+            ->latest('resolved_at')
+            ->get()
+            ->unique(fn (Report $report) => $report->listing_id.'|'.$report->resolution->value.'|'.$report->resolved_at)
+            ->values();
     }
 }

@@ -101,6 +101,10 @@
             </p>
         @endif
 
+        @if (session('status'))
+            <x-notice variant="success" class="mt-4">{{ session('status') }}</x-notice>
+        @endif
+
         @error('reservation')
             <x-notice variant="danger" class="mt-4">{{ $message }}</x-notice>
         @enderror
@@ -206,5 +210,48 @@
                 <p class="flex min-h-14 items-center justify-center rounded-2xl bg-line font-semibold text-muted">{{ match ($state) { 'sold_out' => 'Sold out', 'closed' => 'Closed', default => 'Ended' } }}</p>
             </div>
         @endif
+        @can('create', \App\Models\Report::class)
+            {{-- Report this listing to the admins. Opens in place; works without JavaScript. --}}
+            <details {{ $errors->report->any() || $errors->has('report') ? 'open' : '' }} class="mt-6 border-t border-line pt-4">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-muted underline underline-offset-4">
+                    Something wrong? Report this listing
+                </summary>
+
+                @error('report')
+                    <x-notice variant="danger" class="mt-2">{{ $message }}</x-notice>
+                @enderror
+
+                <form method="POST" action="{{ route('reports.store', $listing) }}" class="mt-3 space-y-4">
+                    @csrf
+
+                    <fieldset>
+                        <legend class="text-sm font-semibold">What is wrong?</legend>
+                        <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            @foreach (\App\Enums\ReportReason::cases() as $reason)
+                                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border-2 border-line bg-white px-3 text-sm font-medium has-checked:border-forest has-checked:bg-marigold-soft">
+                                    <input type="radio" name="reason" value="{{ $reason->value }}" required class="size-4 accent-forest"
+                                           @checked(old('reason') === $reason->value)>
+                                    {{ $reason->label() }}
+                                </label>
+                            @endforeach
+                        </div>
+                        @if ($errors->report->has('reason'))
+                            <p class="mt-1 text-sm font-medium text-danger">{{ $errors->report->first('reason') }}</p>
+                        @endif
+                    </fieldset>
+
+                    <div>
+                        <label for="report-details" class="block text-sm font-semibold">What happened? <span class="font-normal text-muted">(optional, the seller may see your words but not your name)</span></label>
+                        <textarea id="report-details" name="details" rows="3" maxlength="500"
+                                  class="mt-1.5 block w-full rounded-xl border-2 border-forest bg-white px-3.5 py-2.5 text-base">{{ old('details') }}</textarea>
+                        @if ($errors->report->has('details'))
+                            <p class="mt-1 text-sm font-medium text-danger">{{ $errors->report->first('details') }}</p>
+                        @endif
+                    </div>
+
+                    <x-button type="submit" variant="outline">Send report</x-button>
+                </form>
+            </details>
+        @endcan
     </div>
 </x-layouts.customer>

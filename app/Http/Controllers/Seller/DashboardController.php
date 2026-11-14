@@ -26,6 +26,7 @@ class DashboardController extends Controller
             'pickups' => $overview->pickups(),
             'listings' => $overview->activeListings(),
             'leftovers' => $overview->leftoversToOffer(),
+            'adminMessages' => $overview->adminMessages(),
         ]);
     }
 }

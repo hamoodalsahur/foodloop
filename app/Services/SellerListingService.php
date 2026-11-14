@@ -72,6 +72,10 @@ class SellerListingService
                     throw new SellerActionRefused('This listing has closed, so it can’t be changed any more.');
                 }
 
+                if ($listing->status === ListingStatus::Hidden) {
+                    throw new SellerActionRefused('FoodLoop took this listing down after a report, so it can’t be changed.');
+                }
+
                 $locked = $this->isLocked($listing);
 
                 $listing->fill(collect($data)->only([
