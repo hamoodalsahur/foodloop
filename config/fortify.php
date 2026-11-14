@@ -131,10 +131,9 @@ return [
     |
     */
 
-    // FoodLoop: off until Stage 4 adds our own login and register screens
-    // (Fortify::loginView() etc. in FortifyServiceProvider). Until then only
-    // the form endpoints exist: POST /login, POST /register, POST /logout.
-    'views' => false,
+    // FoodLoop: on. The login and register screens are our own Blade views
+    // (resources/views/auth), registered in FortifyServiceProvider.
+    'views' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -167,8 +166,9 @@ return [
     'features' => [
         Features::registration(),
 
-        // Stage 4: turn this on together with 'views' above. The reset link in
-        // the email points at a screen, so it needs the views to exist first.
+        // Password reset is left out of the prototype (it needs two more
+        // screens and real email). To add it later: uncomment the next line and
+        // register Fortify::requestPasswordResetLinkView / resetPasswordView.
         // Features::resetPasswords(),
 
         // Not used in this prototype: profile and password updates,

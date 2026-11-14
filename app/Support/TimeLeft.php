@@ -30,6 +30,14 @@ class TimeLeft
         };
     }
 
+    /** "00:42:10" for the live countdowns (hours:minutes:seconds, never negative). */
+    public static function clock(CarbonInterface $until): string
+    {
+        $seconds = max(0, (int) now()->diffInSeconds($until, false));
+
+        return sprintf('%02d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds % 3600, 60), $seconds % 60);
+    }
+
     public static function isUrgent(CarbonInterface $until): bool
     {
         $minutes = self::minutes($until);

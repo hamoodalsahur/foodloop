@@ -18,7 +18,8 @@ describe('developer preview pages', function () {
             ->assertOk()
             ->assertSeeInOrder([
                 'x-button', 'x-card', 'x-tag', 'x-status-pill', 'x-price-box', 'x-food-photo',
-                'x-deal-row', 'x-stat-tile', 'x-spec-grid', 'x-empty-state', 'x-error-state',
+                'x-deal-row', 'x-stat-tile', 'x-spec-grid', 'x-notice', 'x-countdown', 'x-back-link', 'x-form.input',
+                'x-empty-state', 'x-error-state',
             ])
             ->assertSee('sample data')
             ->assertSee('Try again');
@@ -65,8 +66,29 @@ describe('customer layout', function () {
 
         $this->blade('<x-layouts.customer>Hi</x-layouts.customer>')
             ->assertSee('AR')
-            ->assertSee('Signed in as Aina Rahman')
+            ->assertSee('Account menu for Aina Rahman')
+            ->assertSee('Log out')
             ->assertDontSee('Log in');
+    });
+
+    it('greys out menu items whose page is not built yet instead of linking nowhere', function () {
+        $this->blade('<x-layouts.customer active="deals">Hi</x-layouts.customer>')
+            ->assertSee('href="'.route('deals.index').'"', false)
+            ->assertSee('Map<span class="sr-only"> (coming soon)</span>', false)
+            ->assertDontSee('href="#"', false);
+    });
+
+    it('can drop the logo bar and the bottom navigation for detail pages', function () {
+        $this->blade('<x-layouts.customer :header="false" :nav="false" flush>Hi</x-layouts.customer>')
+            ->assertDontSee('foodloop<span', false)
+            ->assertDontSee('aria-label="Main"', false)
+            ->assertSee('Skip to content');
+    });
+
+    it('has a "You’re offline" strip ready for when the connection drops', function () {
+        $this->blade('<x-layouts.customer>Hi</x-layouts.customer>')
+            ->assertSee('You’re offline')
+            ->assertSee('@offline.window', false);
     });
 
     it('shows the dark notice strip only when a page sets one', function () {

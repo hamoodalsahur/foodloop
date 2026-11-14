@@ -13,7 +13,7 @@ Built for the ENT600 Technology Entrepreneurship New Product Development (NPD) a
 |---|---|
 | System workflow and business rules | ✅ designed |
 | UI mockups (style C: forest, marigold, cream) | ✅ approved |
-| Laravel + MySQL prototype | 🚧 Stages 0–3 done (setup, database, demo data, reservation engine, roles, layouts and design system) · Stage 4 (student flow) next |
+| Laravel + MySQL prototype | 🚧 Stages 0–4 done: a student can sign up, browse deals, reserve and get a pickup code · Stage 5 (seller flow) next |
 
 All shop names, prices and numbers in the mockups and in the app are **demo data**, not real offers or
 research results. Payments are simulated.
@@ -114,8 +114,26 @@ only; never use this data or this password on a real server.
 | Customer, blocked | `daniel@foodloop.test` · `farah@foodloop.test` | Blocked after 3 no-shows, for 5 and 2 more days |
 | Customer, 2 strikes | `jason@foodloop.test` | One more no-show and he is blocked |
 
-There are no sign-in screens yet (they arrive in Stage 4), so for now the accounts are used by the tests
-and by the stages that follow.
+Log in at <http://localhost:8000/login>. Customers land on the deals, sellers on `/seller`, the admin on
+`/admin` (the seller and admin areas are still placeholders).
+
+## Try the student flow
+
+With `php artisan serve` running and the demo data seeded (about 2 minutes):
+
+1. Open <http://localhost:8000>. You see tonight's deals, closing soonest first. Try the tabs
+   (Nearest, Cheapest), the **Halal only** and **Distance** tiles and the food chips.
+2. Tap **Bakery Surprise Bundle**. You see the −60% band, the live countdown and the facts box.
+3. Tap **Log in to reserve**, then **Create an account** and sign up with any name and email
+   (or log in as `aina@foodloop.test` / `password`). You come straight back to the bundle.
+4. Pick how many, choose **Pay now** or **Pay at pickup**, tap **Reserve for RM…**.
+5. You land on **You're booked.** with your 4-digit pickup code, the countdown to the pickup window and
+   the free-cancellation time. **Orders** in the menu lists all your reservations.
+6. Tap **Cancel**, then **Yes, cancel**: it's free at this point and the food goes back on sale.
+
+To see the other states: reserve everything that's left of a deal and open it again (**Sold out**), open
+<http://localhost:8000/?category=groceries> (**All gone nearby**), or log in as `daniel@foodloop.test`
+(blocked: **You can't reserve until…**). Map and Impact in the menu are greyed out until Stage 6.
 
 ## See the design system
 
@@ -134,21 +152,21 @@ in `docs/UI_GUIDE.md`.
 
 ## Run the tests
 
-Quick run on SQLite in memory (about 10 seconds):
+Quick run on SQLite in memory (about 15 seconds):
 
 ```
 php artisan test
 ```
 
 The same tests on MySQL, plus the race test where 8 requests go for the last item at the same moment
-(about 30 seconds; uses the `foodloop_test` database, MySQL must be running):
+(about 45 seconds; uses the `foodloop_test` database, MySQL must be running):
 
 ```
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 249 passed` for the quick run and
-`Tests: 251 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 366 passed` for the quick run and
+`Tests: 368 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout
@@ -159,6 +177,7 @@ every commit.
 | `app/Models/`, `app/Enums/` | The data: users, sellers, listings, reservations, reports, donations, and their allowed values |
 | `app/Services/ReservationService.php` | The reservation engine: reserve, cancel, collect by code, no-show, strikes. The only code that changes stock or a reservation's status |
 | `app/Policies/`, `app/Http/Middleware/EnsureRole.php`, `routes/web.php` | Who may open which area (customer, seller, admin) and who may touch which listing or reservation |
+| `app/Http/Controllers/`, `resources/views/deals`, `listings`, `orders`, `auth` | The student pages: deals, one listing, reserve, orders and pickup code, log in and register |
 | `resources/views/components/` | The design system: layouts and reusable components. Guide: `docs/UI_GUIDE.md` |
 | `app/Services/ListingCloser.php`, `routes/console.php` | Closing finished listings, the food-bank offer, and the every-minute schedule |
 | `database/seeders/DemoSeeder.php` | The demo shops, people, listings and order history |

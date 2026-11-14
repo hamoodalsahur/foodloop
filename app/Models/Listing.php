@@ -7,6 +7,7 @@ use App\Enums\ListingCategory;
 use App\Enums\ListingStatus;
 use App\Enums\ListingType;
 use App\Enums\ReservationStatus;
+use App\Enums\SellerStatus;
 use App\Exceptions\BusinessRuleViolation;
 use App\Support\Money;
 use Database\Factories\ListingFactory;
@@ -29,6 +30,12 @@ class Listing extends Model
 {
     /** @use HasFactory<ListingFactory> */
     use HasFactory;
+
+    /**
+     * Km from "you are here" to the shop. Not a database column: filled in by
+     * App\Queries\DealsQuery (or by hand) when a page shows distances.
+     */
+    public ?float $distanceKm = null;
 
     /**
      * @var array<string, mixed>
@@ -109,6 +116,37 @@ class Listing extends Model
     public function scopeLive(Builder $query): void
     {
         $query->where('status', ListingStatus::Live);
+    }
+
+    /**
+     * Deals a customer can reserve right now: live, pickup window not over,
+     * and from a shop that is (still) approved.
+     */
+    public function scopeOpen(Builder $query): void
+    {
+        $query->where('status', ListingStatus::Live)
+            ->where('pickup_end', '>', now())
+            ->whereHas('seller', fn (Builder $seller) => $seller->where('status', SellerStatus::Approved));
+    }
+
+    /** Can be reserved right now (the same test as the `open` scope, for one listing). */
+    public function isOpen(): bool
+    {
+        return $this->status === ListingStatus::Live
+            && $this->pickup_end->isFuture()
+            && $this->seller->isApproved();
+    }
+
+    /** Was on the deals page at some point: live, sold out or closed (not a draft, not paused). */
+    public function isPublished(): bool
+    {
+        return in_array($this->status, [ListingStatus::Live, ListingStatus::SoldOut, ListingStatus::Closed], true);
+    }
+
+    /** Reservations are taken until the pickup window ends. */
+    public function reservationsCloseAt(): Carbon
+    {
+        return $this->pickup_end;
     }
 
     /** The last moment a reservation can be cancelled for free. */

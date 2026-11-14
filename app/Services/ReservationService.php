@@ -271,11 +271,7 @@ class ReservationService
         $this->refuseIf($reservation->status !== ReservationStatus::Reserved, RefusalReason::NotReserved);
         $this->refuseIf($now->greaterThan($reservation->expires_at), RefusalReason::AlreadyExpired);
 
-        $changedMindUntil = $reservation->created_at->copy()->addMinutes(config('foodloop.change_of_mind_minutes'));
-
-        $late = $byCustomer
-            && $now->greaterThan($listing->freeCancelUntil())
-            && $now->greaterThan($changedMindUntil);
+        $late = $byCustomer && ! $reservation->setRelation('listing', $listing)->isFreeToCancel();
 
         $reservation->status = ReservationStatus::Cancelled;
         $reservation->cancelled_at = $now;

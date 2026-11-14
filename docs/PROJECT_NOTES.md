@@ -13,9 +13,76 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 | Style C full screen set + states | ✅ approved by owner (13 Nov), food pictures added | Same canvas, page "C · Full set"; PNGs in `docs/mockups/` |
 | Demo food pictures | ✅ (illustrations, stand-ins for real photos) | `docs/demo-food/*.svg` |
 | Build plan (data model, rules, stages) | ✅ | `docs/BUILD_PLAN.md` |
-| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 next | repo root; setup steps and demo accounts in `README.md` |
+| Laravel prototype | 🚧 Stage 0 (setup) ✅ · Stage 1 (database, demo data) ✅ · Stage 2 (reservation engine) ✅ · Stage 3 (roles, layouts, design system) ✅ · Stage 4 (student flow) ✅ · Stage 5 next | repo root; setup steps and demo accounts in `README.md` |
 
 ---
+
+## 14 Nov 2026 · Stage 4 · The student flow, end to end
+
+- **What:** a student can now go from the deals page to a pickup code.
+  - *Deals page* (`/`, mockups c01, c05, c06): closing soonest first; tabs Closing soon / Nearest /
+    Cheapest / New; tiles for Surprise Bundles left, Halal only and Distance; food category chips; the
+    strip "N deals close within the hour"; "All gone nearby." when nothing matches, with buttons that undo
+    one filter each; "Couldn't load deals." with Try again when the database doesn't answer.
+  - *Listing page* (`/listings/{id}`, c02, c07): discount band, live countdown, facts box (pickup, left,
+    halal, allergens), quantity stepper, pay now / pay at pickup, "Reserve for RM…". Sold-out and ended
+    versions suggest other deals. Guests see "Log in to reserve" and come straight back after logging in.
+  - *You're booked* (`/orders/{id}`, c03): pickup code, countdown (window opens in / closes in / last
+    chance), three-step bar, details, the free or late cancellation wording, Directions, and Cancel with
+    a confirm step. Also shows collected, cancelled (refunded) and missed (strikes) reservations.
+  - *Orders* (`/orders`): waiting for pickup first, then earlier ones.
+  - *Log in and register* (`/login`, `/register`) in style C. New accounts are customers. After login
+    customers go to the deals, sellers to `/seller`, admins to `/admin`.
+  - *Error pages* 403, 404, 419, 429, 500, 503 in the same style, and a red "You're offline" strip.
+  - New shared pieces: `x-notice`, `x-countdown`, `x-back-link`, `x-form.input`, big `page` versions of
+    `x-empty-state` and `x-error-state`, `App\Support\Distance`, `PickupWindow`, `DealFilters`,
+    `App\Queries\DealsQuery`. `docs/UI_GUIDE.md` has a new "How to add a page" section for Stages 5 to 8.
+- **Choices made on the way (and why):**
+  - *Reservations close when the pickup window ends,* as the build plan and the engine say. The mockup's
+    listing countdown (00:42:10) matched the time until the window *opens*; ours counts to the window's
+    end, so the demo bundle shows about 02:45:00. The booked page does show "Pickup window opens in
+    00:4x:xx" like the mockup. **Question for the team:** should reserving stop when the window opens
+    instead?
+  - *"Halal only" is on by default* (as in the mockup) and hides only listings marked not halal.
+    Certified and Muslim-owned both stay, and every listing says which one it is, with a line explaining
+    that "Certified" means an admin checked the certificate. **Question for the team:** should "Halal
+    only" mean certified only?
+  - *Distance is measured from a made-up point* (`config/foodloop.php`, `demo_origin`), not the phone's
+    real position, and the page says the distances are demo data. Default "Within 2 km"; the tile steps
+    2 km → 5 km → any.
+  - *Sold-out deals are not in the list;* their page still opens and says "Sold out" (c07). A listing
+    whose window has passed shows "Ended" even before the every-minute job closes it.
+  - *Drafts and paused listings answer "not found"* for everyone but their shop and admins.
+  - *Money and quantity:* the button total updates as you change the quantity; the limit shown is what
+    this customer may still take (3 minus what they already hold, at most what's left).
+  - *Demo seed:* pickup windows now start from the last 5-minute mark, so times read "8:45–10:45 PM"
+    instead of "8:43–10:43 PM". The "min left" numbers are therefore 15 to 20, 30 to 35 and so on.
+- **In the mockups but left out** (not in the build plan): deal alerts ("Turn on deal alerts"), "Notify
+  me next time" on a sold-out deal, a real payment method name ("DuitNow") on the booked page (it says
+  "Paid (simulated)"), and password reset. Map and Impact are greyed out in the menu until Stage 6.
+- **Good to know:** with the session stored in the database (the default in `.env.example`), a full
+  database outage shows the styled 500 page ("Something broke on our side", Try again) rather than the
+  deals error state, because the session fails first. The deals error state covers a failing deals query.
+- **Tested:** 368 tests on MySQL 8.0.46 (1,288 assertions), 366 + 2 skipped on SQLite. New: 117 tests
+  for the deals page (order, every filter, tiles, empty and error states), the listing page (each state
+  and each kind of visitor), reserving (happy path, form checks, and each refusal: sold out, blocked,
+  window ended, not enough left, already holds three, shop suspended), the booked page in every phase,
+  cancelling free and late, the orders list, login and register, and the whole journey on the seeded demo
+  data.
+  - *Browser (Chrome, 390 px and 1280 px):* a scripted walk through the real pages: deals → listing →
+    log in → register → back on the listing → 2 portions, pay at pickup → booked page (countdown seen
+    ticking) → orders → cancel with confirm → sell a deal out → sold-out page → ended page → account menu
+    → log out → 404 → deals with the listings table hidden (503 error state) → Aina's orders and code
+    4721 → wrong password → seller login lands on `/seller`. On every page: no sideways scroll, fonts
+    loaded, no broken pictures, every button, field and stand-alone link at least 44 px tall (links
+    inside a sentence are not counted), no console errors
+    other than the two error pages opened on purpose.
+  - Compared side by side with mockups c01, c02, c03, c05, c06, c07. Found and fixed this way: "Egg,
+    milk, wheat" wrapped in the facts box, the shop name was squeezed by the wider "RM4.50" box, the
+    booked page repeated "You're booked" in a second box, and the earlier-orders rows cut off the date.
+  - Screenshots: `docs/screenshots/stage4-*.png`.
+- **Not tested:** on Windows; with a screen reader; with JavaScript switched off (the pages are built to
+  work without it, but this was not checked in a browser).
 
 ## 14 Nov 2026 · Stage 3 · Roles, policies, layouts and the design system
 
@@ -150,7 +217,8 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
   - *Money text:* whole ringgit shows as `RM8`, anything with sen as `RM4.50`. The mockup wrote `RM4.5` in
     one place and `RM6.50` in another; two decimals is the normal way to write money.
   - *Demo times move with the clock.* Pickup windows are set relative to the moment of seeding (bundle window
-    opens in 42 min, curry puffs close in 18 min, …), so the demo always has deals closing soon. Reseed
+    opens in about 45 min, curry puffs close in about 20 min, …; since Stage 4 they start from the last
+    5-minute mark so the clock times look real), so the demo always has deals closing soon. Reseed
     right before the pitch.
   - *`ssm_no` can be empty,* because the admin mockup shows a shop with the SSM number "Missing".
   - *Demo stock adds up:* every portion that is not available belongs to a reservation.

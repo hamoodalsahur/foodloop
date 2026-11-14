@@ -2,6 +2,8 @@
 
 use App\Enums\RefusalReason;
 use App\Exceptions\ReservationRefused;
+use App\Models\Listing;
+use App\Models\Seller;
 use App\Services\ReservationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,4 +44,23 @@ function expectRefusal(Closure $attempt, RefusalReason $reason): void
     }
 
     test()->fail("Expected a refusal ({$reason->value}) but it went through.");
+}
+
+/**
+ * A live listing from an approved shop that sits $km north of the demo
+ * "you are here" point, for tests of the deals page.
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function dealAt(float $km, array $attributes = [], string $shop = 'Test Shop'): Listing
+{
+    $origin = config('foodloop.demo_origin');
+
+    $seller = Seller::factory()->approved()->create([
+        'business_name' => $shop,
+        'lat' => $origin['lat'] + $km * 0.009,
+        'lng' => $origin['lng'],
+    ]);
+
+    return Listing::factory()->for($seller)->create($attributes);
 }

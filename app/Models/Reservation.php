@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 // Status changes go through App\Services\ReservationService only (Stage 2).
 #[Fillable([
@@ -58,6 +59,29 @@ class Reservation extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function isReserved(): bool
+    {
+        return $this->status === ReservationStatus::Reserved;
+    }
+
+    /**
+     * The last moment this reservation can be cancelled for free: the later
+     * of "30 min before the window starts" and "5 min after reserving"
+     * (both numbers from config/foodloop.php).
+     */
+    public function freeCancelUntil(): Carbon
+    {
+        $changedMindUntil = $this->created_at->copy()->addMinutes(config('foodloop.change_of_mind_minutes'));
+
+        return $this->listing->freeCancelUntil()->max($changedMindUntil);
+    }
+
+    /** Would cancelling right now be free (true) or a late cancel with a strike (false)? */
+    public function isFreeToCancel(): bool
+    {
+        return now()->lessThanOrEqualTo($this->freeCancelUntil());
     }
 
     /** "RM16" */

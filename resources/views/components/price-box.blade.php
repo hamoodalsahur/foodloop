@@ -9,8 +9,8 @@
 
 @php($money = \App\Support\Money::class)
 
-<div {{ $attributes->class('flex min-w-[4.25rem] shrink-0 flex-col items-center justify-center rounded-2xl bg-forest px-2.5 py-2 text-cream') }}>
-    <span class="font-display text-lg font-bold leading-tight">{{ $money::format($priceSen) }}</span>
+<div {{ $attributes->class('flex min-w-16 shrink-0 flex-col items-center justify-center rounded-2xl bg-forest px-2 py-2 sm:min-w-[4.25rem] sm:px-2.5 text-cream') }}>
+    <span class="font-display text-base font-bold leading-tight sm:text-lg">{{ $money::format($priceSen) }}</span>
     @if ($originalSen !== null && $originalSen > $priceSen)
         <span class="text-xs text-mist">
             <span class="sr-only">instead of</span>
