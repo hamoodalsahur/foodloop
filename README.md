@@ -65,6 +65,9 @@ Success looks like: `composer install` ends without red errors, `migrate:fresh -
 `DemoSeeder ... DONE`, and `npm run build` ends with `✓ built`. If your MySQL root user has a password, add `-p` to the `mysql`
 command and put the password in `DB_PASSWORD` in `.env`.
 
+`ERROR 2003 ... Can't connect to MySQL server on 'localhost:3306' (10061)` means MySQL isn't running: click
+**Start All** in Laragon's window and wait until MySQL shows as started, then run the command again.
+
 **3. Start it.**
 
 ```
