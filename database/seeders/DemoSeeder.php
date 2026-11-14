@@ -80,14 +80,49 @@ class DemoSeeder extends Seeder
         ]);
     }
 
+    /** Real photo types the seeder accepts, in order of preference. */
+    private const PHOTO_TYPES = ['jpg', 'jpeg', 'png', 'webp'];
+
     /**
-     * The drawn food pictures stand in for seller photos.
+     * Copy the demo food pictures to where listing photos live.
+     *
+     * Each product has a drawn picture (docs/demo-food/curry-puffs.svg). If a
+     * real photo with the same name is in the "real" subfolder
+     * (docs/demo-food/real/curry-puffs.jpg), it is copied as well and
+     * demoPhoto() picks it instead. See docs/demo-food/real/README.md.
      */
     private function copyDemoPhotos(): void
     {
-        foreach (glob(base_path('docs/demo-food/*.svg')) as $file) {
+        $folder = config('foodloop.demo_photo_dir');
+
+        // Start clean, so a photo that was removed from the folder is not used again.
+        // (Only the demo folder: photos that sellers uploaded are in listings/ itself.)
+        Storage::disk('public')->deleteDirectory('listings/demo');
+
+        $files = [
+            ...glob($folder.'/*.svg'),
+            ...glob($folder.'/real/*.{'.implode(',', self::PHOTO_TYPES).'}', GLOB_BRACE),
+        ];
+
+        foreach ($files as $file) {
             Storage::disk('public')->put('listings/demo/'.basename($file), file_get_contents($file));
         }
+    }
+
+    /**
+     * The picture for a product: the real photo when one was provided,
+     * otherwise the drawn one.  demoPhoto('curry-puffs') →
+     * "listings/demo/curry-puffs.jpg" or "listings/demo/curry-puffs.svg"
+     */
+    private function demoPhoto(string $name): string
+    {
+        foreach (self::PHOTO_TYPES as $type) {
+            if (Storage::disk('public')->exists("listings/demo/{$name}.{$type}")) {
+                return "listings/demo/{$name}.{$type}";
+            }
+        }
+
+        return "listings/demo/{$name}.svg";
     }
 
     private function user(string $name, string $email): User
@@ -214,7 +249,7 @@ class DemoSeeder extends Seeder
                 'title' => 'Bakery Surprise Bundle',
                 'description' => '4–6 of today’s unsold breads, buns and pastries. You’ll find out what’s inside at pickup.',
                 'category' => ListingCategory::Bakery,
-                'photo_path' => 'listings/demo/bakery-bundle.svg',
+                'photo_path' => $this->demoPhoto('bakery-bundle'),
                 'original_price_sen' => 2000,
                 'price_sen' => 800,
                 'halal_status' => HalalStatus::Certified,
@@ -226,7 +261,7 @@ class DemoSeeder extends Seeder
                 'title' => 'Butter croissants × 3',
                 'description' => 'Three butter croissants baked this morning.',
                 'category' => ListingCategory::Bakery,
-                'photo_path' => 'listings/demo/croissants.svg',
+                'photo_path' => $this->demoPhoto('croissants'),
                 'original_price_sen' => 1200,
                 'price_sen' => 600,
                 'halal_status' => HalalStatus::Certified,
@@ -238,7 +273,7 @@ class DemoSeeder extends Seeder
                 'title' => 'Curry puffs × 4',
                 'description' => 'Four potato curry puffs from this afternoon’s batch.',
                 'category' => ListingCategory::Kuih,
-                'photo_path' => 'listings/demo/curry-puffs.svg',
+                'photo_path' => $this->demoPhoto('curry-puffs'),
                 'original_price_sen' => 600,
                 'price_sen' => 300,
                 'halal_status' => HalalStatus::MuslimOwned,
@@ -250,7 +285,7 @@ class DemoSeeder extends Seeder
                 'title' => 'Iced latte',
                 'description' => 'Iced latte made to order before closing.',
                 'category' => ListingCategory::Drinks,
-                'photo_path' => 'listings/demo/iced-latte.svg',
+                'photo_path' => $this->demoPhoto('iced-latte'),
                 'original_price_sen' => 900,
                 'price_sen' => 450,
                 'halal_status' => HalalStatus::MuslimOwned,
@@ -262,7 +297,7 @@ class DemoSeeder extends Seeder
                 'title' => 'Sandwich & pastry pack',
                 'description' => 'Two sandwiches and two pastries from today’s display.',
                 'category' => ListingCategory::Bakery,
-                'photo_path' => 'listings/demo/sandwich-pack.svg',
+                'photo_path' => $this->demoPhoto('sandwich-pack'),
                 'original_price_sen' => 2400,
                 'price_sen' => 900,
                 'halal_status' => HalalStatus::MuslimOwned,
@@ -274,7 +309,7 @@ class DemoSeeder extends Seeder
                 'title' => 'Nasi ayam set (2 pax)',
                 'description' => 'Chicken rice for two with soup and sambal.',
                 'category' => ListingCategory::Meals,
-                'photo_path' => 'listings/demo/nasi-ayam.svg',
+                'photo_path' => $this->demoPhoto('nasi-ayam'),
                 'original_price_sen' => 1300,
                 'price_sen' => 650,
                 'halal_status' => HalalStatus::MuslimOwned,
