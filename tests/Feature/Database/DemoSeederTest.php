@@ -192,7 +192,8 @@ it('seeds the placeholder food bank partner and one open report', function () {
 });
 
 it('copies the demo food pictures and points every listing at one that exists', function () {
-    expect(Storage::disk('public')->files('listings/demo'))->toHaveCount(7);
+    // One per drawn picture in docs/demo-food (no real photos in these tests).
+    expect(Storage::disk('public')->files('listings/demo'))->toHaveCount(count(glob(base_path('docs/demo-food/*.svg'))));
 
     Listing::all()->each(
         fn (Listing $listing) => Storage::disk('public')->assertExists($listing->photo_path)

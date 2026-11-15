@@ -78,7 +78,9 @@ class SellerOverview
 
     /**
      * Closed listings from the last 7 days with portions left over and no
-     * food-bank offer yet: the "Offer to food bank" list.
+     * food-bank offer yet: the "Offer to food bank" list. Only listings that
+     * closed because their pickup window ended: one that `demo:refresh` took
+     * off sale early has no real leftovers.
      *
      * @return Collection<int, Listing>
      */
@@ -87,6 +89,7 @@ class SellerOverview
         return $this->seller->listings()
             ->where('status', ListingStatus::Closed)
             ->where('pickup_end', '>=', now()->subDays(7))
+            ->whereColumn('closed_at', '>=', 'pickup_end')
             ->whereDoesntHave('donations')
             ->whereDoesntHave('reservations', fn ($q) => $q->where('status', ReservationStatus::Reserved))
             ->latest('pickup_end')

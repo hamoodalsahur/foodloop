@@ -4,6 +4,8 @@
 // name replaces that product's drawn picture (docs/demo-food/real/README.md).
 
 use App\Models\Listing;
+use App\Support\Demo\DemoMenu;
+use App\Support\Demo\DemoPhotos;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -84,7 +86,7 @@ it('ignores files that are not pictures or not named after a product', function 
 });
 
 it('only has photos in the real folder that are named after a product, so none is silently ignored', function () {
-    $names = ['bakery-bundle', 'croissants', 'curry-puffs', 'iced-latte', 'sandwich-pack', 'nasi-ayam'];
+    $names = array_keys(DemoMenu::photoNames());
 
     $unknown = collect(File::files(base_path('docs/demo-food/real')))
         ->reject(fn ($file) => $file->getFilename() === 'README.md')
@@ -104,4 +106,36 @@ it('documents the six product names, and each has a drawn picture to fall back o
         expect($readme)->toContain("`{$name}.jpg`");
         expect(File::exists(base_path("docs/demo-food/{$name}.svg")))->toBeTrue();
     }
+});
+
+it('documents a photo name for every item on the bigger menu, and each has a drawing to fall back on', function () {
+    $readme = File::get(base_path('docs/demo-food/real/README.md'));
+
+    foreach (DemoMenu::items() as $item) {
+        expect($readme)->toContain("`{$item['photo']}.jpg`");
+
+        // Its own drawing, or the drawing of its kind ("kuih", "rice-meal"…).
+        $drawing = File::exists(base_path("docs/demo-food/{$item['photo']}.svg")) ? $item['photo'] : $item['picture'];
+
+        expect($drawing)->not->toBeNull($item['title'])
+            ->and(File::exists(base_path("docs/demo-food/{$drawing}.svg")))->toBeTrue($item['title'])
+            ->and($readme)->toContain("`{$drawing}.jpg`");
+    }
+});
+
+it('shows an item without its own picture with: its real photo, else the photo of its kind, else the drawing of its kind', function () {
+    // Kuih lapis has no drawing of its own, so it starts with the general kuih drawing.
+    expect(DemoPhotos::path('kuih-lapis', 'kuih'))->toBe('listings/demo/kuih.svg');
+
+    ($this->addPhoto)('kuih.png');
+    expect(DemoPhotos::path('kuih-lapis', 'kuih'))->toBe('listings/demo/kuih.png');
+
+    ($this->addPhoto)('kuih-lapis.webp');
+    expect(DemoPhotos::path('kuih-lapis', 'kuih'))->toBe('listings/demo/kuih-lapis.webp');
+
+    // An item with its own drawing keeps it, whatever its kind has.
+    expect(DemoPhotos::path('curry-puffs', 'kuih'))->toBe('listings/demo/curry-puffs.svg');
+
+    DemoPhotos::copy();
+    Storage::disk('public')->assertExists(['listings/demo/kuih-lapis.webp', 'listings/demo/kuih.png', 'listings/demo/kuih.svg']);
 });

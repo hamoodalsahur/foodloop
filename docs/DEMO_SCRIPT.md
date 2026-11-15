@@ -12,8 +12,8 @@ rehearsed on the Windows laptop yet: do one full run there before the pitch.
 ## Before you present (about 5 minutes)
 
 **1. Reset the demo data.** Do this **no more than 30 minutes before you present**. The deals count down
-for real: about 45 minutes after seeding the Bakery Surprise Bundle stops taking reservations, and about
-95 minutes after seeding Aina's sandwich pickup (step 2) closes.
+for real: about 45 minutes after the reset the Bakery Surprise Bundle stops taking reservations, and about
+95 minutes after it Aina's sandwich pickup (step 2) closes.
 
 In Laragon's Terminal, inside `C:\laragon\www\foodloop`:
 
@@ -24,6 +24,21 @@ php artisan serve
 
 Success looks like `DemoSeeder ... DONE`, then `Server running on [http://127.0.0.1:8000]`. Leave that
 window open.
+
+**Which reset?** There are two (about 5 seconds each):
+
+| | `php artisan migrate:fresh --seed` | `php artisan demo:refresh` |
+|---|---|---|
+| Use it for | **The real pitch**, and the first time | Rehearsals, or when you want to keep accounts you made |
+| Accounts and past orders | Wiped and rebuilt | Kept |
+| The numbers in this script (15 meals, RM133) | Always exactly these | One meal and RM15 higher for every rehearsal in which code `2468` was collected |
+| "Approve Kedai Kopi Sinar" (1:25) | Back to waiting | Stays approved once you clicked it |
+| The stale-bread report (1:25) | Back | Back (a new one is filed if you dealt with the old one) |
+
+Both post fresh deals that close soon, and both always bring back the two this script uses: the
+**Bakery Surprise Bundle** (RM8, Aina's code 4721) and the **Sandwich & pastry pack** with code **2468**.
+The other deals on the page are a different pick each time, so the list won't look exactly like the last
+run. If the server is already running, you can run `demo:refresh` in another Terminal without stopping it.
 
 **2. Keep the clock running.** Open a second Terminal in the same folder:
 
@@ -111,18 +126,19 @@ Point at **Platform totals** at the bottom of the admin page (meals rescued, por
 
 | What you see | What to do |
 |---|---|
-| The bundle says **Closed** or **Sold out**, or there's no Reserve button | Too long since seeding. Skip the reserve step: click **Orders** in window A and open the reservation with code **4721** instead. It is the same "You're booked." page. |
-| Code `2468` gives "The pickup time for this reservation has passed" | More than 95 minutes since seeding. Reseed (step 1 above) or skip to the Impact step and say "after the pickup…". |
-| Code `2468` gives "No reservation with that code is waiting at your shop" | It was already collected in a rehearsal. Reseed. |
+| The bundle says **Closed** or **Sold out**, or there's no Reserve button | Too long since the reset. Run `php artisan demo:refresh` in a second Terminal and press F5, or skip the reserve step: click **Orders** in window A and open the reservation with code **4721** instead. It is the same "You're booked." page. |
+| Code `2468` gives "The pickup time for this reservation has passed" | More than 95 minutes since the reset. Run `php artisan demo:refresh` (5 seconds) or skip to the Impact step and say "after the pickup…". |
+| Code `2468` gives "No reservation with that code is waiting at your shop" | It was already collected in a rehearsal. Run `php artisan demo:refresh`: the code works again (Impact then shows one meal more than this script says). |
 | "You're offline" strip, or the page won't load | The `php artisan serve` window was closed. Start it again and press F5. |
 | "Something broke on our side" (error 500) | Laragon's MySQL stopped. In Laragon click **Start All**, then press F5. |
 | You are logged in as the wrong person | Click the round initials button (top right) and **Log out**, or use the right window. |
-| The food pictures are grey plates | Run `php artisan storage:link` once, then reseed. |
+| The food pictures are grey plates | Run `php artisan storage:link` once, then `php artisan demo:refresh`. |
 
 ## Good to know while presenting
 
 - **Reset any time** with `php artisan migrate:fresh --seed` (about 5 seconds). It wipes everything you
-  clicked and brings back the same starting point.
+  clicked and brings back the same starting point. `php artisan demo:refresh` only puts fresh food on
+  sale and keeps accounts and past orders (see "Which reset?" above).
 - **Other things worth showing if you have more time:**
   - Sign up as a new student from **Log in → Create an account** (window with nobody logged in).
   - `http://localhost:8000/map`: a street map of the real shops around UiTM Kedah with deals right now.

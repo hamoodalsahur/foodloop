@@ -49,6 +49,16 @@ return [
     // See docs/demo-food/real/README.md.
     'demo_photo_dir' => base_path('docs/demo-food'),
 
+    // Which deals the demo data posts (App\Support\Demo\DemoDeals), for both
+    // `php artisan migrate:fresh --seed` and `php artisan demo:refresh`:
+    //   random  the two deals the demo script needs, plus a different pick
+    //           from the catalogue each time (6 to 9 deals in all)
+    //   mockup  exactly the six deals on the approved mockups, every time
+    //           (the tests use this, see phpunit.xml)
+    'demo_menu' => env('DEMO_MENU', 'random'),
+    // A number here gives the same "random" pick every time. Empty = a new pick each time.
+    'demo_menu_seed' => env('DEMO_MENU_SEED'),
+
     // Where "you are here" is: the pilot campus, UiTM Kedah in Merbok, near
     // Sungai Petani (main gate). There is no GPS in the prototype, so every
     // student is treated as being on campus. Distances on the deals page

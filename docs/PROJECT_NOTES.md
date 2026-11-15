@@ -17,6 +17,70 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 
 ---
 
+## 15 Nov 2026 · `demo:refresh` and a bigger, random demo menu
+
+- **Why:** the owner wanted to reset the demo food without losing accounts or history, and more variety
+  than the same six deals.
+- **What changed:**
+  - *New command `php artisan demo:refresh`* (well under 5 seconds). It keeps every account (also ones made
+    by signing up), every past order (collected, cancelled, no-show), Aina's impact history, donations,
+    reports, the three shops waiting for approval, strikes and blocks. It deletes the reservations that
+    were still waiting (with their "You're booked" and "New reservation" bell messages, so no dead links),
+    closes every listing that was still open (draft, live, sold out, paused), puts their "left" numbers
+    right, and posts a fresh set of deals counted from now. Nobody gets a strike and nothing goes to the
+    food bank because of a refresh. It can run any number of times. Without the demo data (or with a demo
+    shop suspended) it says what is missing and changes nothing. `migrate:fresh --seed` is still the full
+    wipe.
+  - *Bigger menu:* 29 made-up items across the five shops (`app/Support/Demo/DemoMenu.php`): cakes, tarts
+    and buns at Bonda Mawar; kuih lapis, onde-onde, seri muka, ketayap at Kuih Tradisional Tupah; Spanish
+    latte, matcha latte, Vietnamese coffee, teh tarik at Kopi Saigon; nasi ayam panggang, nasi lemak, mee
+    goreng at Merbok Roasted; nasi campur, nasi goreng, bihun goreng, banana cake at Se.Bunga; plus three new
+    Surprise Bundles. All 50–63% off, with allergens, halal status following the shop.
+  - *Random pick:* each seed or refresh posts 6 to 9 deals: the two fixed ones, one from each of the other
+    four shops (so every shop has a pin on the map; Se.Bunga had none before), and up to three more. Random
+    portions and pickup windows, two of them closing within the hour, sometimes one already sold out, never
+    two deals with the same picture. `DEMO_MENU=mockup` in `.env` gives the six mockup deals instead;
+    `--seed=7` repeats a pick.
+  - *Two deals never change* (the demo script depends on them): Bakery Surprise Bundle at Bonda Mawar, RM8
+    instead of RM20, 3 of 5 left, Aina's code 4721 and Hafiz's 3390; Sandwich & pastry pack at Se.Bunga with
+    the pickup window already open and Aina's code 2468.
+  - *One place for tonight's deals:* the seeder and the command both use `App\Support\Demo\DemoDeals`, so
+    they can't drift apart. The seeder keeps the shops, people and Aina's history.
+  - *Pictures:* eight new drawings in the same style for kinds of food (`kuih`, `cake-slice`, `pastry`,
+    `iced-drink`, `hot-drink`, `rice-meal`, `noodles`, `surprise-bag`). An item shows its own real photo, else
+    its own drawing, else a real photo of its kind, else the drawing of its kind. File names for all 29
+    items are in `docs/demo-food/real/README.md`.
+- **Small extras (feature freeze respected, nothing new for users):**
+  - The seller's "Left over at closing?" list now skips listings that were closed before their pickup window
+    ended. Only `demo:refresh` does that; without this every refresh would have added lines to it.
+  - `.env.example` documents `DEMO_MENU`.
+- **Good to know:**
+  - After a rehearsal in which code 2468 was collected, a refresh keeps that pickup (it is history), so
+    Aina's impact reads 16 / RM148 after the next handover instead of the script's 15 / RM133. A shop you
+    approved as admin stays approved. For the real pitch use `migrate:fresh --seed`; the demo script has a
+    table.
+  - The "already happened today" data (croissant flash deal with its pickups and no-show, Mei Ling's
+    collected sandwich pack) is added again at most once every 12 hours, so refreshing ten times doesn't put
+    ten of them in the history. Mei Ling's report is filed again only when no report of hers is open.
+  - The six original items use the team's real photos, the 23 new ones are drawings until photos are added,
+    so the deals page mixes both. The iced matcha latte shares the (coffee-coloured) iced drink drawing.
+- **How tested:** 643 tests on SQLite (641 pass, 2 MySQL-only skipped); MySQL was not available in this
+  session, so `php artisan test -c phpunit.mysql.xml` still has to be run on the owner's machine. New tests:
+  the menu (prices, halal, allergens, a picture for everything), the random pick with six fixed numbers
+  (two fixed deals, 6–9 deals, every shop open and within 5 km, stock adds up, unique codes, same number =
+  same pick), and the refresh (accounts incl. a new sign-up unchanged, history rows byte-for-byte the same,
+  only waiting reservations gone, no strikes, no donation even after the clockwork runs, stock adds up,
+  three runs in a row, refusals). The existing seeded-data tests run unchanged with `DEMO_MENU=mockup` set
+  in both phpunit files; two had a hard-coded count/name list updated for the new drawings. In Chromium at
+  390 px and 1280 px after several refreshes: deals page, three new listing pages, orders, the street map
+  with real tiles (5 shops, pins match the list), seller dashboard/listings/pickups, admin overview and
+  listings: no sideways scroll, no broken pictures, no console errors; code 2468 handed over through the
+  seller page and Aina's impact went to 15 / RM133. The service worker and manifest are untouched and still
+  register; the last deal clears the bottom menu. Not checked: a real phone, and true installed
+  (standalone) mode, which the test browser could not emulate.
+
+---
+
 ## 15 Nov 2026 · Real map, real shops around UiTM Kedah, installable on phones
 
 - **Why:** the owner asked for a real map with the food places near their campus, and whether FoodLoop

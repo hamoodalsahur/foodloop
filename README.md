@@ -94,9 +94,27 @@ service or another MySQL 8 server. Put its user and password in `.env`.
 
 ## Demo data and demo accounts
 
-`php artisan migrate:fresh --seed` wipes the database and fills it with the **demo data** from the mockups
-(about 5 seconds). Run it again any time to reset, for example right before a demo: pickup times are set
-from the moment you run it, so there are always deals closing soon.
+There are two ways to reset the demo. Both take about 5 seconds, and both set the pickup times from the
+moment you run them, so there are always deals closing soon.
+
+| Command | What it does | Keeps | Throws away |
+|---|---|---|---|
+| `php artisan demo:refresh` | **Fresh food, same people.** Closes tonight's old deals and posts a new set | Every account (also ones you made by signing up), all past orders (collected, cancelled, no-show), Aina's impact history, donations, reports, the shops waiting for approval, strikes and blocks | Reservations that were still waiting to be collected (nobody gets a strike for them), with their bell messages |
+| `php artisan migrate:fresh --seed` | **Full wipe.** Empties the database and builds the demo from scratch | Nothing | Everything, including accounts you created |
+
+Success for `demo:refresh` looks like `Demo deals refreshed: 7 fresh listings posted, …`. If the demo data
+isn't there yet it says so and changes nothing; run `migrate:fresh --seed` first.
+
+**What gets posted.** The five shops have a menu of 29 made-up items (kuih, cakes, drinks, rice and noodle
+meals, Surprise Bundles; `app/Support/Demo/DemoMenu.php`). Each time, 6 to 9 of them go on sale with
+different portions and pickup times: a few closing within the hour, sometimes one already sold out. Two
+deals are **always the same**, because the demo script uses them: the **Bakery Surprise Bundle** at Bonda
+Mawar (RM8 instead of RM20, Aina's code 4721) and the **Sandwich & pastry pack** at Se.Bunga with its pickup
+window already open (Aina's code 2468).
+
+Want exactly the six deals from the mockups instead? Put `DEMO_MENU=mockup` in `.env` (or run
+`php artisan demo:refresh --menu=mockup` once). `php artisan demo:refresh --seed=7` gives the same random
+pick every time you use the same number.
 
 Every account signs in with the password **`password`**. The people are made up. The approved shops are
 **real food places on and around the UiTM Kedah campus in Merbok** (within 5 km of the main gate), but they
@@ -175,8 +193,8 @@ Customers can report a listing from its page ("Something wrong? Report this list
 ## Demo for the pitch
 
 `docs/DEMO_SCRIPT.md` is a 2-minute click-through (student reserves, seller hands over, impact, admin),
-with setup steps and what to do if something goes wrong. Reseed no more than 30 minutes before you
-present: the deals count down for real.
+with setup steps and what to do if something goes wrong. Run `php artisan demo:refresh` (or reseed) no
+more than 30 minutes before you present: the deals count down for real.
 
 ## Open it on your phone (and install it like an app)
 
@@ -256,7 +274,8 @@ every commit.
 | `app/Http/Controllers/`, `resources/views/deals`, `listings`, `orders`, `auth` | The student pages: deals, one listing, reserve, orders and pickup code, log in and register |
 | `resources/views/components/` | The design system: layouts and reusable components. Guide: `docs/UI_GUIDE.md` |
 | `app/Services/ListingCloser.php`, `routes/console.php` | Closing finished listings, the food-bank offer, and the every-minute schedule |
-| `database/seeders/DemoSeeder.php` | The demo shops, people, listings and order history |
+| `database/seeders/DemoSeeder.php` | The demo shops, people and order history |
+| `app/Support/Demo/` | Tonight's demo deals: the menu (`DemoMenu`), posting them (`DemoDeals`, used by the seeder and by `demo:refresh`), their pictures (`DemoPhotos`) and the refresh itself (`DemoRefresh`) |
 | `config/foodloop.php` | The business rules as numbers (grace minutes, strikes, max quantity…). Change a rule here, nowhere else |
 | `resources/css/app.css` | The style C colours and fonts as Tailwind tokens (`bg-forest`, `text-marigold`, `bg-cream`, `font-display`) |
 | `docs/BUILD_PLAN.md` | The build plan: stack, business rules, data model, stages |

@@ -4,10 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\DonationStatus;
 use App\Enums\HalalStatus;
-use App\Enums\ListingCategory;
 use App\Enums\ListingStatus;
-use App\Enums\ListingType;
-use App\Enums\ReportReason;
 use App\Enums\ReportStatus;
 use App\Enums\ReservationStatus;
 use App\Enums\SellerStatus;
@@ -19,11 +16,11 @@ use App\Models\Reservation;
 use App\Models\Seller;
 use App\Models\User;
 use App\Services\Notifier;
+use App\Support\Demo\DemoDeals;
+use App\Support\Demo\DemoMenu;
+use App\Support\Demo\DemoPhotos;
 use Carbon\CarbonImmutable;
-use Carbon\CarbonInterface;
-use Closure;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
@@ -32,10 +29,13 @@ use RuntimeException;
  * (docs/mockups): the shops, people, prices, coordinates and order history are
  * not real offers or research results.
  *
- * Reset it any time with:  php artisan migrate:fresh --seed
+ * Reset everything with:        php artisan migrate:fresh --seed
+ * Only put fresh food on sale:  php artisan demo:refresh   (keeps accounts and history)
  *
  * Pickup times are set relative to the moment you seed, so there are always
- * deals "closing soon" no matter what time of day you run it.
+ * deals "closing soon" no matter what time of day you run it. Tonight's deals
+ * themselves come from App\Support\Demo\DemoDeals (shared with demo:refresh),
+ * and what the shops sell from App\Support\Demo\DemoMenu.
  */
 class DemoSeeder extends Seeder
 {
@@ -64,7 +64,8 @@ class DemoSeeder extends Seeder
 
         $this->now = CarbonImmutable::now()->startOfMinute();
 
-        $this->copyDemoPhotos();
+        // Start clean, so a photo that was removed from docs/demo-food/real is not used again.
+        DemoPhotos::copy(clean: true);
 
         FoodBankPartner::create([
             'name' => '[FOOD BANK PARTNER NAME]',
@@ -78,16 +79,10 @@ class DemoSeeder extends Seeder
         $shops = $this->approvedShops();
         $this->shopsWaitingForApproval();
 
-        $live = $this->tonightsListings($shops);
-        $this->tonightsReservations($live, $customers);
+        // Tonight's deals and their reservations. The same class posts them
+        // again for `php artisan demo:refresh`.
+        (new DemoDeals)->post();
         $this->ainasOrderHistory($shops, $customers['aina']);
-
-        Report::factory()->create([
-            'reporter_id' => $customers['meiling']->id,
-            'listing_id' => $live['sandwich']->id,
-            'reason' => ReportReason::FoodQuality,
-            'details' => 'Bread was stale at pickup.',
-        ]);
 
         $this->demoNotifications();
     }
@@ -102,17 +97,8 @@ class DemoSeeder extends Seeder
     {
         $notifier = app(Notifier::class);
 
-        // Write a message as if it were sent at $moment, then put the clock back.
-        $at = function (CarbonInterface $moment, Closure $send): void {
-            $clock = Carbon::getTestNow();
-            Carbon::setTestNow($moment);
-
-            try {
-                $send();
-            } finally {
-                Carbon::setTestNow($clock);
-            }
-        };
+        // Write each message as if it were sent at that moment.
+        $at = DemoDeals::at(...);
 
         Reservation::query()->where('status', ReservationStatus::Reserved)->orderBy('created_at')->get()
             ->each(fn (Reservation $reservation) => $at($reservation->created_at, function () use ($notifier, $reservation) {
@@ -128,51 +114,6 @@ class DemoSeeder extends Seeder
 
         Donation::query()->where('status', DonationStatus::Offered)->orderBy('created_at')->get()
             ->each(fn (Donation $donation) => $at($donation->created_at, fn () => $notifier->leftoversOffered($donation)));
-    }
-
-    /** Real photo types the seeder accepts, in order of preference. */
-    private const PHOTO_TYPES = ['jpg', 'jpeg', 'png', 'webp'];
-
-    /**
-     * Copy the demo food pictures to where listing photos live.
-     *
-     * Each product has a drawn picture (docs/demo-food/curry-puffs.svg). If a
-     * real photo with the same name is in the "real" subfolder
-     * (docs/demo-food/real/curry-puffs.jpg), it is copied as well and
-     * demoPhoto() picks it instead. See docs/demo-food/real/README.md.
-     */
-    private function copyDemoPhotos(): void
-    {
-        $folder = config('foodloop.demo_photo_dir');
-
-        // Start clean, so a photo that was removed from the folder is not used again.
-        // (Only the demo folder: photos that sellers uploaded are in listings/ itself.)
-        Storage::disk('public')->deleteDirectory('listings/demo');
-
-        $files = [
-            ...glob($folder.'/*.svg'),
-            ...glob($folder.'/real/*.{'.implode(',', self::PHOTO_TYPES).'}', GLOB_BRACE),
-        ];
-
-        foreach ($files as $file) {
-            Storage::disk('public')->put('listings/demo/'.basename($file), file_get_contents($file));
-        }
-    }
-
-    /**
-     * The picture for a product: the real photo when one was provided,
-     * otherwise the drawn one.  demoPhoto('curry-puffs') →
-     * "listings/demo/curry-puffs.jpg" or "listings/demo/curry-puffs.svg"
-     */
-    private function demoPhoto(string $name): string
-    {
-        foreach (self::PHOTO_TYPES as $type) {
-            if (Storage::disk('public')->exists("listings/demo/{$name}.{$type}")) {
-                return "listings/demo/{$name}.{$type}";
-            }
-        }
-
-        return "listings/demo/{$name}.svg";
     }
 
     private function user(string $name, string $email): User
@@ -313,201 +254,16 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * What each shop sells in the mockups. Prices in sen (RM8 = 800).
-     *
-     * @return array<string, array<string, mixed>>
-     */
-    private function products(): array
-    {
-        return [
-            'bundle' => [
-                'shop' => 'bondamawar',
-                'type' => ListingType::Bundle,
-                'title' => 'Bakery Surprise Bundle',
-                'description' => '4–6 of today’s unsold breads, buns and pastries. You’ll find out what’s inside at pickup.',
-                'category' => ListingCategory::Bakery,
-                'photo_path' => $this->demoPhoto('bakery-bundle'),
-                'original_price_sen' => 2000,
-                'price_sen' => 800,
-                'halal_status' => HalalStatus::Certified,
-                'allergens' => ['egg', 'milk', 'wheat'],
-            ],
-            'croissants' => [
-                'shop' => 'bondamawar',
-                'type' => ListingType::Flash,
-                'title' => 'Butter croissants × 3',
-                'description' => 'Three butter croissants baked this morning.',
-                'category' => ListingCategory::Bakery,
-                'photo_path' => $this->demoPhoto('croissants'),
-                'original_price_sen' => 1200,
-                'price_sen' => 600,
-                'halal_status' => HalalStatus::Certified,
-                'allergens' => ['egg', 'milk', 'wheat'],
-            ],
-            'puffs' => [
-                'shop' => 'kuihtupah',
-                'type' => ListingType::Regular,
-                'title' => 'Curry puffs × 4',
-                'description' => 'Four potato curry puffs from this afternoon’s batch.',
-                'category' => ListingCategory::Kuih,
-                'photo_path' => $this->demoPhoto('curry-puffs'),
-                'original_price_sen' => 600,
-                'price_sen' => 300,
-                'halal_status' => HalalStatus::MuslimOwned,
-                'allergens' => ['wheat'],
-            ],
-            'latte' => [
-                'shop' => 'kopisaigon',
-                'type' => ListingType::Regular,
-                'title' => 'Iced latte',
-                'description' => 'Iced latte made to order before closing.',
-                'category' => ListingCategory::Drinks,
-                'photo_path' => $this->demoPhoto('iced-latte'),
-                'original_price_sen' => 900,
-                'price_sen' => 450,
-                'halal_status' => HalalStatus::MuslimOwned,
-                'allergens' => ['milk'],
-            ],
-            'sandwich' => [
-                'shop' => 'sebunga',
-                'type' => ListingType::Regular,
-                'title' => 'Sandwich & pastry pack',
-                'description' => 'Two sandwiches and two pastries from today’s display.',
-                'category' => ListingCategory::Bakery,
-                'photo_path' => $this->demoPhoto('sandwich-pack'),
-                'original_price_sen' => 2400,
-                'price_sen' => 900,
-                'halal_status' => HalalStatus::MuslimOwned,
-                'allergens' => ['egg', 'milk', 'wheat'],
-            ],
-            'nasiayam' => [
-                'shop' => 'merbokroasted',
-                'type' => ListingType::Regular,
-                'title' => 'Nasi ayam set (2 pax)',
-                'description' => 'Chicken rice for two with soup and sambal.',
-                'category' => ListingCategory::Meals,
-                'photo_path' => $this->demoPhoto('nasi-ayam'),
-                'original_price_sen' => 1300,
-                'price_sen' => 650,
-                'halal_status' => HalalStatus::MuslimOwned,
-                'allergens' => ['soy'],
-            ],
-        ];
-    }
-
-    /**
-     * Create one listing for a product.
+     * One closed listing from the past for a catalogue item (App\Support\Demo\DemoMenu).
      *
      * @param  array<string, Seller>  $shops
      * @param  array<string, mixed>  $overrides
      */
     private function listing(array $shops, string $product, array $overrides): Listing
     {
-        $data = $this->products()[$product];
-        $shop = $shops[$data['shop']];
-        unset($data['shop']);
-
-        return Listing::factory()->for($shop)->create([...$data, ...$overrides]);
-    }
-
-    /**
-     * Today's listings: the deals list, the listing page and the seller
-     * dashboard. Minutes are counted from the moment of seeding.
-     *
-     * @param  array<string, Seller>  $shops
-     * @return array<string, Listing>
-     */
-    private function tonightsListings(array $shops): array
-    {
-        // Count from the last 5-minute mark, so pickup times read like real
-        // ones ("4:55–6:55 PM", not "4:53–6:53 PM"). The "min left" numbers on
-        // the deals page are therefore up to 5 minutes less than written here.
-        $slot = $this->now->subMinutes($this->now->minute % 5);
-
-        $window = fn (int $start, int $end) => [
-            'pickup_start' => $slot->addMinutes($start),
-            'pickup_end' => $slot->addMinutes($end),
-            'published_at' => $slot->subHours(4),
-        ];
-
-        return [
-            'puffs' => $this->listing($shops, 'puffs', [
-                ...$window(20, 80), 'quantity_total' => 6, 'quantity_available' => 4,
-            ]),
-            'latte' => $this->listing($shops, 'latte', [
-                ...$window(35, 95), 'quantity_total' => 8, 'quantity_available' => 5,
-            ]),
-            // Pickup window opens in about 45 minutes and lasts two hours; 3 of 5 left.
-            'bundle' => $this->listing($shops, 'bundle', [
-                ...$window(45, 165), 'quantity_total' => 5, 'quantity_available' => 3, 'offer_leftovers' => true,
-            ]),
-            'nasiayam' => $this->listing($shops, 'nasiayam', [
-                ...$window(60, 120), 'quantity_total' => 4, 'quantity_available' => 2,
-            ]),
-            // Pickup is open right now, so this is the one a seller can hand over in a live demo.
-            'sandwich' => $this->listing($shops, 'sandwich', [
-                ...$window(-25, 95), 'quantity_total' => 5, 'quantity_available' => 3,
-            ]),
-            // The flash deal that sold out and ended an hour ago, so it is closed.
-            'croissants' => $this->listing($shops, 'croissants', [
-                ...$window(-180, -60), 'quantity_total' => 4, 'quantity_available' => 0,
-                'status' => ListingStatus::Closed, 'closed_at' => $slot->subMinutes(60),
-            ]),
-        ];
-    }
-
-    /**
-     * Today's reservations, including the "Pickups" table on the seller
-     * dashboard mockup with its pickup codes.
-     *
-     * @param  array<string, Listing>  $listings
-     * @param  array<string, User>  $customers
-     */
-    private function tonightsReservations(array $listings, array $customers): void
-    {
-        $bundle = Reservation::factory()->for($listings['bundle']);
-        $croissants = Reservation::factory()->for($listings['croissants']);
-
-        $bundle->paidNow()->create(['customer_id' => $customers['aina']->id, 'pickup_code' => '4721']);
-        $bundle->create(['customer_id' => $customers['hafiz']->id, 'pickup_code' => '3390']);
-
-        $croissants->collected()->create([
-            'customer_id' => $customers['priya']->id, 'pickup_code' => '6208',
-            'collected_at' => $this->now->subMinutes(150),
-        ]);
-        $croissants->collected()->create([
-            'customer_id' => $customers['meiling']->id, 'pickup_code' => '1185', 'quantity' => 2,
-            'collected_at' => $this->now->subMinutes(120),
-        ]);
-        $croissants->noShow()->create(['customer_id' => $customers['daniel']->id, 'pickup_code' => '9052']);
-
-        // Daniel's uncollected croissants were offered to the food bank when the listing closed.
-        $this->donate($listings['croissants'], 1, DonationStatus::Offered, $this->now->subMinutes(40));
-
-        // The other shops' listings: every portion that is no longer
-        // available belongs to a reservation, so the stock numbers add up.
-        Reservation::factory()->for($listings['puffs'])->create([
-            'customer_id' => $customers['priya']->id, 'pickup_code' => '2846', 'quantity' => 2,
-        ]);
-        Reservation::factory()->for($listings['latte'])->paidNow()->create([
-            'customer_id' => $customers['jason']->id, 'pickup_code' => '5173', 'quantity' => 2,
-        ]);
-        Reservation::factory()->for($listings['latte'])->create([
-            'customer_id' => $customers['hafiz']->id, 'pickup_code' => '7730',
-        ]);
-        Reservation::factory()->for($listings['nasiayam'])->create([
-            'customer_id' => $customers['hafiz']->id, 'pickup_code' => '6412', 'quantity' => 2,
-        ]);
-        // FOR THE PITCH DEMO: Aina is "at the counter" of Daily Grind Café with
-        // code 2468. The pickup window is open, so the seller can type the code
-        // and mark it collected straight away (docs/DEMO_SCRIPT.md).
-        Reservation::factory()->for($listings['sandwich'])->create([
-            'customer_id' => $customers['aina']->id, 'pickup_code' => '2468',
-        ]);
-        // Mei Ling collected this one and then reported it (see the report in run()).
-        Reservation::factory()->for($listings['sandwich'])->collected()->create([
-            'customer_id' => $customers['meiling']->id, 'pickup_code' => '8059',
-            'collected_at' => $this->now->subMinutes(10),
+        return Listing::factory()->for($shops[DemoMenu::shopOf($product)])->create([
+            ...DemoMenu::listingData($product),
+            ...$overrides,
         ]);
     }
 

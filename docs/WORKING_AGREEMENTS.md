@@ -1,7 +1,7 @@
 # FoodLoop · working agreements
 
 How the owner and Claude work on FoodLoop. Read this at the start of every session, then check the
-repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full admin, password reset).
+repo for changes before acting. Last updated: 15 Nov 2026 (demo:refresh and the bigger demo menu).
 
 ## Project facts
 
@@ -77,6 +77,9 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 | 15 Nov | ⚠️ Team to note: Bonda Mawar Cake House is shown as "halal certified" in the demo. That is demo data, not a check of their real certificate; say so if asked, or switch it to Muslim-owned in `DemoSeeder` | The demo needs one certified shop |
 | 15 Nov | Street map with Leaflet + OpenStreetMap tiles (free, no key); falls back to the drawing after 7 s without tiles | Real map for the pitch without accounts or cost; never an empty page offline |
 | 15 Nov | Installable web app (PWA) instead of a native app; opened on phones through a free Cloudflare https tunnel | A Play Store / App Store app is weeks of work; the PWA looks and opens like an app |
+| 15 Nov | `php artisan demo:refresh` resets only the food: accounts, past orders, donations, reports, strikes stay. `migrate:fresh --seed` stays the full wipe | Owner: reset the demo without losing accounts or history |
+| 15 Nov | Demo menu of 29 items; each reset posts 6–9 at random. Two deals never change (Bakery Surprise Bundle with code 4721, Sandwich & pastry pack with code 2468) | Owner wanted variety; the demo script needs those two |
+| 15 Nov | Fable's calls on the refresh (⚠️ owner to confirm): it removes **every** waiting reservation and closes **every** open listing (also ones you made yourself as a seller, drafts too); a refreshed-away listing never goes to the food bank or the seller's "Left over at closing?" list; the croissant deal, Mei Ling's pickup and her report are re-added at most once a day; tests run with `DEMO_MENU=mockup` (the six mockup deals) | Keeps the history honest and the dashboards from filling up with refresh leftovers |
 
 ## Current status
 
@@ -96,7 +99,8 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 - Confirm the business rules above with the team (the 4 questions from Stage 2 are answered and built).
 - Open the design-system pages once (README → "See the design system") and say if anything looks off.
 - Walk through README → "Try the student flow" and "Try the seller flow" once on the Windows machine and say if anything looks off.
-- Optional: put real photos of campus food in `docs/demo-food/real/` (names in its README) and reseed.
+- Optional: put real photos of campus food in `docs/demo-food/real/` (names in its README, 29 items now) and run `php artisan demo:refresh`.
+- Run `git pull`, `php artisan migrate:fresh --seed` once, then try `php artisan demo:refresh` and look at the deals page and `/map` on the phone.
 - Rehearse `docs/DEMO_SCRIPT.md` once on the Windows laptop.
 - Decide whether the repo should stay public (it is public now).
 - Name a real food bank partner (placeholder for now).
@@ -126,6 +130,7 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 15. ✅ 15 Nov (Fable): in-app notifications for every role, "Notify me next time" and deal alerts, the rest of the admin mockup (Ask for info, Listings, Food banks), Forgot your password. 588 tests on SQLite, 590 on MySQL.
 16. ✅ 15 Nov: polish pass on the most-used pages (see PROJECT_NOTES). Features are frozen from here: only fixes and polish.
 17. ✅ 15 Nov: real street map, real shops around UiTM Kedah, installable on phones (see PROJECT_NOTES).
+17a. ✅ 15 Nov (Fable): `php artisan demo:refresh` and the bigger random demo menu with 8 new drawings (see PROJECT_NOTES). 643 tests on SQLite; MySQL not run here.
 18. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
 19. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
 
