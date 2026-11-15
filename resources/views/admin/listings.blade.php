@@ -53,7 +53,7 @@
                                 </a>
                             @endif
                             @if ($listing->waiting_portions > 0)
-                                <span class="text-muted">· {{ $listing->waiting_portions }} reserved, waiting for pickup</span>
+                                <span class="text-muted">{{ $listing->waiting_portions }} reserved, waiting for pickup</span>
                             @endif
                         </p>
                     </div>

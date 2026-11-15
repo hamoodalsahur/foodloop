@@ -285,9 +285,9 @@ describe('food banks page', function () {
                 'Portions waiting for the food bank', '4', 'Portions collected', '3', 'Portions declined', '2',
                 'Partner', 'This is still the placeholder.', 'value="[FOOD BANK PARTNER NAME]"', 'value="[FOOD BANK CONTACT]"', 'Save details',
                 'Leftover offers',
-                '4 × Curry puffs', 'Roti Lane Bakery · to [FOOD BANK PARTNER NAME] · offered 16 Nov, 6:18 PM', 'Mark collected', 'Declined',
+                'Curry puffs', '4 portions · Roti Lane Bakery · to [FOOD BANK PARTNER NAME] · offered 16 Nov, 6:18 PM', 'Mark collected', 'Declined',
             ], false)
-            ->assertSeeInOrder(['4 × Curry puffs', '3 × Croissants']);
+            ->assertSeeInOrder(['Curry puffs', 'Croissants', '3 portions']);
     });
 
     it('says so when nothing has been offered', function () {

@@ -17,11 +17,12 @@
     <div class="min-h-screen lg:grid lg:grid-cols-[14rem_1fr]">
         <aside class="bg-forest text-cream lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto">
             <div class="flex items-center justify-between gap-2 px-5 pt-5 lg:pl-6 lg:pr-4 lg:pt-6">
-                <div class="flex min-w-0 items-baseline gap-2">
+                {{-- Wide screens: the area name sits under the logo, so the bell fits in the narrow sidebar. --}}
+                <div class="flex min-w-0 items-baseline gap-2 lg:flex-col lg:gap-0">
                     <a href="{{ $nav[0]['href'] ?? '#' }}" class="inline-flex min-h-11 items-center font-display text-2xl font-bold tracking-tight">
                         foodloop<span class="text-marigold">.</span>
                     </a>
-                    <span class="text-[0.6875rem] font-bold uppercase tracking-widest text-mist">{{ $area }}</span>
+                    <span class="text-[0.6875rem] font-bold uppercase tracking-widest text-mist lg:-mt-1.5">{{ $area }}</span>
                 </div>
                 {{-- The signed-in person's notifications --}}
                 <x-bell tone="dark" />

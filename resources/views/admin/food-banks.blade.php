@@ -42,9 +42,9 @@
             @forelse ($donations as $donation)
                 <div class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white p-4">
                     <div class="min-w-0">
-                        <p class="font-bold">{{ $donation->quantity }} × {{ $donation->listing->title }}</p>
+                        <p class="font-bold">{{ $donation->listing->title }}</p>
                         <p class="text-sm text-muted">
-                            {{ $donation->listing->seller->business_name }} · to {{ $donation->partner->name }} · offered {{ $donation->created_at->format('j M, g:i A') }}
+                            {{ $donation->quantity }} {{ Str::plural('portion', $donation->quantity) }} · {{ $donation->listing->seller->business_name }} · to {{ $donation->partner->name }} · offered {{ $donation->created_at->format('j M, g:i A') }}
                         </p>
                     </div>
                     @if ($donation->status === DonationStatus::Offered)
