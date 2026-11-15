@@ -246,3 +246,26 @@ it('refuses to run in production', function () {
 
     expect(fn () => (new DemoSeeder)->run())->toThrow(RuntimeException::class, 'must not run in production');
 });
+
+it('fills the inboxes with the messages the demo data would have caused', function () {
+    $user = fn (string $name) => User::where('email', "{$name}@foodloop.test")->sole();
+
+    $booked = $user('aina')->notifications()->get()->where('data.kind', 'reservation.booked');
+    $admin = $user('admin')->notifications()->get();
+
+    expect($booked->pluck('data.body')->implode(' '))->toContain('Pickup code 2468. Collect at Daily Grind Café')
+        // One "you're booked" per reservation still waiting, dated like the reservation.
+        ->and($booked->count())->toBe($user('aina')->reservations()->where('status', 'reserved')->count())
+        ->and($booked->first()->created_at->equalTo(
+            $user('aina')->reservations()->whereKey(str($booked->first()->data['url'])->afterLast('/')->toString())->sole()->created_at
+        ))->toBeTrue()
+        ->and($admin->where('data.kind', 'admin.shop_waiting')->pluck('data.title')->sort()->values()->all())->toBe([
+            'New shop to approve: Dapur Bonda',
+            'New shop to approve: Kedai Kopi Sinar',
+            'New shop to approve: Sweet Crumbs Bakehouse',
+        ])
+        ->and($admin->where('data.kind', 'admin.report')->sole()->data['body'])->toBe('Daily Grind Café · Food quality: “Bread was stale at pickup.”')
+        ->and($user('dailygrind')->notifications()->get()->where('data.kind', 'seller.reservation'))->not->toBeEmpty()
+        // Nothing is marked read yet, so the bells show a number in the demo.
+        ->and($user('admin')->unreadNotifications()->count())->toBe($admin->count());
+});

@@ -1,15 +1,18 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\DealAlertController;
 use App\Http\Controllers\DealController;
 use App\Http\Controllers\DevPreviewController;
 use App\Http\Controllers\ImpactController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\Seller;
+use App\Http\Controllers\ShopFollowController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,7 +20,8 @@ use Illuminate\Support\Facades\Route;
 |
 |   everyone ............ /  (the deals), /map, /listings/{id}, /login, /register
 |   guests .............. /sell (shop sign-up)
-|   customers only ...... reserving, /orders/...
+|   anyone signed in .... /notifications (the bell)
+|   customers only ...... reserving, /orders/..., following a shop, deal alerts
 |   sellers only ........ /seller/...
 |   admins only ......... /admin/...
 |
@@ -33,6 +37,10 @@ Route::get('/', [DealController::class, 'index'])->name('deals.index');
 Route::get('/listings/{listing}', [ListingController::class, 'show'])->name('listings.show');
 Route::get('/map', MapController::class)->name('map');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', NotificationController::class)->name('notifications.index');
+});
+
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::post('/listings/{listing}/reservations', [ReservationController::class, 'store'])
         ->middleware('throttle:20,1')
@@ -47,6 +55,11 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::post('/listings/{listing}/reports', [ReportController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('reports.store');
+
+    // "Notify me next time" for one shop, and "Turn on deal alerts" for every new deal.
+    Route::post('/shops/{seller}/follow', [ShopFollowController::class, 'store'])->name('shops.follow');
+    Route::delete('/shops/{seller}/follow', [ShopFollowController::class, 'destroy'])->name('shops.unfollow');
+    Route::put('/deal-alerts', DealAlertController::class)->name('deal-alerts.update');
 });
 
 // "Sell on FoodLoop": a shop's own sign-up page (signed-in people get sent home).

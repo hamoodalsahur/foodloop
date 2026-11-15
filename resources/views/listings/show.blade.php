@@ -189,6 +189,33 @@
                 @endguest
             </div>
         @else
+            {{-- "Notify me next time" (mockup c07): hear when this shop posts again. --}}
+            @if ($seller->isApproved())
+                @guest
+                    <x-button size="lg" variant="outline" :href="route('login')" class="mt-4">
+                        <span class="inline-flex items-center gap-2"><x-icon.bell class="size-5" /> Notify me next time</span>
+                    </x-button>
+                @else
+                    @if ($following)
+                        <x-notice class="mt-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="inline-flex items-center gap-2 font-semibold"><x-icon.bell class="size-5" /> You’ll be notified when {{ $seller->business_name }} posts again.</span>
+                            <form method="POST" action="{{ route('shops.unfollow', $seller) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Stop</button>
+                            </form>
+                        </x-notice>
+                    @elseif ($user->isCustomer())
+                        <form method="POST" action="{{ route('shops.follow', $seller) }}" class="mt-4">
+                            @csrf
+                            <x-button type="submit" size="lg" variant="outline">
+                                <span class="inline-flex items-center gap-2"><x-icon.bell class="size-5" /> Notify me next time</span>
+                            </x-button>
+                        </form>
+                    @endif
+                @endguest
+            @endif
+
             {{-- Sold out or ended: point to what can still be rescued. --}}
             <h2 class="mt-6 font-display text-xl font-bold">Still available nearby</h2>
 

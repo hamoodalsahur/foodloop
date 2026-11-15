@@ -13,6 +13,7 @@
       :nav="false"      no bottom navigation (pages with their own button fixed at the bottom)
       flush             no side padding on the content (the page adds its own px-5)
 
+    Signed-in people get the bell (their notifications) and the account menu.
     It also shows flash messages (session "status"), and a red "You're offline" strip
     when the phone loses its connection.
 --}}
@@ -68,6 +69,8 @@
                 </nav>
 
                 @if ($user)
+                    <div class="flex items-center gap-2">
+                    <x-bell />
                     {{-- The round initials button opens a small account menu. --}}
                     <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false">
                         <button type="button" @click="open = ! open" :aria-expanded="open" aria-haspopup="true"
@@ -79,6 +82,9 @@
                              class="absolute right-0 z-50 mt-2 w-56 rounded-2xl border-2 border-forest bg-white p-2 shadow-lg">
                             <p class="truncate px-3 pt-2 text-sm font-bold">{{ $user->name }}</p>
                             <p class="truncate px-3 pb-2 text-xs text-muted">{{ $user->email }}</p>
+                            <a href="{{ route('notifications.index') }}" class="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold hover:bg-cream">
+                                Notifications and alerts
+                            </a>
                             @unless ($user->isCustomer())
                                 <a href="{{ $user->homeUrl() }}" class="flex min-h-11 items-center rounded-xl px-3 text-sm font-semibold hover:bg-cream">
                                     {{ $user->role->label() }} area
@@ -91,6 +97,7 @@
                                 </button>
                             </form>
                         </div>
+                    </div>
                     </div>
                 @else
                     <x-button variant="outline" :href="route('login')">Log in</x-button>

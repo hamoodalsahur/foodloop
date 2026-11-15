@@ -53,11 +53,15 @@
 
         @if ($listings->isEmpty())
             {{-- Nothing to rescue with these filters (mockup c05). The buttons undo one filter each. --}}
+            @php
+                $alertsOn = (bool) auth()->user()?->deal_alerts;
+            @endphp
             <x-empty-state page
                            title="All gone nearby."
-                           :message="$filters->withinKm
-                               ? 'Everything within '.$filters->withinKm.' km that matches has been rescued. Try a wider area, or check back later.'
-                               : 'Everything that matches has been rescued. Check back later.'">
+                           :message="($filters->withinKm
+                               ? 'Everything within '.$filters->withinKm.' km that matches has been rescued. Try a wider area, or '
+                               : 'Everything that matches has been rescued. You can ')
+                               .($alertsOn ? 'wait for a notification: your deal alerts are on.' : 'get a notification when the next deal drops.')">
                 @if ($filters->widerDistance())
                     <x-button size="lg" :href="$filters->url(['within' => $filters->widerDistance()])">
                         {{ $filters->widerDistance() === 'any' ? 'Search any distance' : 'Search within '.$filters->widerDistance().' km' }}
@@ -69,6 +73,19 @@
                 @if ($filters->halalOnly)
                     <x-button size="lg" variant="outline" :href="$filters->url(['halal' => '0'])">Include food not marked halal</x-button>
                 @endif
+                {{-- "Turn on deal alerts" (mockup c05): customers only; guests log in first. --}}
+                @guest
+                    <x-button size="lg" variant="outline" :href="route('login')">Turn on deal alerts</x-button>
+                @else
+                    @if (auth()->user()->isCustomer())
+                        <form method="POST" action="{{ route('deal-alerts.update') }}">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="on" value="{{ $alertsOn ? 0 : 1 }}">
+                            <x-button type="submit" size="lg" variant="outline">{{ $alertsOn ? 'Turn off deal alerts' : 'Turn on deal alerts' }}</x-button>
+                        </form>
+                    @endif
+                @endguest
             </x-empty-state>
         @else
             {{-- The three tiles: bundles, halal filter, distance filter --}}

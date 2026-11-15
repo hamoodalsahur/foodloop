@@ -33,6 +33,8 @@ class SellerListingService
         'original_price_sen', 'price_sen', 'quantity_total', 'pickup_start', 'pickup_end', 'halal_status',
     ];
 
+    public function __construct(private Notifier $notifier) {}
+
     /** Someone holds (or held) part of this listing: any reservation that wasn't cancelled. */
     public function isLocked(Listing $listing): bool
     {
@@ -60,7 +62,9 @@ class SellerListingService
         $newPhotoPath = $photo?->store('listings', 'public');
 
         try {
-            return DB::transaction(function () use ($seller, $listing, $data, $newPhotoPath, $publish) {
+            $firstTimeLive = false;
+
+            $listing = DB::transaction(function () use ($seller, $listing, $data, $newPhotoPath, $publish, &$firstTimeLive) {
                 if ($listing === null) {
                     $listing = new Listing(['status' => ListingStatus::Draft]);
                     $listing->seller()->associate($seller);
@@ -94,7 +98,7 @@ class SellerListingService
                 }
 
                 if ($publish && in_array($listing->status, [ListingStatus::Draft, ListingStatus::Paused], true)) {
-                    $this->goLive($listing);
+                    $firstTimeLive = $this->goLive($listing);
                 }
 
                 $listing->save();
@@ -105,6 +109,12 @@ class SellerListingService
 
                 return $listing;
             });
+
+            if ($firstTimeLive) {
+                $this->notifier->newListing($listing);
+            }
+
+            return $listing;
         } catch (\Throwable $e) {
             // Nothing was saved, so the new picture isn't used by anything.
             if ($newPhotoPath !== null) {
@@ -122,18 +132,24 @@ class SellerListingService
      */
     public function publish(Listing $listing): Listing
     {
-        return DB::transaction(function () use ($listing) {
+        [$listing, $firstTimeLive] = DB::transaction(function () use ($listing) {
             $listing = Listing::query()->lockForUpdate()->findOrFail($listing->getKey());
 
             if (! in_array($listing->status, [ListingStatus::Draft, ListingStatus::Paused], true)) {
                 throw new SellerActionRefused('Only a draft or a paused listing can be put live.');
             }
 
-            $this->goLive($listing);
+            $firstTimeLive = $this->goLive($listing);
             $listing->save();
 
-            return $listing;
+            return [$listing, $firstTimeLive];
         });
+
+        if ($firstTimeLive) {
+            $this->notifier->newListing($listing);
+        }
+
+        return $listing;
     }
 
     /**
@@ -190,7 +206,7 @@ class SellerListingService
      */
     public function offerLeftovers(Listing $listing): Donation
     {
-        return DB::transaction(function () use ($listing) {
+        $donation = DB::transaction(function () use ($listing) {
             $listing = Listing::query()->lockForUpdate()->findOrFail($listing->getKey());
             $partner = FoodBankPartner::query()->orderBy('id')->first();
 
@@ -217,10 +233,20 @@ class SellerListingService
 
             return $donation;
         });
+
+        $this->notifier->leftoversOffered($donation);
+
+        return $donation;
     }
 
-    /** @throws SellerActionRefused */
-    private function goLive(Listing $listing): void
+    /**
+     * Returns true when this is the first time the listing goes live (that
+     * is when followers and people with deal alerts are told), false when a
+     * paused listing comes back.
+     *
+     * @throws SellerActionRefused
+     */
+    private function goLive(Listing $listing): bool
     {
         if (! $listing->seller->isApproved()) {
             throw new SellerActionRefused('Your shop has to be approved by an admin before listings can go live.');
@@ -229,8 +255,12 @@ class SellerListingService
             throw new SellerActionRefused('The pickup time has already started. Choose a later pickup time first.');
         }
 
+        $firstTime = $listing->published_at === null;
+
         $listing->status = $listing->quantity_available > 0 ? ListingStatus::Live : ListingStatus::SoldOut;
         $listing->published_at ??= now();
+
+        return $firstTime && $listing->status === ListingStatus::Live;
     }
 
     /** A photo a seller uploaded (not one of the demo pictures). */

@@ -38,6 +38,9 @@ class ReservationService
     /** How many times a transaction is retried if the database reports a deadlock. */
     private const ATTEMPTS = 3;
 
+    /** Messages go out after the database work is saved (see App\Services\Notifier). */
+    public function __construct(private Notifier $notifier) {}
+
     /**
      * Reserve portions of a listing for a customer.
      *
@@ -45,7 +48,7 @@ class ReservationService
      */
     public function reserve(User $customer, Listing $listing, int $quantity, PaymentMethod $paymentMethod): Reservation
     {
-        return DB::transaction(function () use ($customer, $listing, $quantity, $paymentMethod) {
+        $reservation = DB::transaction(function () use ($customer, $listing, $quantity, $paymentMethod) {
             // Lock the listing row first: a second request for the same
             // listing waits here until this one has finished, then sees the
             // new stock. This is what stops two people buying the last item.
@@ -94,6 +97,15 @@ class ReservationService
 
             return $reservation;
         }, self::ATTEMPTS);
+
+        $this->notifier->reservationBooked($reservation);
+        $this->notifier->newReservation($reservation);
+
+        if ($reservation->listing->status === ListingStatus::SoldOut) {
+            $this->notifier->listingSoldOut($reservation->listing);
+        }
+
+        return $reservation;
     }
 
     /**
@@ -113,9 +125,8 @@ class ReservationService
             self::ATTEMPTS,
         );
 
-        if ($nowBlocked) {
-            $this->cancelWaitingReservationsOf($reservation->customer_id);
-        }
+        $this->notifier->reservationCancelled($reservation);
+        $this->afterStrike($reservation, struck: $reservation->late_cancel, nowBlocked: $nowBlocked);
 
         return $reservation;
     }
@@ -129,7 +140,7 @@ class ReservationService
      */
     public function collect(Seller $seller, string $code): Reservation
     {
-        return DB::transaction(function () use ($seller, $code) {
+        $reservation = DB::transaction(function () use ($seller, $code) {
             $reservation = Reservation::query()
                 ->where('status', ReservationStatus::Reserved)
                 ->where('pickup_code', trim($code))
@@ -152,6 +163,10 @@ class ReservationService
 
             return $reservation;
         }, self::ATTEMPTS);
+
+        $this->notifier->reservationCollected($reservation);
+
+        return $reservation;
     }
 
     /**
@@ -176,9 +191,8 @@ class ReservationService
             return [$reservation, $this->addStrike($reservation->customer_id, $now)];
         }, self::ATTEMPTS);
 
-        if ($nowBlocked) {
-            $this->cancelWaitingReservationsOf($reservation->customer_id);
-        }
+        $this->notifier->noShow($reservation);
+        $this->afterStrike($reservation, struck: true, nowBlocked: $nowBlocked);
 
         return $reservation;
     }
@@ -203,8 +217,10 @@ class ReservationService
             ->get()
             ->each(function (Reservation $reservation) use (&$cancelled) {
                 try {
-                    DB::transaction(fn () => $this->cancelLocked($reservation, byCustomer: false), self::ATTEMPTS);
+                    [$reservation] = DB::transaction(fn () => $this->cancelLocked($reservation, byCustomer: false), self::ATTEMPTS);
                     $cancelled++;
+                    // The customer gets one message about the limit; each shop hears its portions are back.
+                    $this->notifier->reservationCancelled($reservation);
                 } catch (ReservationRefused) {
                     // Collected a moment ago, or already past its grace
                     // period (then it becomes a no-show instead).
@@ -230,8 +246,10 @@ class ReservationService
             ->get()
             ->each(function (Reservation $reservation) use (&$cancelled) {
                 try {
-                    DB::transaction(fn () => $this->cancelLocked($reservation, byCustomer: false), self::ATTEMPTS);
+                    [$reservation] = DB::transaction(fn () => $this->cancelLocked($reservation, byCustomer: false), self::ATTEMPTS);
                     $cancelled++;
+                    // The shop gets one message about the takedown (App\Services\AdminService).
+                    $this->notifier->reservationCancelledByFoodLoop($reservation);
                 } catch (ReservationRefused) {
                     // Collected a moment ago or already past its grace period.
                 }
@@ -279,6 +297,21 @@ class ReservationService
             });
 
         return $expired;
+    }
+
+    /**
+     * Tell the customer about a strike they just got. If it was the one that
+     * started a limit, the reservations they still hold are cancelled first,
+     * so the message can say how many.
+     */
+    private function afterStrike(Reservation $reservation, bool $struck, bool $nowBlocked): void
+    {
+        if ($nowBlocked) {
+            $cancelled = $this->cancelWaitingReservationsOf($reservation->customer_id);
+            $this->notifier->customerBlocked($reservation->customer, $cancelled);
+        } elseif ($struck) {
+            $this->notifier->strikeAdded($reservation);
+        }
     }
 
     /**

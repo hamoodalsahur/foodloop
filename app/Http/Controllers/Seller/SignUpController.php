@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Seller;
 use App\Models\User;
+use App\Services\Notifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,7 @@ class SignUpController extends Controller
         return view('seller.sign-up');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, Notifier $notifier): RedirectResponse
     {
         $input = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -83,6 +84,8 @@ class SignUpController extends Controller
         if ($certPath !== null && $input['halal_claim'] !== HalalStatus::Certified->value) {
             Storage::disk('local')->delete($certPath);
         }
+
+        $notifier->shopWaiting($user->seller);
 
         Auth::login($user);
         $request->session()->regenerate();

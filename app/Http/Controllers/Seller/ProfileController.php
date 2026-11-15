@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Services\Notifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -23,7 +24,7 @@ class ProfileController extends Controller
         return view('seller.profile', ['shop' => $shop]);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request, Notifier $notifier): RedirectResponse
     {
         $shop = $request->user()->seller;
         abort_if($shop === null, 404);
@@ -37,6 +38,15 @@ class ProfileController extends Controller
         ], [
             'business_name.required' => 'Your shop needs a name.',
         ]));
+
+        // Saving the profile is how a shop answers the admin's "Ask for info".
+        if ($shop->info_request !== null) {
+            $shop->forceFill(['info_request' => null, 'info_requested_at' => null])->save();
+            $notifier->shopAnswered($shop);
+
+            return redirect()->route('seller.profile.edit')
+                ->with('status', 'Shop details saved. The admin has been told you’ve updated them.');
+        }
 
         return redirect()->route('seller.profile.edit')->with('status', 'Shop details saved.');
     }

@@ -51,6 +51,8 @@ class ListingController extends Controller
             'maxQuantity' => max(0, min(config('foodloop.max_qty_per_listing') - $held, $listing->quantity_available)),
             'canReserve' => $user?->can('create', Reservation::class) ?? false,
             'alternatives' => $open ? collect() : $deals->alternativesTo($listing),
+            // "Notify me next time" is already on for this shop?
+            'following' => ($user?->isCustomer() ?? false) && $user->follows($listing->seller),
         ]);
     }
 }

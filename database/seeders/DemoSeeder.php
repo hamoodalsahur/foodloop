@@ -8,6 +8,9 @@ use App\Enums\ListingCategory;
 use App\Enums\ListingStatus;
 use App\Enums\ListingType;
 use App\Enums\ReportReason;
+use App\Enums\ReportStatus;
+use App\Enums\ReservationStatus;
+use App\Enums\SellerStatus;
 use App\Models\Donation;
 use App\Models\FoodBankPartner;
 use App\Models\Listing;
@@ -15,8 +18,12 @@ use App\Models\Report;
 use App\Models\Reservation;
 use App\Models\Seller;
 use App\Models\User;
+use App\Services\Notifier;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use Closure;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
@@ -78,6 +85,46 @@ class DemoSeeder extends Seeder
             'reason' => ReportReason::FoodQuality,
             'details' => 'Bread was stale at pickup.',
         ]);
+
+        $this->demoNotifications();
+    }
+
+    /**
+     * Fill the inboxes (the bell) with the messages the demo data above would
+     * have caused, with the app's real wording (App\Services\Notifier): every
+     * reservation still waiting, every shop waiting for approval, every open
+     * report and every leftover offer. Each is dated like the thing it is about.
+     */
+    private function demoNotifications(): void
+    {
+        $notifier = app(Notifier::class);
+
+        // Write a message as if it were sent at $moment, then put the clock back.
+        $at = function (CarbonInterface $moment, Closure $send): void {
+            $clock = Carbon::getTestNow();
+            Carbon::setTestNow($moment);
+
+            try {
+                $send();
+            } finally {
+                Carbon::setTestNow($clock);
+            }
+        };
+
+        Reservation::query()->where('status', ReservationStatus::Reserved)->orderBy('created_at')->get()
+            ->each(fn (Reservation $reservation) => $at($reservation->created_at, function () use ($notifier, $reservation) {
+                $notifier->reservationBooked($reservation);
+                $notifier->newReservation($reservation);
+            }));
+
+        Seller::query()->where('status', SellerStatus::Pending)->orderBy('created_at')->get()
+            ->each(fn (Seller $shop) => $at($shop->created_at, fn () => $notifier->shopWaiting($shop)));
+
+        Report::query()->where('status', ReportStatus::Open)->orderBy('created_at')->get()
+            ->each(fn (Report $report) => $at($report->created_at, fn () => $notifier->listingReported($report)));
+
+        Donation::query()->where('status', DonationStatus::Offered)->orderBy('created_at')->get()
+            ->each(fn (Donation $donation) => $at($donation->created_at, fn () => $notifier->leftoversOffered($donation)));
     }
 
     /** Real photo types the seeder accepts, in order of preference. */

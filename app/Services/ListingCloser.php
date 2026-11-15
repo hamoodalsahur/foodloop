@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
  */
 class ListingCloser
 {
+    public function __construct(private Notifier $notifier) {}
+
     /**
      * Step 1: close every published listing whose pickup window has ended,
      * so it can't be reserved any more. Drafts are left alone.
@@ -76,13 +78,13 @@ class ListingCloser
             ->orderBy('id')
             ->pluck('id')
             ->each(function (int $id) use ($partner, &$offered) {
-                $offered += DB::transaction(function () use ($id, $partner) {
+                $donation = DB::transaction(function () use ($id, $partner) {
                     $listing = Listing::query()->lockForUpdate()->findOrFail($id);
 
                     $stillWaiting = $listing->reservations()->where('status', ReservationStatus::Reserved)->exists();
 
                     if ($stillWaiting || $listing->donations()->exists() || $listing->leftovers() < 1) {
-                        return 0;
+                        return null;
                     }
 
                     $donation = new Donation([
@@ -93,8 +95,13 @@ class ListingCloser
                     $donation->partner()->associate($partner);
                     $donation->save();
 
-                    return 1;
+                    return $donation;
                 });
+
+                if ($donation !== null) {
+                    $offered++;
+                    $this->notifier->leftoversOffered($donation);
+                }
             });
 
         return $offered;

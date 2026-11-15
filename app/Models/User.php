@@ -7,13 +7,14 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// role, no_show_strikes and blocked_until are deliberately NOT fillable, so a
-// sign-up form can never set them. Change them with forceFill() in trusted code.
+// role, no_show_strikes, blocked_until and deal_alerts are deliberately NOT fillable,
+// so a sign-up form can never set them. Change them with forceFill() in trusted code.
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -29,6 +30,7 @@ class User extends Authenticatable
     protected $attributes = [
         'role' => UserRole::Customer->value,
         'no_show_strikes' => 0,
+        'deal_alerts' => false,
     ];
 
     /**
@@ -42,6 +44,7 @@ class User extends Authenticatable
             'role' => UserRole::class,
             'no_show_strikes' => 'integer',
             'blocked_until' => 'datetime',
+            'deal_alerts' => 'boolean',
         ];
     }
 
@@ -61,6 +64,17 @@ class User extends Authenticatable
     public function reports(): HasMany
     {
         return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    /** Shops this customer asked to hear from ("Notify me next time"). */
+    public function followedShops(): BelongsToMany
+    {
+        return $this->belongsToMany(Seller::class, 'shop_follows')->withTimestamps();
+    }
+
+    public function follows(Seller $shop): bool
+    {
+        return $this->followedShops()->whereKey($shop->getKey())->exists();
     }
 
     public function isCustomer(): bool

@@ -4,6 +4,7 @@ use App\Enums\RefusalReason;
 use App\Exceptions\ReservationRefused;
 use App\Models\Listing;
 use App\Models\Seller;
+use App\Models\User;
 use App\Services\ReservationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -63,4 +64,31 @@ function dealAt(float $km, array $attributes = [], string $shop = 'Test Shop'): 
     ]);
 
     return Listing::factory()->for($seller)->create($attributes);
+}
+
+/**
+ * The one message of this kind in someone's inbox (see App\Services\Notifier
+ * for the kinds), as ['kind', 'title', 'body', 'url'], or null if there is none.
+ *
+ * @return array{kind: string, title: string, body: string, url: string|null}|null
+ */
+function messageFor(User $user, string $kind): ?array
+{
+    $matches = $user->notifications()->get()->where('data.kind', $kind);
+
+    if ($matches->count() > 1) {
+        test()->fail("Expected at most one \"{$kind}\" message but found {$matches->count()}.");
+    }
+
+    return $matches->first()?->data;
+}
+
+/**
+ * Every kind of message in someone's inbox, sorted, e.g. ['reservation.booked'].
+ *
+ * @return list<string>
+ */
+function messageKinds(User $user): array
+{
+    return $user->notifications()->get()->pluck('data.kind')->sort()->values()->all();
 }
