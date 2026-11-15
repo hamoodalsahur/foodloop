@@ -123,7 +123,7 @@ Forest sidebar on wide screens; on phones it stacks on top and the menu becomes 
 ```
 
 - Seller `active`: `dashboard`, `listings`, `pickups`, `donations`, `profile`.
-  Admin `active`: `overview`, `sellers`, `listings`, `reports`, `customers`.
+  Admin `active`: `overview`, `sellers`, `listings`, `orders`, `reports`, `customers`, `food-banks`.
 - The seller layout shows the signed-in seller's shop name and status by itself.
 - Both are thin wrappers around `<x-layouts.dashboard>` (which takes `area`, `nav`, `active`).
 

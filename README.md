@@ -187,6 +187,11 @@ Log in as `admin@foodloop.test` / `password` (about 2 minutes):
 3. **Reports**: hide a reported listing, warn the seller, or dismiss the report. The seller sees the
    warning on their dashboard.
 4. **Customers**: lift a no-show limit or clear strikes.
+5. **Orders**: every order from every shop, with tabs (Waiting · Collected · Cancelled · No-shows · All),
+   search by pickup code, customer or shop, and totals. Open an order for its full timeline (the audit
+   trail). On a waiting order, **Mark collected (admin override)** pushes it through straight away, without
+   waiting for the pickup window: handy for demos and screenshots. It is recorded as an override on the
+   order, and the student gets the usual "collected" message.
 
 Customers can report a listing from its page ("Something wrong? Report this listing").
 
@@ -259,8 +264,8 @@ The same tests on MySQL, plus the race test where 8 requests go for the last ite
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 600 passed` for the quick run and
-`Tests: 602 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 705 passed` for the quick run and
+`Tests: 707 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout

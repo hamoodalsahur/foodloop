@@ -3,7 +3,7 @@
 
     <x-layouts.admin title="Overview" active="overview">…</x-layouts.admin>
 
-    `active` is one of: overview, sellers, listings, reports, customers, food-banks.
+    `active` is one of: overview, sellers, listings, orders, reports, customers, food-banks.
 --}}
 @props(['title', 'active' => null])
 
@@ -14,6 +14,7 @@
         ['key' => 'overview', 'label' => 'Overview', 'href' => $link('admin.dashboard')],
         ['key' => 'sellers', 'label' => 'Sellers', 'href' => $link('admin.sellers.index')],
         ['key' => 'listings', 'label' => 'Listings', 'href' => $link('admin.listings.index')],
+        ['key' => 'orders', 'label' => 'Orders', 'href' => $link('admin.orders.index')],
         ['key' => 'reports', 'label' => 'Reports', 'href' => $link('admin.reports.index')],
         ['key' => 'customers', 'label' => 'Customers', 'href' => $link('admin.customers.index')],
         ['key' => 'food-banks', 'label' => 'Food banks', 'href' => $link('admin.food-banks.index')],

@@ -28,13 +28,19 @@ class FoodBankController extends Controller
     {
         $donations = $overview->donations();
 
+        // Portions per outcome, added up in one query.
+        $portions = Donation::query()->toBase()
+            ->selectRaw('status, sum(quantity) as portions')
+            ->groupBy('status')
+            ->pluck('portions', 'status');
+
         return view('admin.food-banks', [
             'partners' => FoodBankPartner::query()->orderBy('id')->get(),
             'donations' => $donations,
             'portions' => [
-                'waiting' => (int) Donation::where('status', DonationStatus::Offered)->sum('quantity'),
-                'collected' => (int) Donation::where('status', DonationStatus::Collected)->sum('quantity'),
-                'declined' => (int) Donation::where('status', DonationStatus::Declined)->sum('quantity'),
+                'waiting' => (int) $portions->get(DonationStatus::Offered->value, 0),
+                'collected' => (int) $portions->get(DonationStatus::Collected->value, 0),
+                'declined' => (int) $portions->get(DonationStatus::Declined->value, 0),
             ],
         ]);
     }

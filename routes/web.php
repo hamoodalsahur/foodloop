@@ -109,6 +109,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/reports/{listing}/warn', [Admin\ReportController::class, 'warn'])->name('reports.warn');
     Route::post('/reports/{listing}/dismiss', [Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
 
+    // Every order across all shops (the audit view), and the override that marks a waiting one collected.
+    Route::get('/orders', [Admin\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{reservation}', [Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{reservation}/collect', [Admin\OrderController::class, 'collect'])->name('orders.collect');
+
     Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
     Route::post('/customers/{user}/lift-limit', [Admin\CustomerController::class, 'liftLimit'])->name('customers.lift-limit');
 

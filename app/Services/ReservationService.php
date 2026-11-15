@@ -14,6 +14,7 @@ use App\Models\Seller;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 use RuntimeException;
 
 /**
@@ -21,7 +22,7 @@ use RuntimeException;
  * changes (docs/BUILD_PLAN.md §5). Controllers call these methods and show
  * the refusal message; they never touch status or stock themselves.
  *
- *   reserved ─ collect() ──▶ collected
+ *   reserved ─ collect() ──▶ collected   (collectAsAdmin(): the same, any time, by an admin)
  *      ├───── cancel() ───▶ cancelled (late = +1 strike), stock returned, pay-now refunded
  *      └───── markNoShow() ▶ no_show (+1 strike), stock becomes leftovers
  *
@@ -165,6 +166,49 @@ class ReservationService
         }, self::ATTEMPTS);
 
         $this->notifier->reservationCollected($reservation);
+
+        return $reservation;
+    }
+
+    /**
+     * The admin override (Admin → Orders): mark a waiting reservation
+     * collected right now, whatever the pickup window or grace period says.
+     * For demos, screenshots and fixing a pickup the shop forgot to record.
+     *
+     * Everything else is the same as collect(): the status, the time,
+     * pay-at-pickup counts as paid (simulated), the customer gets the normal
+     * "Collected" message and it counts in the impact numbers. The admin is
+     * written on the reservation, and the shop is told, because it did not
+     * do this itself.
+     *
+     * @throws ReservationRefused when the reservation is not waiting any more
+     */
+    public function collectAsAdmin(Reservation $reservation, User $admin): Reservation
+    {
+        // The policy and the admin-only routes decide who may ask; this is the safety net under them.
+        if (! $admin->isAdmin()) {
+            throw new LogicException('Only an admin can use the collect override.');
+        }
+
+        $reservation = DB::transaction(function () use ($reservation, $admin) {
+            // Lock the row first: a second tap (or the shop collecting at the
+            // same moment) waits here, then sees it is no longer waiting.
+            $reservation = Reservation::query()->lockForUpdate()->findOrFail($reservation->getKey());
+
+            $this->refuseIf($reservation->status !== ReservationStatus::Reserved, RefusalReason::NotReserved);
+
+            $reservation->status = ReservationStatus::Collected;
+            $reservation->collected_at = now();
+            $reservation->collected_by_admin_id = $admin->getKey();
+            // Pay-at-pickup reservations are paid at this moment (simulated), as in collect().
+            $reservation->payment_status = PaymentStatus::SimulatedPaid;
+            $reservation->save();
+
+            return $reservation;
+        }, self::ATTEMPTS);
+
+        $this->notifier->reservationCollected($reservation);
+        $this->notifier->collectedByAdmin($reservation);
 
         return $reservation;
     }

@@ -229,6 +229,18 @@ class Notifier
         ]);
     }
 
+    /** An admin marked the order collected (the override), so the shop knows it wasn't them. */
+    public function collectedByAdmin(Reservation $reservation): void
+    {
+        $this->send('seller.collected_by_admin', fn () => [
+            $reservation->listing->seller->user,
+            'FoodLoop marked code '.$reservation->pickup_code.' collected',
+            'An admin marked '.$reservation->quantity.' × '.$reservation->listing->title.' for '
+                .CustomerName::short($reservation->customer->name).' as collected. Nothing for you to do.',
+            $this->path('seller.pickups.index'),
+        ]);
+    }
+
     public function shopApproved(Seller $seller): void
     {
         $this->send('seller.approved', fn () => [

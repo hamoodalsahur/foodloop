@@ -18,19 +18,32 @@ use Illuminate\Support\Collection;
  */
 class SellerOverview
 {
+    /** @var Collection<int, Donation>|null */
+    private ?Collection $donations = null;
+
     public function __construct(private Seller $seller) {}
 
     /** @return array{waiting: int, today: int, salesWeekSen: int, rescuedMonth: int} */
     public function stats(): array
     {
-        $mine = Reservation::query()->whereHas('listing', fn ($q) => $q->where('seller_id', $this->seller->id));
-        $collected = (clone $mine)->where('status', ReservationStatus::Collected);
+        $collected = ReservationStatus::Collected->value;
+
+        // One pass over this shop's reservations for all four numbers.
+        $sums = Reservation::query()
+            ->join('listings', 'listings.id', '=', 'reservations.listing_id')
+            ->where('listings.seller_id', $this->seller->id)
+            ->toBase()
+            ->selectRaw('coalesce(sum(case when reservations.status = ? then 1 else 0 end), 0) as waiting', [ReservationStatus::Reserved->value])
+            ->selectRaw('coalesce(sum(case when reservations.status != ? and reservations.created_at >= ? then 1 else 0 end), 0) as today', [ReservationStatus::Cancelled->value, today()])
+            ->selectRaw('coalesce(sum(case when reservations.status = ? and reservations.collected_at >= ? then reservations.total_sen else 0 end), 0) as sales_week_sen', [$collected, now()->startOfWeek()])
+            ->selectRaw('coalesce(sum(case when reservations.status = ? and reservations.collected_at >= ? then reservations.quantity else 0 end), 0) as rescued_month', [$collected, now()->startOfMonth()])
+            ->first();
 
         return [
-            'waiting' => (clone $mine)->where('status', ReservationStatus::Reserved)->count(),
-            'today' => (clone $mine)->where('status', '!=', ReservationStatus::Cancelled)->where('created_at', '>=', today())->count(),
-            'salesWeekSen' => (int) (clone $collected)->where('collected_at', '>=', now()->startOfWeek())->sum('total_sen'),
-            'rescuedMonth' => (int) (clone $collected)->where('collected_at', '>=', now()->startOfMonth())->sum('quantity'),
+            'waiting' => (int) $sums->waiting,
+            'today' => (int) $sums->today,
+            'salesWeekSen' => (int) $sums->sales_week_sen,
+            'rescuedMonth' => (int) $sums->rescued_month,
         ];
     }
 
@@ -92,17 +105,21 @@ class SellerOverview
             ->whereColumn('closed_at', '>=', 'pickup_end')
             ->whereDoesntHave('donations')
             ->whereDoesntHave('reservations', fn ($q) => $q->where('status', ReservationStatus::Reserved))
+            // The no-show portions come along with the listings (it used to ask twice per listing).
+            ->withSum(['reservations as no_show_portions' => fn ($q) => $q->where('status', ReservationStatus::NoShow)], 'quantity')
             ->latest('pickup_end')
             ->get()
-            ->filter(fn (Listing $l) => $l->leftovers() > 0)
-            ->each(fn (Listing $l) => $l->setAttribute('leftover_count', $l->leftovers()))
+            // The same sum as Listing::leftovers(): unsold portions plus no-shows.
+            ->each(fn (Listing $l) => $l->setAttribute('leftover_count', $l->quantity_available + (int) $l->no_show_portions))
+            ->filter(fn (Listing $l) => $l->leftover_count > 0)
             ->values();
     }
 
     /** @return Collection<int, Donation> */
     public function donations(): Collection
     {
-        return Donation::query()
+        // Asked for once per page: the list and "portions given so far" share it.
+        return $this->donations ??= Donation::query()
             ->with(['listing', 'partner'])
             ->whereHas('listing', fn ($q) => $q->where('seller_id', $this->seller->id))
             ->latest()

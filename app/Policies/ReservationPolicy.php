@@ -38,6 +38,12 @@ class ReservationPolicy
         return $this->isAtUsersShop($user, $reservation);
     }
 
+    /** The admin override: only admins can mark any waiting order collected, at any time. */
+    public function collectAsAdmin(User $user, Reservation $reservation): bool
+    {
+        return $user->isAdmin();
+    }
+
     private function isAtUsersShop(User $user, Reservation $reservation): bool
     {
         return $user->isSeller()

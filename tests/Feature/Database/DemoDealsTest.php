@@ -194,6 +194,10 @@ it('says no to a menu it does not know', function () {
 });
 
 it('still posts exactly the six mockup deals when the menu is "mockup"', function () {
+    // A fixed evening: just after midnight, yesterday's history listings are
+    // also "less than 2 hours old" and this count was off (failed 00:00–02:00).
+    $this->travelTo('2026-11-16 18:18:00');
+
     $this->seed(DatabaseSeeder::class);
 
     expect(config('foodloop.demo_menu'))->toBe('mockup')

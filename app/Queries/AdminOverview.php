@@ -163,16 +163,26 @@ class AdminOverview
      */
     public function totals(): array
     {
-        $collected = Reservation::where('status', ReservationStatus::Collected)
-            ->with('listing:id,original_price_sen,price_sen')
-            ->get(['id', 'listing_id', 'quantity']);
+        // Added up by the database in one go (it used to load every collected
+        // order into memory). The saving is never negative: a listing priced
+        // above its "normal" price saves nothing.
+        $collected = Reservation::query()
+            ->join('listings', 'listings.id', '=', 'reservations.listing_id')
+            ->where('reservations.status', ReservationStatus::Collected)
+            ->toBase()
+            ->selectRaw(
+                'coalesce(sum(reservations.quantity), 0) as meals, '
+                .'coalesce(sum(case when listings.original_price_sen > listings.price_sen '
+                .'then (listings.original_price_sen - listings.price_sen) * reservations.quantity else 0 end), 0) as saved_sen'
+            )
+            ->first();
 
         return [
             'customers' => User::where('role', UserRole::Customer)->count(),
             'approvedSellers' => Seller::where('status', SellerStatus::Approved)->count(),
-            'mealsRescued' => (int) $collected->sum('quantity'),
+            'mealsRescued' => (int) $collected->meals,
             // What customers paid less than the normal price, added up.
-            'savedSen' => (int) $collected->sum(fn (Reservation $r) => max(0, $r->listing->saving_sen) * $r->quantity),
+            'savedSen' => (int) $collected->saved_sen,
             'portionsDonated' => (int) Donation::where('status', '!=', DonationStatus::Declined)->sum('quantity'),
         ];
     }

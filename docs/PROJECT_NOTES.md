@@ -17,6 +17,38 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 
 ---
 
+## 16 Nov 2026 · Admin → Orders (audit view, admin override) and speed-ups
+
+- **Why:** the owner wanted to log in as a "super admin", see every past and current order like an audit
+  log, and push an order through without waiting for its pickup window (demos, documentation). Also asked
+  to optimise the app where needed.
+- **What (built by Fable, finished by the writer after Fable hit its usage limit):**
+  - *Admin → Orders* (`/admin/orders`): every order across all shops, newest first; tabs Waiting ·
+    Collected · Cancelled · No-shows · All with counts; search by code, customer or shop; totals (orders,
+    money, portions) over the whole tab; 25 per page. Rows become cards on phones.
+  - *Order detail*: all facts plus a "What happened" timeline (reserved, paid, collected / cancelled /
+    no-show, refunded) from the order's own timestamps.
+  - *Mark collected (admin override)*: on waiting orders only, behind a confirm screen, admin-only (role,
+    policy and a check inside `ReservationService::collectAsAdmin`), row-locked so a double tap or the shop
+    collecting at the same moment can't count it twice. Records which admin did it
+    (`reservations.collected_by_admin_id`, new migration); shown as "Admin override" in the list and the
+    timeline. Student and shop get the usual messages; it counts in history and impact. Sellers and
+    students keep the normal rules.
+  - *Speed-ups (same results, fewer database calls):* seller dashboard numbers in one query instead of
+    four; "Left over at closing?" no longer asks twice per listing; admin totals added up by the database
+    instead of loading every collected order; food-bank portions in one query; donations list asked once
+    per page. New indexes for what the busy pages filter and sort by (customer's orders, collected dates,
+    the Orders tabs, a shop's listings, the deals page). A new test opens 12 busy pages with a little and
+    with a lot more data and fails if the number of database calls grows (no query per row) or passes a
+    ceiling.
+- **Tested:** 705 passed, 2 skipped on SQLite (50 new admin-order tests, 14 query-count tests). Browser
+  check in Chromium at 390 and 1280 px: Orders list (all tabs, search), order detail, the override end to
+  end (confirm screen → "Collected · Admin override" → shows in Aina's orders); no sideways scroll.
+  MySQL not run here: owner runs `php artisan test -c phpunit.mysql.xml`.
+- **Owner must run:** `php artisan migrate` (adds one column and some indexes; wipes nothing).
+
+---
+
 ## 15 Nov 2026 · `demo:refresh` and a bigger, random demo menu
 
 - **Why:** the owner wanted to reset the demo food without losing accounts or history, and more variety

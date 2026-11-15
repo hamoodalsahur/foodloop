@@ -76,6 +76,7 @@ repo for changes before acting. Last updated: 15 Nov 2026 (demo:refresh and the 
 | 15 Nov | Demo shops are **real food places within 5 km of campus**, with real names and positions, clearly labelled as demo (they haven't joined); their SSM and phone numbers stay fake. The 3 shops waiting for approval stay made up | Owner's decision. Made-up shops there so no real business appears to have applied without an SSM number |
 | 15 Nov | ⚠️ Team to note: Bonda Mawar Cake House is shown as "halal certified" in the demo. That is demo data, not a check of their real certificate; say so if asked, or switch it to Muslim-owned in `DemoSeeder` | The demo needs one certified shop |
 | 15 Nov | Street map with Leaflet + OpenStreetMap tiles (free, no key); falls back to the drawing after 7 s without tiles | Real map for the pitch without accounts or cost; never an empty page offline |
+| 16 Nov | The admin can mark a waiting order collected at any time (admin override); it is recorded with the admin's name and shown as an override | Owner: demos and documentation without waiting for pickup windows; the audit stays honest |
 | 15 Nov | Installable web app (PWA) instead of a native app; opened on phones through a free Cloudflare https tunnel | A Play Store / App Store app is weeks of work; the PWA looks and opens like an app |
 | 15 Nov | `php artisan demo:refresh` resets only the food: accounts, past orders, donations, reports, strikes stay. `migrate:fresh --seed` stays the full wipe | Owner: reset the demo without losing accounts or history |
 | 15 Nov | Demo menu of 29 items; each reset posts 6–9 at random. Two deals never change (Bakery Surprise Bundle with code 4721, Sandwich & pastry pack with code 2468) | Owner wanted variety; the demo script needs those two |
@@ -132,7 +133,8 @@ repo for changes before acting. Last updated: 15 Nov 2026 (demo:refresh and the 
 17. ✅ 15 Nov: real street map, real shops around UiTM Kedah, installable on phones (see PROJECT_NOTES).
 17a. ✅ 15 Nov (Fable): `php artisan demo:refresh` and the bigger random demo menu with 8 new drawings (see PROJECT_NOTES). 643 tests on SQLite; MySQL not run here.
 18. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
-19. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
+19. ✅ 16 Nov: Admin → Orders (audit view + admin override to mark collected) and speed-ups (see PROJECT_NOTES).
+20. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
 
 ## Commit roles (14 Nov)
 

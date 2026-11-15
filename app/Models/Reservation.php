@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 // Status changes go through App\Services\ReservationService only (Stage 2).
+// collected_by_admin_id is deliberately NOT fillable: only the service sets it.
 #[Fillable([
     'quantity', 'total_sen', 'payment_method', 'payment_status', 'pickup_code',
     'status', 'expires_at', 'collected_at', 'cancelled_at', 'late_cancel',
@@ -59,6 +60,18 @@ class Reservation extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    /** The admin who marked this collected with the override. Null for a normal pickup at the shop. */
+    public function collectedByAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'collected_by_admin_id');
+    }
+
+    /** Collected by an admin from Admin → Orders, not by the shop typing the code. */
+    public function isAdminOverride(): bool
+    {
+        return $this->collected_by_admin_id !== null;
     }
 
     public function isReserved(): bool
