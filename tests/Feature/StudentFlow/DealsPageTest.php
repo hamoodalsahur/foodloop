@@ -142,7 +142,7 @@ describe('the tiles and the strip', function () {
         dealAt(0.6, ['title' => 'Plain latte', 'quantity_available' => 4]);
         dealAt(9, ['title' => 'Faraway bundle', 'type' => 'bundle', 'quantity_available' => 7]);
 
-        $this->get('/')->assertSeeInOrder(['Surprise Bundles', '8', 'left tonight']);
+        $this->get('/')->assertSeeInOrder(['8', 'Surprise Bundles', 'left']);
 
         $this->get('/?type=bundle')
             ->assertSee('Bakery bundle')->assertSee('Veg bundle')->assertDontSee('Plain latte')

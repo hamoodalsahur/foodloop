@@ -13,7 +13,7 @@
     $soldOut = $listing->quantity_available < 1;
 @endphp
 
-<a href="{{ $href }}" {{ $attributes->class('flex min-h-24 min-w-0 items-center gap-3 rounded-3xl bg-white p-3 text-forest transition-shadow hover:shadow-md') }}>
+<a href="{{ $href }}" {{ $attributes->class('flex h-full min-h-24 min-w-0 items-center gap-3 rounded-3xl bg-white p-3 text-forest transition-shadow hover:shadow-md') }}>
     <x-food-photo :path="$listing->photo_path" alt="" class="max-sm:size-[4.5rem]" />
 
     <div class="min-w-0 flex-1">
@@ -26,7 +26,7 @@
                 </span>
             @endif
         </p>
-        <p class="truncate font-display text-base font-bold leading-snug">{{ $listing->title }}</p>
+        <p class="line-clamp-2 font-display text-base font-bold leading-snug">{{ $listing->title }}</p>
         {{-- The shop name shortens if it must; the distance always stays readable. --}}
         <p class="flex text-[0.8125rem] text-muted sm:text-sm">
             <span class="truncate">{{ $listing->seller->business_name }}</span>

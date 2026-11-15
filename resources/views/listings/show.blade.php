@@ -20,9 +20,12 @@
     $elapsedPercent = (int) round(min(1, max(0, $startedAt->diffInSeconds(now()) / $total)) * 100);
 @endphp
 
-<x-layouts.customer :title="$listing->title" :header="false" :nav="false" flush>
+<x-layouts.customer :title="$listing->title" :header="false" :nav="false" flush wide>
+    {{-- On wide screens: the picture and countdown on the left, the details and Reserve on the right. --}}
+    <div class="lg:grid lg:grid-cols-2 lg:items-start lg:gap-10 lg:px-5 lg:pt-5">
+    <div class="lg:sticky lg:top-5">
     {{-- Picture, back button, deal type --}}
-    <div class="relative overflow-hidden md:mx-5 md:mt-5 md:rounded-3xl">
+    <div class="relative overflow-hidden md:mx-5 md:mt-5 md:rounded-3xl lg:mx-0 lg:mt-0">
         <x-food-photo :path="$listing->photo_path" alt="" size="hero"
                       :class="$state === 'open' ? '' : 'opacity-40 grayscale'" />
 
@@ -55,7 +58,7 @@
 
     @if ($state === 'open')
         {{-- The discount --}}
-        <div class="flex items-end justify-between gap-4 bg-marigold px-5 py-3 md:mx-5">
+        <div class="flex items-end justify-between gap-4 bg-marigold px-5 py-3 md:mx-5 lg:mx-0">
             <p class="font-display text-7xl font-bold leading-none tracking-tighter">
                 <span class="sr-only">{{ $listing->discount_percent }}% off</span>
                 <span aria-hidden="true">−{{ $listing->discount_percent }}%</span>
@@ -66,7 +69,7 @@
         </div>
 
         {{-- The countdown --}}
-        <div class="bg-forest px-5 py-4 text-cream md:mx-5 md:rounded-b-3xl">
+        <div class="bg-forest px-5 py-4 text-cream md:mx-5 md:rounded-b-3xl lg:mx-0">
             <div class="flex items-center justify-between gap-4">
                 <p class="text-sm text-mist">Reservations close in</p>
                 <x-countdown :until="$listing->reservationsCloseAt()" class="text-2xl" />
@@ -76,8 +79,9 @@
             </div>
         </div>
     @endif
+    </div>
 
-    <div class="flex flex-1 flex-col px-5 pb-6 pt-5">
+    <div class="flex flex-1 flex-col px-5 pb-6 pt-5 lg:min-h-full lg:px-0 lg:pt-1">
         <h1 class="font-display text-3xl font-bold leading-tight tracking-tight">{{ $listing->title }}</h1>
         <p class="mt-1 text-sm text-muted">
             {{ $seller->business_name }}@if ($listing->distanceKm !== null) · {{ Distance::label($listing->distanceKm) }}@endif
@@ -181,7 +185,7 @@
                                 @enderror
                             </fieldset>
 
-                            <x-button type="submit" size="lg" arrow class="mt-5">
+                            <x-button type="submit" size="lg" arrow class="mt-5" data-busy="Reserving…">
                                 Reserve for <span x-text="total">{{ Money::format($listing->price_sen * (int) old('quantity', 1)) }}</span>
                             </x-button>
                         </form>
@@ -280,5 +284,6 @@
                 </form>
             </details>
         @endcan
+    </div>
     </div>
 </x-layouts.customer>

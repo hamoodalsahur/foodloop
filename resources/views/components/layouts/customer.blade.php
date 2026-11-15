@@ -12,22 +12,24 @@
       :header="false"   no logo bar (detail pages that start with a picture or a dark block)
       :nav="false"      no bottom navigation (pages with their own button fixed at the bottom)
       flush             no side padding on the content (the page adds its own px-5)
+      wide              a wider page on desktop (deals in two columns, listing side by side)
 
     Signed-in people get the bell (their notifications) and the account menu.
     It also shows flash messages (session "status"), and a red "You're offline" strip
     when the phone loses its connection.
 --}}
-@props(['title' => null, 'active' => null, 'header' => true, 'nav' => true, 'flush' => false])
+@props(['title' => null, 'active' => null, 'header' => true, 'nav' => true, 'flush' => false, 'wide' => false])
 
 @php
     // A menu item whose page doesn't exist yet has no link and is shown greyed out.
     $link = fn (string $route) => \Illuminate\Support\Facades\Route::has($route) ? route($route) : null;
 
+    // icon: the SVG path drawn above the label in the bottom navigation.
     $menu = [
-        'deals' => ['label' => 'Deals', 'href' => $link('deals.index')],
-        'map' => ['label' => 'Map', 'href' => $link('map')],
-        'orders' => ['label' => 'Orders', 'href' => $link('orders.index')],
-        'impact' => ['label' => 'Impact', 'href' => $link('impact')],
+        'deals' => ['label' => 'Deals', 'href' => $link('deals.index'), 'icon' => 'M4 7h16l-1.5 11.5a2 2 0 0 1-2 1.5h-9a2 2 0 0 1-2-1.5zM9 7V5.5a3 3 0 0 1 6 0V7'],
+        'map' => ['label' => 'Map', 'href' => $link('map'), 'icon' => 'M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z'],
+        'orders' => ['label' => 'Orders', 'href' => $link('orders.index'), 'icon' => 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9.5 8h5M9.5 12h5'],
+        'impact' => ['label' => 'Impact', 'href' => $link('impact'), 'icon' => 'M5 20V12M12 20V5M19 20v-6'],
     ];
 
     $user = auth()->user();
@@ -37,7 +39,7 @@
 @endphp
 
 <x-layouts.base :title="$title">
-    <div @class(['mx-auto flex min-h-screen max-w-2xl flex-col', 'pb-20 md:pb-10' => $nav, 'md:pb-10' => ! $nav])>
+    <div @class(['mx-auto flex min-h-screen max-w-2xl flex-col', 'lg:max-w-5xl' => $wide, 'pb-20 md:pb-10' => $nav, 'md:pb-10' => ! $nav])>
         @if ($header)
             <header class="flex items-center justify-between gap-4 px-5 py-4">
                 <a href="{{ $menu['deals']['href'] }}" class="inline-flex min-h-11 items-center font-display text-3xl font-bold tracking-tight">
@@ -138,24 +140,29 @@
     @if ($nav)
         {{-- Bottom navigation: phones only --}}
         <nav aria-label="Main" class="fixed inset-x-0 bottom-0 z-40 bg-forest text-cream md:hidden">
-            <ul class="mx-auto grid max-w-2xl grid-cols-4">
+            <ul class="mx-auto grid max-w-2xl grid-cols-4 pb-[env(safe-area-inset-bottom)]">
                 @foreach ($menu as $key => $item)
                     <li>
                         @if ($item['href'])
                             <a href="{{ $item['href'] }}"
                                @if ($active === $key) aria-current="page" @endif
                                @class([
-                                   'flex h-16 flex-col items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-widest',
+                                   'flex h-16 flex-col items-center justify-center gap-1 text-[0.6875rem] font-bold uppercase tracking-widest',
                                    'text-cream' => $active === $key,
                                    'text-mist' => $active !== $key,
                                ])>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                     @class(['size-6', 'text-marigold' => $active === $key]) aria-hidden="true">
+                                    <path d="{{ $item['icon'] }}" />
+                                </svg>
                                 <span>{{ $item['label'] }}</span>
-                                <span @class(['h-1 w-5 rounded-full', 'bg-marigold' => $active === $key]) aria-hidden="true"></span>
                             </a>
                         @else
-                            <span class="flex h-16 flex-col items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-widest text-mist/50" title="Coming soon">
+                            <span class="flex h-16 flex-col items-center justify-center gap-1 text-[0.6875rem] font-bold uppercase tracking-widest text-mist/50" title="Coming soon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6" aria-hidden="true">
+                                    <path d="{{ $item['icon'] }}" />
+                                </svg>
                                 <span>{{ $item['label'] }}<span class="sr-only"> (coming soon)</span></span>
-                                <span class="h-1 w-5" aria-hidden="true"></span>
                             </span>
                         @endif
                     </li>

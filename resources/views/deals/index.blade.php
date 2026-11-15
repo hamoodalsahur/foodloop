@@ -4,9 +4,11 @@
 --}}
 @php
     use App\Support\Distance;
+
+    use App\Support\DayPart;
 @endphp
 
-<x-layouts.customer title="Deals" active="deals">
+<x-layouts.customer title="Deals" active="deals" wide>
     @unless ($failed)
         <x-slot:notice>
             @if ($closingSoon > 0)
@@ -88,42 +90,45 @@
                 @endguest
             </x-empty-state>
         @else
-            {{-- The three tiles: bundles, halal filter, distance filter --}}
-        <div class="mt-4 grid grid-cols-2 gap-3">
-            <a href="{{ $filters->url(['type' => $filters->type?->value === 'bundle' ? null : 'bundle']) }}"
-               class="row-span-2 flex min-h-48 flex-col justify-between rounded-3xl bg-marigold p-5 text-forest">
-                <span class="text-sm font-bold">Surprise Bundles</span>
-                <span>
-                    <span class="block font-display text-7xl font-bold leading-none tracking-tight">{{ $bundlesLeft }}</span>
-                    <span class="mt-1 block text-sm font-semibold">
+            {{-- The three tiles: bundles, halal filter, distance filter. One slim row, so the deals show sooner. --}}
+            <div class="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                <a href="{{ $filters->url(['type' => $filters->type?->value === 'bundle' ? null : 'bundle']) }}"
+                   @if ($filters->type?->value === 'bundle') aria-current="true" @endif
+                   @class([
+                       'flex min-h-[4.75rem] flex-col justify-center rounded-2xl bg-marigold px-3 py-2.5 text-forest sm:px-4',
+                       'ring-4 ring-forest ring-inset' => $filters->type?->value === 'bundle',
+                   ])>
+                    <span class="flex items-baseline gap-1.5">
+                        <span class="font-display text-3xl font-bold leading-none tracking-tight">{{ $bundlesLeft }}</span>
+                        <span class="text-xs font-bold leading-tight sm:text-sm">Surprise {{ Str::plural('Bundle', $bundlesLeft) }}</span>
+                    </span>
+                    <span class="mt-1 text-xs font-semibold">
                         @if ($filters->type?->value === 'bundle')
-                            left tonight · show all deals
+                            left {{ DayPart::word() }} · show all deals
                         @else
-                            left tonight <span aria-hidden="true">→</span><span class="sr-only">, show only bundles</span>
+                            left {{ DayPart::word() }} <span aria-hidden="true">→</span><span class="sr-only">, show only bundles</span>
                         @endif
                     </span>
-                </span>
-            </a>
+                </a>
 
-            <a href="{{ $filters->url(['halal' => $filters->halalOnly ? '0' : '1']) }}"
-               class="flex flex-col justify-center rounded-3xl bg-forest p-5 text-cream">
-                <span class="text-xs text-mist">Filter</span>
-                <span class="mt-1 flex flex-wrap items-center gap-2 font-display font-bold">
-                    Halal only
-                    <x-tag :variant="$filters->halalOnly ? 'marigold' : 'outline'" :class="$filters->halalOnly ? '' : 'border-mist text-mist'">
-                        {{ $filters->halalOnly ? 'On' : 'Off' }}
-                    </x-tag>
-                </span>
-                <span class="sr-only">Tap to turn {{ $filters->halalOnly ? 'off' : 'on' }}</span>
-            </a>
+                <a href="{{ $filters->url(['halal' => $filters->halalOnly ? '0' : '1']) }}"
+                   class="flex min-h-[4.75rem] flex-col justify-center rounded-2xl bg-forest px-3 py-2.5 text-cream sm:px-4">
+                    <span class="text-xs text-mist">Halal only</span>
+                    <span class="mt-1">
+                        <x-tag :variant="$filters->halalOnly ? 'marigold' : 'outline'" :class="$filters->halalOnly ? '' : 'border-mist text-mist'">
+                            {{ $filters->halalOnly ? 'On' : 'Off' }}
+                        </x-tag>
+                    </span>
+                    <span class="sr-only">Tap to turn {{ $filters->halalOnly ? 'off' : 'on' }}</span>
+                </a>
 
-            <a href="{{ $filters->url(['within' => $filters->nextDistance()]) }}"
-               class="flex flex-col justify-center rounded-3xl border-2 border-forest bg-white p-5 text-forest">
-                <span class="text-xs text-muted">Distance</span>
-                <span class="mt-1 font-display font-bold">{{ $filters->distanceLabel() }}</span>
-                <span class="sr-only">Tap to change</span>
-            </a>
-        </div>
+                <a href="{{ $filters->url(['within' => $filters->nextDistance()]) }}"
+                   class="flex min-h-[4.75rem] flex-col justify-center rounded-2xl border-2 border-forest bg-white px-3 py-2.5 text-forest sm:px-4">
+                    <span class="text-xs text-muted">Distance</span>
+                    <span class="mt-1 font-display text-sm font-bold leading-tight sm:text-base">{{ $filters->distanceLabel() }}</span>
+                    <span class="sr-only">Tap to change</span>
+                </a>
+            </div>
 
         {{-- Category chips --}}
         <nav aria-label="Food category" class="-mx-5 mt-4 overflow-x-auto px-5">
@@ -145,7 +150,7 @@
             </ul>
         </nav>
 
-            <ul class="mt-4 space-y-3">
+            <ul class="mt-4 grid gap-3 lg:grid-cols-2">
                 @foreach ($listings as $listing)
                     <li>
                         <x-deal-row :listing="$listing"

@@ -143,14 +143,14 @@
                     </p>
                     <div class="mt-3 grid grid-cols-2 gap-3">
                         <x-button variant="outline" @click="confirming = false">Keep it</x-button>
-                        <x-button type="submit">Yes, cancel</x-button>
+                        <x-button type="submit" data-busy="Cancelling…">Yes, cancel</x-button>
                     </div>
                 </form>
                 <noscript>
                     <form method="POST" action="{{ route('orders.destroy', $reservation) }}" class="mt-3">
                         @csrf
                         @method('DELETE')
-                        <x-button type="submit" variant="outline">Yes, cancel this reservation</x-button>
+                        <x-button type="submit" variant="outline" data-busy="Cancelling…">Yes, cancel this reservation</x-button>
                     </form>
                 </noscript>
             </div>

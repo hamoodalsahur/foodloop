@@ -323,6 +323,11 @@ Add `page` for the big version when the whole page failed (mockup c06).
   `grid-cols-1` can push long text off the screen.
 - **Tables:** a real `<table>` from `md:` up, a stack of small cards below that
   (see `resources/views/dev/layout-dashboard.blade.php`).
+- **Busy buttons:** give the main submit button of a form `data-busy="Reserving…"`. While the form is being
+  sent the button shows that text and can't be tapped twice (every POST form already blocks a second send).
+- **Time of day:** say "tonight" only in the evening: use `App\Support\DayPart::word()` ("today" before 5 PM).
+- **Wide pages:** `<x-layouts.customer wide>` lets a customer page use more room on desktop (deals in two
+  columns, the listing page side by side). Phone layout is unchanged.
 - **Forms:** inputs are `min-h-11 rounded-xl border-2 border-forest bg-cream px-3`, each with a `<label>`.
 - **Refusals:** when the reservation engine says no, show `$exception->reason->label()` in an
   `x-notice variant="danger"`; the sentences are written in `App\Enums\RefusalReason`.

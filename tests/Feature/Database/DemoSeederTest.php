@@ -201,9 +201,9 @@ it('uses the drawn pictures when no real photos were provided', function () {
 
 it('keeps real-looking details as obvious placeholders', function () {
     Seller::where('status', SellerStatus::Approved)->get()->each(function (Seller $shop) {
-        expect($shop->ssm_no)->toBe('[SSM NO.]')
-            ->and($shop->phone)->toBe('[PHONE]')
-            ->and($shop->address)->toBe('[SHOP ADDRESS]');
+        expect($shop->ssm_no)->toMatch('/^DEMO-\d{4}$/')
+            ->and($shop->phone)->toBe('Demo number')
+            ->and($shop->address)->toBe('Demo address near campus');
     });
 });
 

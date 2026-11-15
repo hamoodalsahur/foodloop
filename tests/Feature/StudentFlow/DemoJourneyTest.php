@@ -26,7 +26,7 @@ it('shows the mockup deals on the home page, soonest first, with their distances
         ], false)
         // Its pickup has already started, so it takes no new reservations.
         ->assertDontSee('Sandwich &amp; pastry pack', false)
-        ->assertSeeInOrder(['Surprise Bundles', '3', 'left tonight'])
+        ->assertSeeInOrder(['3', 'Surprise Bundles', 'left'])
         ->assertDontSee('Butter croissants');
 });
 

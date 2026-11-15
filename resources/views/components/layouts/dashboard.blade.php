@@ -36,7 +36,7 @@
 
             <nav aria-label="{{ $area }}" class="mt-4 lg:mt-6 lg:flex-1">
                 {{-- Phones: one row you can swipe. Wide screens: a column. --}}
-                <ul class="flex gap-2 overflow-x-auto px-5 pb-4 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-4 lg:pb-0">
+                <ul class="flex flex-wrap gap-1.5 px-5 pb-4 lg:flex-col lg:flex-nowrap lg:gap-1 lg:px-4 lg:pb-0">
                     @foreach ($nav as $item)
                         <li class="shrink-0">
                             <a href="{{ $item['href'] }}"

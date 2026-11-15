@@ -67,6 +67,8 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 | 14 Nov | Fable trial work ends after Stage 4; Stages 5–8 are built in the owner's main chat | Owner's call |
 | 14 Nov | Once anyone has reserved, a listing's price, portions, pickup time and halal status are locked; name, photo, description and pausing stay editable | Owner's decision: students keep the deal they booked |
 | 14 Nov | Shops sign up on their own "Sell on FoodLoop" page (`/sell`) | Owner's decision: clearer than a role choice on the student sign-up |
+| 15 Nov | Feature freeze: from now on only fixes and polish on the most-used pages | Owner: priority to the features people use most, not more features |
+| 15 Nov | Demo shop details read `DEMO-0001` / "Demo number" / "Demo address near campus" | Clearly made up but not looking unfinished; realistic numbers could match real companies |
 | 15 Nov | Notifications are in-app only (bell and inbox), no email, push or SMS | As the build plan says; nothing to set up for the demo |
 | 15 Nov | ⚠️ Team to confirm: on a laptop (`APP_ENV=local`, no real email) the forgot-password page shows an "Open the reset link" button so the reset can be demoed | The prototype sends no real email; never shown in production |
 | 14 Nov | Fable's calls in Stages 6–8 (⚠️ team to confirm): "Warn seller" is one click; suspending a shop keeps its reservations; the impact page says "Everyone on FoodLoop" (computed) instead of "Campus"; the map is a simplified drawing, not a street map | Kept the prototype small; real maps need internet at the pitch |
@@ -117,8 +119,9 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 13. ⏳ Owner rehearses `docs/DEMO_SCRIPT.md` once on the Windows laptop.
 14. ⏳ Team checks Fable's open decisions (below) and adds real food photos if wanted.
 15. ✅ 15 Nov (Fable): in-app notifications for every role, "Notify me next time" and deal alerts, the rest of the admin mockup (Ask for info, Listings, Food banks), Forgot your password. 588 tests on SQLite, 590 on MySQL.
-16. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
-17. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
+16. ✅ 15 Nov: polish pass on the most-used pages (see PROJECT_NOTES). Features are frozen from here: only fixes and polish.
+17. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
+18. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
 
 ## Commit roles (14 Nov)
 

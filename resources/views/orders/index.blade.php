@@ -13,7 +13,7 @@
         <x-empty-state class="mt-6"
                        title="No orders yet"
                        message="When you reserve a deal, your pickup code shows up here.">
-            <x-button :href="route('deals.index')">See tonight’s deals</x-button>
+            <x-button :href="route('deals.index')">See {{ \App\Support\DayPart::word() }}’s deals</x-button>
         </x-empty-state>
     @endif
 
@@ -64,7 +64,7 @@
 
     @if ($waiting->isEmpty() && $past->isNotEmpty())
         <div class="mt-6">
-            <x-button :href="route('deals.index')">See tonight’s deals</x-button>
+            <x-button :href="route('deals.index')">See {{ \App\Support\DayPart::word() }}’s deals</x-button>
         </div>
     @endif
 </x-layouts.customer>

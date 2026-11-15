@@ -35,7 +35,7 @@
         <x-empty-state class="mt-4"
                        title="Nothing rescued yet"
                        message="Reserve a deal and pick it up. It shows up here as soon as the seller marks it collected.">
-            <x-button :href="route('deals.index')">See tonight’s deals</x-button>
+            <x-button :href="route('deals.index')">See {{ \App\Support\DayPart::word() }}’s deals</x-button>
         </x-empty-state>
     @else
         <x-card as="section" class="mt-4">

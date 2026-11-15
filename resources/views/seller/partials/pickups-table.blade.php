@@ -2,6 +2,9 @@
     The pickups table (mockup c08) with the code check above it.
     Pass `pickups` (reservations with listing and customer loaded) and
     optionally `showDay` to print the day next to the pickup time.
+
+    On phones each row becomes a small card (code, name and status on top, the item
+    under it, the time and the button at the bottom), so nothing hides off the edge.
 --}}
 @php
     use App\Enums\ReservationStatus;
@@ -21,7 +24,7 @@
                    @error('code') aria-invalid="true" aria-describedby="code-error" @enderror
                    class="mt-1.5 block min-h-12 w-32 rounded-xl border-2 border-forest bg-cream px-3 font-display text-xl tracking-[0.2em]">
         </div>
-        <x-button type="submit" variant="marigold" class="min-h-12">Check and collect</x-button>
+        <x-button type="submit" variant="marigold" class="min-h-12" data-busy="Checking…">Check and collect</x-button>
     </form>
 </div>
 @error('code')
@@ -31,9 +34,9 @@
 @if ($pickups->isEmpty())
     <x-empty-state class="mt-4" title="No pickups yet today" message="They show up here as students reserve your listings." />
 @else
-    <div class="relative mt-4 overflow-x-auto">
-        <table class="w-full min-w-[40rem] text-left text-sm">
-            <thead>
+    <div class="relative mt-4 md:overflow-x-auto">
+        <table class="w-full text-left text-sm max-md:block md:min-w-[40rem]">
+            <thead class="max-md:sr-only">
                 <tr class="border-b-2 border-forest text-[0.6875rem] font-bold uppercase tracking-wider text-muted">
                     <th scope="col" class="py-2 pr-3">Code</th>
                     <th scope="col" class="py-2 pr-3">Customer</th>
@@ -44,7 +47,7 @@
                     <th scope="col" class="py-2"><span class="sr-only">Action</span></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="max-md:block max-md:space-y-3">
                 @foreach ($pickups as $pickup)
                     @php
                         $listing = $pickup->listing;
@@ -52,19 +55,22 @@
                             && now()->greaterThanOrEqualTo($listing->pickup_start)
                             && now()->lessThanOrEqualTo($pickup->expires_at);
                     @endphp
-                    <tr class="border-b border-line">
-                        <td class="py-3 pr-3 font-display text-base font-bold tracking-widest">{{ $pickup->pickup_code }}</td>
-                        <td class="py-3 pr-3 whitespace-nowrap">{{ CustomerName::short($pickup->customer->name) }}</td>
-                        <td class="py-3 pr-3 whitespace-nowrap">{{ $listing->title }}</td>
-                        <td class="py-3 pr-3">{{ $pickup->quantity }}</td>
-                        <td class="py-3 pr-3 whitespace-nowrap text-muted">{{ $showDay ? PickupWindow::withDay($listing->pickup_start, $listing->pickup_end) : PickupWindow::times($listing->pickup_start, $listing->pickup_end) }}</td>
-                        <td class="py-3 pr-3"><x-status-pill :status="$pickup->status" /></td>
-                        <td class="py-2 text-right whitespace-nowrap">
+                    <tr @class([
+                        'border-b border-line max-md:grid max-md:grid-cols-[auto_1fr_auto] max-md:items-center max-md:gap-x-3 max-md:gap-y-1 max-md:rounded-2xl max-md:border-2 max-md:p-3',
+                        'max-md:border-forest' => $canCollect,
+                    ])>
+                        <td class="py-3 pr-3 font-display text-base font-bold tracking-widest max-md:col-start-1 max-md:row-start-1 max-md:p-0 max-md:text-xl">{{ $pickup->pickup_code }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap max-md:col-start-2 max-md:row-start-1 max-md:truncate max-md:p-0 max-md:font-semibold">{{ CustomerName::short($pickup->customer->name) }}</td>
+                        <td class="py-3 pr-3 md:whitespace-nowrap max-md:col-span-2 max-md:col-start-1 max-md:row-start-2 max-md:p-0">{{ $listing->title }}</td>
+                        <td class="py-3 pr-3 max-md:col-start-3 max-md:row-start-2 max-md:p-0 max-md:text-right max-md:font-semibold"><span class="md:hidden">Qty </span>{{ $pickup->quantity }}</td>
+                        <td class="py-3 pr-3 whitespace-nowrap text-muted max-md:col-span-2 max-md:col-start-1 max-md:row-start-3 max-md:p-0">{{ $showDay ? PickupWindow::withDay($listing->pickup_start, $listing->pickup_end) : PickupWindow::times($listing->pickup_start, $listing->pickup_end) }}</td>
+                        <td class="py-3 pr-3 max-md:col-start-3 max-md:row-start-1 max-md:p-0 max-md:text-right"><x-status-pill :status="$pickup->status" /></td>
+                        <td class="py-2 text-right whitespace-nowrap max-md:col-start-3 max-md:row-start-3 max-md:p-0 max-md:empty:hidden">
                             @if ($canCollect)
                                 <form method="POST" action="{{ route('seller.pickups.collect') }}">
                                     @csrf
                                     <input type="hidden" name="code" value="{{ $pickup->pickup_code }}">
-                                    <x-button type="submit" variant="outline" aria-label="Mark {{ $pickup->pickup_code }} collected">Mark collected</x-button>
+                                    <x-button type="submit" variant="outline" aria-label="Mark {{ $pickup->pickup_code }} collected" data-busy="Collecting…">Mark collected</x-button>
                                 </form>
                             @elseif ($pickup->status === ReservationStatus::Reserved && now()->lessThan($listing->pickup_start))
                                 <span class="text-xs text-muted">From {{ PickupWindow::time($listing->pickup_start) }}</span>

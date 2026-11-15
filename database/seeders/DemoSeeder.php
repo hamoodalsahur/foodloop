@@ -39,6 +39,9 @@ use RuntimeException;
  */
 class DemoSeeder extends Seeder
 {
+    /** Numbers the demo shops' made-up SSM numbers (DEMO-0001, DEMO-0002…). */
+    private int $shopCount = 0;
+
     /** Every demo account signs in with this password. */
     public const PASSWORD = 'password';
 
@@ -272,9 +275,10 @@ class DemoSeeder extends Seeder
         return Seller::factory()->state([
             'user_id' => $owner->id,
             'business_name' => $name,
-            'ssm_no' => '[SSM NO.]',
-            'phone' => '[PHONE]',
-            'address' => '[SHOP ADDRESS]',
+            // Obviously made up, so nobody mistakes them for a real company's details.
+            'ssm_no' => sprintf('DEMO-%04d', ++$this->shopCount),
+            'phone' => 'Demo number',
+            'address' => 'Demo address near campus',
             'lat' => round(config('foodloop.demo_origin.lat') + cos(deg2rad($bearing)) * $km * self::KM, 7),
             'lng' => round(config('foodloop.demo_origin.lng') + sin(deg2rad($bearing)) * $km * self::KM, 7),
             'halal_claim' => HalalStatus::MuslimOwned,

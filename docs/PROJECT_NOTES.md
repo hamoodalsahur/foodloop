@@ -17,6 +17,28 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 
 ---
 
+## 15 Nov 2026 · Polish pass on the most-used pages
+
+- **Why:** the owner asked for the pages people use most to feel better and look nicer, rather than more
+  features. Claude went through the app as student, seller and admin at 390 and 1280 px and listed 8 fixes.
+- **What changed:**
+  - *Deals:* the three big tiles are now one slim row, so about 4 deals show on a phone screen instead of
+    2½. Long names wrap onto two lines instead of being cut off. On desktop the deals sit in two columns.
+  - *Listing page on desktop:* picture and countdown on the left, details and Reserve on the right, so
+    Reserve is visible without scrolling.
+  - *Busy buttons:* Reserve, Cancel, Check and collect and Mark collected say "Reserving…" etc. while the
+    form is sent, and no form can be sent twice by a double tap.
+  - *Seller on a phone:* each pickup is a card with code, name, status, item, time and the Mark collected
+    button (before, status and the button were hidden off the edge). The seller and admin tabs wrap onto
+    two lines instead of hiding the last ones.
+  - *Wording:* "Today" before 5 PM, "Tonight" after (seller dashboard title, "left today", "See today's deals").
+  - *Bottom menu:* small icons above Deals, Map, Orders, Impact.
+  - *Demo data:* the shops' SSM number, phone and address read `DEMO-0001`, "Demo number", "Demo address
+    near campus" instead of `[SSM NO.]` placeholders: still clearly made up, but no longer look unfinished.
+- **Not changed (needs the owner):** the watermarked bakery photo and the nasi ayam cut-out photo.
+- **Tested:** 595 passed, 2 skipped on SQLite (7 new in `PolishTest`). Browser check in Chromium at 390 and
+  1280 px: no sideways scroll on any customer or seller page; "Reserving…" seen during a real submit.
+
 ## 15 Nov 2026 · Notifications, the rest of admin, password reset (built by Fable)
 
 - **What:**

@@ -7,7 +7,7 @@
     $next = $listings->first(fn ($l) => $l->pickup_start->isFuture());
 @endphp
 
-<x-layouts.seller title="Tonight" active="dashboard">
+<x-layouts.seller :title="\App\Support\DayPart::title()" active="dashboard">
     <x-slot:subtitle>
         {{ now()->format('l j M') }}@if ($next) · next pickup window opens at {{ PickupWindow::time($next->pickup_start) }}@endif
     </x-slot:subtitle>
