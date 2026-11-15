@@ -26,8 +26,9 @@ class SellerFactory extends Factory
             'ssm_no' => fake()->numerify('20##0#######'),
             'phone' => fake()->numerify('01#-### ####'),
             'address' => fake()->streetAddress(),
-            'lat' => fake()->latitude(3.06, 3.08),
-            'lng' => fake()->longitude(101.49, 101.51),
+            // Within about 1 km of "you are here" (the campus).
+            'lat' => config('foodloop.demo_origin.lat') + fake()->randomFloat(5, -0.009, 0.009),
+            'lng' => config('foodloop.demo_origin.lng') + fake()->randomFloat(5, -0.009, 0.009),
             'halal_claim' => HalalStatus::MuslimOwned,
             'halal_cert_path' => null,
             'status' => SellerStatus::Pending,

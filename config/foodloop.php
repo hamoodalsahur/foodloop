@@ -49,15 +49,21 @@ return [
     // See docs/demo-food/real/README.md.
     'demo_photo_dir' => base_path('docs/demo-food'),
 
-    // Where "you are here" is. DEMO VALUE: a made-up point that the demo shops
-    // are placed around, until the team picks the pilot campus. Distances on
-    // the deals page ("0.4 km") are measured from here.
-    'demo_origin' => ['lat' => 3.0690, 'lng' => 101.5040],
+    // Where "you are here" is: the pilot campus, UiTM Kedah in Merbok, near
+    // Sungai Petani (main gate). There is no GPS in the prototype, so every
+    // student is treated as being on campus. Distances on the deals page
+    // ("0.4 km") and the map are measured from here.
+    'demo_origin' => ['lat' => 5.713848, 'lng' => 100.450482],
+    'demo_origin_label' => 'UiTM Kedah, Merbok',
+
+    // Browser bar colour when FoodLoop is opened as an installed app (forest).
+    'theme_colour' => '#0e2a20',
 
     // The distance filter on the deals page: the choices in km, and the one
     // used when the customer hasn't picked. "Any distance" is always offered too.
     'distance_choices_km' => [2, 5],
-    'default_distance_km' => 2,
+    // 5 km: the shops around campus (Merbok, Semeling, Bedong, Sungai Layar).
+    'default_distance_km' => 5,
 
     // A deal counts as "closing within the hour" for the strip on the deals page.
     'closing_soon_minutes' => 60,

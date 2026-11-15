@@ -40,7 +40,7 @@ so use three different ones. Every password is `password`.
 | Window | Use | Log in at `http://localhost:8000/login` as | Then open |
 |---|---|---|---|
 | A · the student | Chrome, made narrow like a phone (or press F12 and pick a phone size) | `aina@foodloop.test` | `http://localhost:8000` |
-| B · the seller | Chrome Incognito window | `dailygrind@foodloop.test` | lands on the seller dashboard |
+| B · the seller | Chrome Incognito window | `sebunga@foodloop.test` | lands on the seller dashboard |
 | C · the admin | Microsoft Edge (or Firefox) | `admin@foodloop.test` | lands on the admin overview |
 
 Line the windows up so you can click from A to B to C without hunting.
@@ -71,8 +71,8 @@ about free cancellation.
 
 ### 0:45 · The seller hands over (window B)
 
-> "Earlier today Aina also reserved a sandwich pack from Daily Grind Café. She's at the counter now and
-> shows her code."
+> "Earlier today Aina also reserved a sandwich pack from Se.Bunga, the café on campus. She's at the
+> counter now and shows her code."
 
 1. In **Customer's code** type `2468`.
 2. Click **Check and collect**.
@@ -125,11 +125,15 @@ Point at **Platform totals** at the bottom of the admin page (meals rescued, por
   clicked and brings back the same starting point.
 - **Other things worth showing if you have more time:**
   - Sign up as a new student from **Log in → Create an account** (window with nobody logged in).
-  - `http://localhost:8000/map`: the simplified map of shops with deals.
+  - `http://localhost:8000/map`: a street map of the real shops around UiTM Kedah with deals right now.
+    Tap a pin, then **Directions**. (Needs internet; without it the page shows a simplified drawing.)
+  - The app installed on a real phone: see README → "Open it on your phone".
   - Log in as `daniel@foodloop.test`: a student who is blocked after three no-shows.
-  - Log in as `rotilane@foodloop.test`: **Donations** shows leftovers offered to the food bank, and
+  - Log in as `bondamawar@foodloop.test`: **Donations** shows leftovers offered to the food bank, and
     **Listings → New listing** shows how a seller posts food.
   - In window A, open a listing and click **Something wrong? Report this listing**; it appears on the
     admin overview straight away.
-- **What is not real:** no real payments, no real map (the map page is a simplified drawing), no push or
-  SMS notifications, and the food bank partner is a placeholder name.
+- **What is not real:** the shops are real places near campus but have **not** joined FoodLoop, so their
+  deals, prices and halal statuses are demo data; payments are simulated; there are no push or SMS
+  notifications (only the in-app bell); every student is treated as being at the UiTM main gate (no GPS);
+  and the food bank partner is a placeholder name.

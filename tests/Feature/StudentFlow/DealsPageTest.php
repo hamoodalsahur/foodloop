@@ -119,14 +119,14 @@ describe('distance filter', function () {
         Listing::factory()->for(Seller::factory()->approved()->state(['lat' => null, 'lng' => null]))->create(['title' => 'No address yet']);
     });
 
-    it('shows deals within 2 km by default', function () {
+    it('shows deals within 5 km by default: the shops around campus', function () {
         $this->get('/')
-            ->assertSee('Round the corner')->assertDontSee('Across campus')->assertDontSee('In town')
-            ->assertSee('Within 2 km');
+            ->assertSee('Round the corner')->assertSee('Across campus')->assertDontSee('In town')
+            ->assertSee('Within 5 km');
     });
 
-    it('can widen to 5 km or any distance', function () {
-        $this->get('/?within=5')->assertSee('Round the corner')->assertSee('Across campus')->assertDontSee('In town');
+    it('can narrow to 2 km, or widen to any distance', function () {
+        $this->get('/?within=2')->assertSee('Round the corner')->assertDontSee('Across campus')->assertDontSee('In town');
 
         $this->get('/?within=any')
             ->assertSee('Round the corner')->assertSee('Across campus')->assertSee('In town')
@@ -169,13 +169,16 @@ describe('the tiles and the strip', function () {
 describe('empty state (mockup c05)', function () {
     it('shows "All gone nearby" and offers a wider search', function () {
         dealAt(3.5, ['title' => 'Across campus']);
+        dealAt(8, ['title' => 'In town']);
 
-        $this->get('/')
+        $this->get('/?within=2')
             ->assertOk()
             ->assertSee('All gone nearby.')
             ->assertSee('Search within 5 km')
-            ->assertSee(e(route('deals.index', ['within' => 5])), false)
             ->assertDontSee('Across campus');
+
+        $this->get('/')->assertSee('Across campus')->assertDontSee('In town');
+        $this->get('/?within=5&category=groceries')->assertSee('Search any distance');
     });
 
     it('offers to undo each filter that is on', function () {

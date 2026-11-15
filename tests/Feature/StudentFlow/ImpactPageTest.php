@@ -146,5 +146,5 @@ it('matches the mockup for Aina on the seeded demo data', function () {
 
     $this->actingAs($aina)->get('/impact')
         ->assertSeeInOrder(['Meals rescued', '14', 'You saved', 'RM118', 'No-shows', '0 / 3'])
-        ->assertSeeInOrder(['Recent', 'Bakery Surprise Bundle', 'Roti Lane Bakery', '−RM12']);
+        ->assertSeeInOrder(['Recent', 'Bakery Surprise Bundle', 'Bonda Mawar Cake House', '−RM12']);
 });

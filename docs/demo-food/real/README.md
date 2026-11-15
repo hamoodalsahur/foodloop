@@ -5,12 +5,12 @@ picture. No code changes: just add the files and reseed.
 
 | File name (any of `.jpg`, `.jpeg`, `.png`, `.webp`) | Shown on |
 |---|---|
-| `bakery-bundle.jpg` | Bakery Surprise Bundle · Roti Lane Bakery |
-| `croissants.jpg` | Butter croissants × 3 · Roti Lane Bakery |
-| `curry-puffs.jpg` | Curry puffs × 4 · Mak Long's Kuih |
-| `iced-latte.jpg` | Iced latte · Daily Grind Café |
-| `sandwich-pack.jpg` | Sandwich & pastry pack · Daily Grind Café |
-| `nasi-ayam.jpg` | Nasi ayam set (2 pax) · Kafe Seri Ilmu |
+| `bakery-bundle.jpg` | Bakery Surprise Bundle · Bonda Mawar Cake House |
+| `croissants.jpg` | Butter croissants × 3 · Bonda Mawar Cake House |
+| `curry-puffs.jpg` | Curry puffs × 4 · Kuih Tradisional Tupah |
+| `iced-latte.jpg` | Iced latte · Kopi Saigon Merbok |
+| `sandwich-pack.jpg` | Sandwich & pastry pack · Se.Bunga Kafe UiTM |
+| `nasi-ayam.jpg` | Nasi ayam set (2 pax) · Merbok Roasted |
 
 Then, in the project folder:
 

@@ -1,6 +1,7 @@
 <?php
 
-// The map page at /map: a simplified drawing of where the shops with deals are.
+// The map page at /map: a street map of where the shops with deals are (resources/js/map.js),
+// with a simplified drawing underneath that shows instead when the street map can't load.
 
 use App\Models\Listing;
 use App\Models\Seller;
@@ -24,10 +25,35 @@ it('is open to everyone and switched on in the menu', function () {
     $this->actingAs(User::factory()->create())->get('/map')->assertOk();
 });
 
-it('says plainly that it is a simplified map with demo positions', function () {
+it('says plainly that the shops are real places but the deals are demo data', function () {
     dealAt(0.4);
 
-    $this->get('/map')->assertSee('A simplified map, not a street map.')->assertSee('demo data');
+    $this->get('/map')
+        ->assertSee('Distances are from UiTM Kedah, Merbok.')
+        ->assertSee('The shops are real places nearby, but they haven’t joined FoodLoop: their deals are demo data.')
+        ->assertSee('Couldn’t load the street map (no internet?)');
+});
+
+it('gives the street map the campus and every shop with a position, with directions', function () {
+    $near = dealAt(0.4, [], 'Near Shop');
+    dealAt(12, [], 'Faraway Shop');
+    Listing::factory()->for(Seller::factory()->approved()->state(['business_name' => 'No Address Shop', 'lat' => null, 'lng' => null]))->create();
+
+    $html = $this->get('/map')->assertSee('data-state="drawing"', false)->getContent();
+    preg_match('/data-map="([^"]+)"/', $html, $match);
+    $data = json_decode(html_entity_decode($match[1]), true);
+
+    expect($data['origin'])->toBe([...config('foodloop.demo_origin'), 'label' => 'UiTM Kedah, Merbok'])
+        ->and(array_column($data['shops'], 'name'))->toBe(['Near Shop', 'Faraway Shop'])
+        ->and($data['shops'][0])->toMatchArray([
+            'number' => 1,
+            'lat' => (float) $near->seller->lat,
+            'distance' => '0.4 km',
+            'deals' => '1 deal',
+            'directions' => 'https://www.google.com/maps/dir/?api=1&destination='.$near->seller->lat.','.$near->seller->lng,
+        ]);
+
+    $this->get('/map')->assertSee('Directions');
 });
 
 it('lists shops with deals nearest first, numbered like their pins, with their deals', function () {
@@ -77,7 +103,7 @@ it('lists far-away shops and shops without an address, but leaves them off the d
     $this->get('/map')
         ->assertSee('aria-label="1: Near Shop, 0.4 km"', false)
         ->assertDontSee('aria-label="2: Faraway Shop', false)
-        ->assertSeeInOrder(['Near Shop', 'Faraway Shop', '12 km away', 'not on the drawing', 'No Address Shop', 'not on the drawing']);
+        ->assertSeeInOrder(['Near Shop', 'Faraway Shop', '12 km away', 'No Address Shop']);
 });
 
 it('places a shop by direction: north is up, east is right', function () {
@@ -100,7 +126,7 @@ it('has an empty state when no shop has deals', function () {
         ->assertDontSee('<svg viewBox="0 0 320 320"', false);
 });
 
-it('shows the four demo shops on the seeded data', function () {
+it('shows the real shops around campus on the seeded data, nearest first', function () {
     Storage::fake('public');
     Storage::fake('local');
     $this->seed(DatabaseSeeder::class);
@@ -109,9 +135,9 @@ it('shows the four demo shops on the seeded data', function () {
 
     $this->get('/map')->assertSeeInOrder([
         "{$open} deals at 4 shops right now",
-        'Kafe Seri Ilmu', '0.3 km away',
-        'Mak Long’s Kuih', '0.4 km away',
-        'Roti Lane Bakery', '0.6 km away',
-        'Daily Grind Café', '0.9 km away',
+        'Merbok Roasted', '0.1 km away',
+        'Kopi Saigon Merbok', '1.5 km away',
+        'Kuih Tradisional Tupah', '2.7 km away',
+        'Bonda Mawar Cake House', '4.5 km away',
     ]);
 });

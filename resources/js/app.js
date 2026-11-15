@@ -129,3 +129,15 @@ window.addEventListener('pageshow', (event) => {
         }
     });
 });
+
+// The street map only loads on the map page, as its own small download.
+const streetMap = document.querySelector('[data-map]');
+if (streetMap) {
+    import('./map').then(({ startMap }) => startMap(streetMap));
+}
+
+// Installable app: register the service worker (public/sw.js). Browsers only
+// allow this on https (or localhost), so on plain http it is simply skipped.
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}

@@ -201,7 +201,7 @@ README final, a 2-minute demo script in `docs/DEMO_SCRIPT.md`.
 
 ## 7. Out of scope (don't build)
 
-Real payment gateway, delivery, push or SMS notifications, real maps, native mobile apps.
+Real payment gateway, delivery, push or SMS notifications, native mobile apps. (A street map and an installable web app were added on 15 Nov at the owner's request.)
 
 ## 8. Definition of done for every stage
 

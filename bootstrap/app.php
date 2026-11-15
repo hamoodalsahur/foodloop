@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Where `auth` sends people who are not signed in. The login screen
         // itself arrives in Stage 4.
         $middleware->redirectGuestsTo('/login');
+
+        // Opening the app on a phone goes through an https tunnel (README →
+        // "Open it on your phone"). Trust it, so links and assets use https.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

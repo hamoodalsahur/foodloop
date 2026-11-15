@@ -19,10 +19,10 @@ it('shows the mockup deals on the home page, soonest first, with their distances
     $this->get('/')
         ->assertOk()
         ->assertSeeInOrder([
-            'Curry puffs × 4', 'Mak Long’s Kuih', '0.4 km', 'RM3',
-            'Iced latte', 'Daily Grind Café', '0.9 km', 'RM4.50',
-            'Bakery Surprise Bundle', 'Roti Lane Bakery', '0.6 km', 'RM8',
-            'Nasi ayam set (2 pax)', 'Kafe Seri Ilmu', '0.3 km', 'RM6.50',
+            'Curry puffs × 4', 'Kuih Tradisional Tupah', '2.7 km', 'RM3',
+            'Iced latte', 'Kopi Saigon Merbok', '1.5 km', 'RM4.50',
+            'Bakery Surprise Bundle', 'Bonda Mawar Cake House', '4.5 km', 'RM8',
+            'Nasi ayam set (2 pax)', 'Merbok Roasted', '0.1 km', 'RM6.50',
         ], false)
         // Its pickup has already started, so it takes no new reservations.
         ->assertDontSee('Sandwich &amp; pastry pack', false)
@@ -51,7 +51,7 @@ it('takes a new student from sign-up to a pickup code', function () {
     $reservation = User::firstWhere('email', 'siti@example.com')->reservations()->sole();
 
     $this->get(route('orders.show', $reservation))
-        ->assertSeeInOrder(['You’re booked.', 'Roti Lane Bakery', $reservation->pickup_code, 'RM16 · Paid (simulated)']);
+        ->assertSeeInOrder(['You’re booked.', 'Bonda Mawar Cake House', $reservation->pickup_code, 'RM16 · Paid (simulated)']);
 
     $this->get('/orders')->assertSeeInOrder(['Waiting for pickup', 'Bakery Surprise Bundle', $reservation->pickup_code]);
 
@@ -65,7 +65,7 @@ it('shows Aina her reservation from the mockup and her earlier pickups', functio
         ->assertSeeInOrder(['Waiting for pickup', 'Bakery Surprise Bundle', '4721', 'Earlier', 'Collected']);
 
     $this->get(route('orders.show', Reservation::firstWhere('pickup_code', '4721')))
-        ->assertSeeInOrder(['You’re booked.', 'Show this code at Roti Lane Bakery.', '4721', 'Pickup window opens in', 'RM8 · Paid (simulated)']);
+        ->assertSeeInOrder(['You’re booked.', 'Show this code at Bonda Mawar Cake House.', '4721', 'Pickup window opens in', 'RM8 · Paid (simulated)']);
 });
 
 it('keeps blocked demo customers from reserving', function () {

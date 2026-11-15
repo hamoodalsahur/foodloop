@@ -58,7 +58,7 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 | 14 Nov | A cancelled pay-now reservation becomes "refunded (simulated)"; no-shows are not refunded | Owner's decision |
 | 14 Nov | When a customer gets blocked, their waiting reservations are cancelled and the food goes back on sale | Owner's decision |
 | 14 Nov | Every page follows route → controller → form request → service → Blade → feature test (`docs/UI_GUIDE.md`, "How to add a page") | One pattern for the later stages to copy |
-| 14 Nov | Distances are measured from a made-up "you are here" point in `config/foodloop.php` until the pilot campus is chosen | The pilot location is still an open question |
+| 14 Nov | ~~Distances are measured from a made-up "you are here" point~~ (replaced 15 Nov, below) | The pilot location was still open |
 | 14 Nov | ~~Left out of the prototype: deal alerts, "Notify me next time", password reset~~ (all built 15 Nov) | In the mockups but not in the build plan |
 | 14 Nov | Every screen is built from the components and rules in `docs/UI_GUIDE.md`; colours by name, money through the helper, 44 px touch targets, no emoji | Keeps later stages (and other models) on the approved style |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
@@ -71,7 +71,12 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 | 15 Nov | Demo shop details read `DEMO-0001` / "Demo number" / "Demo address near campus" | Clearly made up but not looking unfinished; realistic numbers could match real companies |
 | 15 Nov | Notifications are in-app only (bell and inbox), no email, push or SMS | As the build plan says; nothing to set up for the demo |
 | 15 Nov | ⚠️ Team to confirm: on a laptop (`APP_ENV=local`, no real email) the forgot-password page shows an "Open the reset link" button so the reset can be demoed | The prototype sends no real email; never shown in production |
-| 14 Nov | Fable's calls in Stages 6–8 (⚠️ team to confirm): "Warn seller" is one click; suspending a shop keeps its reservations; the impact page says "Everyone on FoodLoop" (computed) instead of "Campus"; the map is a simplified drawing, not a street map | Kept the prototype small; real maps need internet at the pitch |
+| 14 Nov | Fable's calls in Stages 6–8 (⚠️ team to confirm): "Warn seller" is one click; suspending a shop keeps its reservations; the impact page says "Everyone on FoodLoop" (computed) instead of "Campus"; the map is a simplified drawing, not a street map (replaced 15 Nov by a street map, drawing kept as backup) | Kept the prototype small; real maps need internet at the pitch |
+| 15 Nov | Pilot location: **UiTM Kedah, Merbok** (Sungai Petani). "You are here" is the main gate for every student (no GPS); the deals page shows 5 km by default | Owner's decision; the shops around campus are 0.1–4.5 km away |
+| 15 Nov | Demo shops are **real food places within 5 km of campus**, with real names and positions, clearly labelled as demo (they haven't joined); their SSM and phone numbers stay fake. The 3 shops waiting for approval stay made up | Owner's decision. Made-up shops there so no real business appears to have applied without an SSM number |
+| 15 Nov | ⚠️ Team to note: Bonda Mawar Cake House is shown as "halal certified" in the demo. That is demo data, not a check of their real certificate; say so if asked, or switch it to Muslim-owned in `DemoSeeder` | The demo needs one certified shop |
+| 15 Nov | Street map with Leaflet + OpenStreetMap tiles (free, no key); falls back to the drawing after 7 s without tiles | Real map for the pitch without accounts or cost; never an empty page offline |
+| 15 Nov | Installable web app (PWA) instead of a native app; opened on phones through a free Cloudflare https tunnel | A Play Store / App Store app is weeks of work; the PWA looks and opens like an app |
 
 ## Current status
 
@@ -98,7 +103,7 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 
 ## Pending questions
 
-- Which campus/area is the pilot location?
+- ~~Which campus/area is the pilot location?~~ UiTM Kedah, Merbok (15 Nov).
 - Does the lecturer accept interface screenshots as the "2D prototype"?
 
 ## Next steps
@@ -120,8 +125,9 @@ repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full a
 14. ⏳ Team checks Fable's open decisions (below) and adds real food photos if wanted.
 15. ✅ 15 Nov (Fable): in-app notifications for every role, "Notify me next time" and deal alerts, the rest of the admin mockup (Ask for info, Listings, Food banks), Forgot your password. 588 tests on SQLite, 590 on MySQL.
 16. ✅ 15 Nov: polish pass on the most-used pages (see PROJECT_NOTES). Features are frozen from here: only fixes and polish.
-17. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
-18. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
+17. ✅ 15 Nov: real street map, real shops around UiTM Kedah, installable on phones (see PROJECT_NOTES).
+18. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
+19. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
 
 ## Commit roles (14 Nov)
 

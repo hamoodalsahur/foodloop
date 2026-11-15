@@ -12,6 +12,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ? $title.' · ' : '' }}{{ config('app.name') }}</title>
 
+    {{-- Installable on phones ("Add to Home screen"): public/manifest.webmanifest and public/sw.js. --}}
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="{{ config('foodloop.theme_colour') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FoodLoop">
+
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

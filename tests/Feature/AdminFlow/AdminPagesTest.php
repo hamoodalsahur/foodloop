@@ -150,7 +150,7 @@ describe('overview', function () {
             ->assertOk()
             ->assertSeeInOrder(['Sellers to approve', '3', 'Open reports', '1'])
             ->assertSeeInOrder(['Sweet Crumbs Bakehouse', 'Missing', 'Says certified, no file', 'Dapur Bonda', 'Kedai Kopi Sinar', 'Certificate uploaded'])
-            ->assertSeeInOrder(['Sandwich &amp; pastry pack · Daily Grind Café', '1 report', '“Bread was stale at pickup.”'], false)
+            ->assertSeeInOrder(['Sandwich &amp; pastry pack · Se.Bunga Kafe UiTM', '1 report', '“Bread was stale at pickup.”'], false)
             ->assertSeeInOrder(['Daniel K.', 'Limited · 5 days', 'Farah N.', 'Limited · 2 days', 'Jason L.', '2 strikes']);
     });
 });

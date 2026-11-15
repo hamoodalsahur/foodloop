@@ -1,7 +1,8 @@
 {{--
-    The map page. A simplified drawing, not a real street map: rings of distance around the
-    demo "you are here" point, with a numbered pin per shop that has deals right now.
-    The numbers match the list underneath. Data from App\Http\Controllers\MapController.
+    The map page. A street map around campus (resources/js/map.js) with a numbered pin per shop
+    that has deals right now; the numbers match the list underneath. Under it, a simplified
+    drawing (rings of distance around campus) that shows instead when the street map can't
+    load: no internet, or no JavaScript. Data from App\Http\Controllers\MapController.
 --}}
 @php
     use App\Support\Distance;
@@ -12,7 +13,7 @@
     $scale = ($centre - 26) / $radiusKm;
 @endphp
 
-<x-layouts.customer title="Map" active="map">
+<x-layouts.customer title="Map" active="map" wide>
     <x-slot:notice>
         @if ($dealCount > 0)
             {{ $dealCount }} {{ Str::plural('deal', $dealCount) }} at {{ $shops->count() }} {{ Str::plural('shop', $shops->count()) }} right now
@@ -28,8 +29,12 @@
             <x-button :href="route('deals.index')">Back to the deals</x-button>
         </x-empty-state>
     @else
-        <x-card class="mt-4" padding="none">
-            <svg viewBox="0 0 {{ $size }} {{ $size }}" role="img" class="block w-full"
+        {{-- data-state: "drawing" (the default, also without JavaScript) or "street" once map.js runs. --}}
+        <div class="group mt-4" data-state="drawing" data-map="{{ json_encode($mapData) }}">
+        <x-card padding="none" class="overflow-hidden">
+            <div data-street-map class="hidden h-[26rem] w-full group-data-[state=street]:block lg:h-[32rem]"
+                 role="region" aria-label="Street map of the shops around {{ $mapData['origin']['label'] }}"></div>
+            <svg viewBox="0 0 {{ $size }} {{ $size }}" role="img" class="block w-full group-data-[state=street]:hidden"
                  aria-label="Simplified map: {{ $onMap->count() }} {{ Str::plural('shop', $onMap->count()) }} within {{ $radiusKm }} km of you. The list below has the same shops with their distances.">
                 {{-- Distance rings --}}
                 @foreach ($rings as $ring)
@@ -65,8 +70,10 @@
         </x-card>
 
         <p class="mt-2 text-xs text-muted">
-            A simplified map, not a street map. It shows direction and distance from a demo “you are here” point; the shop positions are demo data.
+            <span data-offline-note hidden>Couldn’t load the street map (no internet?), so this is a simplified drawing. </span>
+            Distances are from {{ $mapData['origin']['label'] }}. The shops are real places nearby, but they haven’t joined FoodLoop: their deals are demo data.
         </p>
+        </div>
 
         <ol class="mt-5 space-y-6">
             @foreach ($shops as $shop)
@@ -80,11 +87,14 @@
                                     {{ Distance::label($shop['distanceKm']) }} away ·
                                 @endif
                                 {{ $shop['listings']->count() }} {{ Str::plural('deal', $shop['listings']->count()) }}
-                                @if ($shop['distanceKm'] === null || ! $onMap->contains('number', $shop['number']))
-                                    · not on the drawing
-                                @endif
                             </p>
                         </div>
+                        @if ($shop['seller']->lat !== null && $shop['seller']->lng !== null)
+                            <a href="{{ \App\Http\Controllers\MapController::directions($shop['seller']->lat, $shop['seller']->lng) }}" target="_blank" rel="noopener"
+                               class="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-xl border-2 border-forest px-3 text-sm font-bold">
+                                Directions
+                            </a>
+                        @endif
                     </div>
                     <ul class="mt-3 space-y-3">
                         @foreach ($shop['listings'] as $listing)

@@ -209,25 +209,43 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * The four shops on the customer mockups, already approved.
+     * The approved shops: real food places on and around the UiTM Kedah campus
+     * in Merbok, at their real positions (from Google Maps, Nov 2026).
+     * DEMO DATA: the names and places are real, but these shops have not
+     * joined FoodLoop; their listings, prices and halal statuses are made up.
      *
      * @return array<string, Seller>
      */
     private function approvedShops(): array
     {
         Storage::disk('local')->put(
-            'halal-certs/demo-roti-lane-bakery.txt',
+            'halal-certs/demo-bonda-mawar.txt',
             "DEMO DATA. Placeholder for an uploaded halal certificate. Not a real document.\n"
         );
 
         return [
-            'rotilane' => $this->shop('Roti Lane Bakery', 'rotilane@foodloop.test', 0.6, 180, [
+            // Cake shop in Kampung Sungai Layar Hujong, 4.5 km south.
+            'bondamawar' => $this->shop('Bonda Mawar Cake House', 'bondamawar@foodloop.test', at: [5.6754781, 100.4627562], extra: [
+                'address' => 'Kampung Sungai Layar Hujong, Sungai Petani',
                 'halal_claim' => HalalStatus::Certified,
-                'halal_cert_path' => 'halal-certs/demo-roti-lane-bakery.txt',
+                'halal_cert_path' => 'halal-certs/demo-bonda-mawar.txt',
             ])->approved()->create(),
-            'kafeseriilmu' => $this->shop('Kafe Seri Ilmu', 'kafeseriilmu@foodloop.test', 0.3, 270)->approved()->create(),
-            'dailygrind' => $this->shop('Daily Grind Café', 'dailygrind@foodloop.test', 0.9, 90)->approved()->create(),
-            'maklong' => $this->shop('Mak Long’s Kuih', 'maklong@foodloop.test', 0.4, 0)->approved()->create(),
+            // Grilled chicken rice right in front of the main gate.
+            'merbokroasted' => $this->shop('Merbok Roasted', 'merbokroasted@foodloop.test', at: [5.7141234, 100.4514946], extra: [
+                'address' => 'In front of UiTM, Semeling, Bedong',
+            ])->approved()->create(),
+            // Coffee shop in Taman Lembah Bujang, 1.4 km west.
+            'kopisaigon' => $this->shop('Kopi Saigon Merbok', 'kopisaigon@foodloop.test', at: [5.7063555, 100.4394582], extra: [
+                'address' => 'Jalan Bujang Indah, Taman Lembah Bujang, Bedong',
+            ])->approved()->create(),
+            // Traditional kuih maker in Kampung Tupah Lama, 2.6 km west.
+            'kuihtupah' => $this->shop('Kuih Tradisional Tupah', 'kuihtupah@foodloop.test', at: [5.72015, 100.4273272], extra: [
+                'address' => 'Jalan Kampung Tupah Lama, Merbok',
+            ])->approved()->create(),
+            // Café on campus, near the Sultan Badlishah library.
+            'sebunga' => $this->shop('Se.Bunga Kafe UiTM', 'sebunga@foodloop.test', at: [5.7123608, 100.4483042], extra: [
+                'address' => 'UiTM Kedah campus, Merbok',
+            ])->approved()->create(),
         ];
     }
 
@@ -241,18 +259,19 @@ class DemoSeeder extends Seeder
             "DEMO DATA. Placeholder for an uploaded halal certificate. Not a real document.\n"
         );
 
-        $this->shop('Kedai Kopi Sinar', 'kedaikopisinar@foodloop.test', 0.8, 45, [
+        // Made-up shops (not real places): a real shop shouldn't appear to have applied, or to have sent no SSM number.
+        $this->shop('Kedai Kopi Sinar', 'kedaikopisinar@foodloop.test', 0.8, 45, extra: [
             'halal_claim' => HalalStatus::Certified,
             'halal_cert_path' => 'halal-certs/demo-kedai-kopi-sinar.txt',
             'created_at' => $this->now->subHours(2),
         ])->create();
 
-        $this->shop('Dapur Bonda', 'dapurbonda@foodloop.test', 1.2, 135, [
+        $this->shop('Dapur Bonda', 'dapurbonda@foodloop.test', 1.2, 135, extra: [
             'created_at' => $this->now->subDay(),
         ])->create();
 
         // Says "certified" but uploaded nothing, and has no SSM number.
-        $this->shop('Sweet Crumbs Bakehouse', 'sweetcrumbs@foodloop.test', 2.1, 225, [
+        $this->shop('Sweet Crumbs Bakehouse', 'sweetcrumbs@foodloop.test', 2.1, 225, extra: [
             'ssm_no' => null,
             'halal_claim' => HalalStatus::Certified,
             'halal_cert_path' => null,
@@ -261,26 +280,33 @@ class DemoSeeder extends Seeder
     }
 
     /**
-     * A shop with its seller account, placed $km away from the made-up "you
-     * are here" point (config foodloop.demo_origin)
-     * in the compass direction $bearing (0 = north, 90 = east).
+     * A shop with its seller account. Placed at the real position `at`
+     * ([lat, lng]), or $km away from "you are here" (config
+     * foodloop.demo_origin) in the compass direction $bearing (0 = north,
+     * 90 = east) for the made-up shops.
      *
+     * @param  array{0: float, 1: float}|null  $at
      * @param  array<string, mixed>  $extra
      */
-    private function shop(string $name, string $email, float $km, int $bearing, array $extra = [])
+    private function shop(string $name, string $email, float $km = 0, int $bearing = 0, ?array $at = null, array $extra = [])
     {
         $owner = $this->user($name.' (demo seller)', $email);
         $owner->forceFill(['role' => 'seller'])->save();
 
+        [$lat, $lng] = $at ?? [
+            config('foodloop.demo_origin.lat') + cos(deg2rad($bearing)) * $km * self::KM,
+            config('foodloop.demo_origin.lng') + sin(deg2rad($bearing)) * $km * self::KM,
+        ];
+
         return Seller::factory()->state([
             'user_id' => $owner->id,
             'business_name' => $name,
-            // Obviously made up, so nobody mistakes them for a real company's details.
+            // Obviously made up, so nobody mistakes them for the shop's real details.
             'ssm_no' => sprintf('DEMO-%04d', ++$this->shopCount),
             'phone' => 'Demo number',
             'address' => 'Demo address near campus',
-            'lat' => round(config('foodloop.demo_origin.lat') + cos(deg2rad($bearing)) * $km * self::KM, 7),
-            'lng' => round(config('foodloop.demo_origin.lng') + sin(deg2rad($bearing)) * $km * self::KM, 7),
+            'lat' => round($lat, 7),
+            'lng' => round($lng, 7),
             'halal_claim' => HalalStatus::MuslimOwned,
             ...$extra,
         ]);
@@ -295,7 +321,7 @@ class DemoSeeder extends Seeder
     {
         return [
             'bundle' => [
-                'shop' => 'rotilane',
+                'shop' => 'bondamawar',
                 'type' => ListingType::Bundle,
                 'title' => 'Bakery Surprise Bundle',
                 'description' => '4–6 of today’s unsold breads, buns and pastries. You’ll find out what’s inside at pickup.',
@@ -307,7 +333,7 @@ class DemoSeeder extends Seeder
                 'allergens' => ['egg', 'milk', 'wheat'],
             ],
             'croissants' => [
-                'shop' => 'rotilane',
+                'shop' => 'bondamawar',
                 'type' => ListingType::Flash,
                 'title' => 'Butter croissants × 3',
                 'description' => 'Three butter croissants baked this morning.',
@@ -319,7 +345,7 @@ class DemoSeeder extends Seeder
                 'allergens' => ['egg', 'milk', 'wheat'],
             ],
             'puffs' => [
-                'shop' => 'maklong',
+                'shop' => 'kuihtupah',
                 'type' => ListingType::Regular,
                 'title' => 'Curry puffs × 4',
                 'description' => 'Four potato curry puffs from this afternoon’s batch.',
@@ -331,7 +357,7 @@ class DemoSeeder extends Seeder
                 'allergens' => ['wheat'],
             ],
             'latte' => [
-                'shop' => 'dailygrind',
+                'shop' => 'kopisaigon',
                 'type' => ListingType::Regular,
                 'title' => 'Iced latte',
                 'description' => 'Iced latte made to order before closing.',
@@ -343,7 +369,7 @@ class DemoSeeder extends Seeder
                 'allergens' => ['milk'],
             ],
             'sandwich' => [
-                'shop' => 'dailygrind',
+                'shop' => 'sebunga',
                 'type' => ListingType::Regular,
                 'title' => 'Sandwich & pastry pack',
                 'description' => 'Two sandwiches and two pastries from today’s display.',
@@ -355,7 +381,7 @@ class DemoSeeder extends Seeder
                 'allergens' => ['egg', 'milk', 'wheat'],
             ],
             'nasiayam' => [
-                'shop' => 'kafeseriilmu',
+                'shop' => 'merbokroasted',
                 'type' => ListingType::Regular,
                 'title' => 'Nasi ayam set (2 pax)',
                 'description' => 'Chicken rice for two with soup and sambal.',

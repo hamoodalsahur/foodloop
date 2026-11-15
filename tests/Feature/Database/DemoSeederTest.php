@@ -12,6 +12,7 @@ use App\Models\Report;
 use App\Models\Reservation;
 use App\Models\Seller;
 use App\Models\User;
+use App\Support\Distance;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Support\Facades\File;
@@ -39,16 +40,19 @@ afterEach(function () {
     File::deleteDirectory($this->drawnOnly);
 });
 
-it('creates the four approved shops from the mockups, one seller account each', function () {
+it('creates the five approved shops: real food places around UiTM Kedah, one seller account each', function () {
     $shops = Seller::where('status', SellerStatus::Approved)->with('user')->get();
 
     expect($shops->pluck('business_name')->sort()->values()->all())->toBe([
-        'Daily Grind Café', 'Kafe Seri Ilmu', 'Mak Long’s Kuih', 'Roti Lane Bakery',
+        'Bonda Mawar Cake House', 'Kopi Saigon Merbok', 'Kuih Tradisional Tupah', 'Merbok Roasted', 'Se.Bunga Kafe UiTM',
     ]);
+
+    // All within the 5 km the deals page shows by default.
+    $shops->each(fn (Seller $shop) => expect(Distance::toSeller($shop))->toBeLessThan(5.0, $shop->business_name));
 
     $shops->each(fn (Seller $shop) => expect($shop->user->role)->toBe(UserRole::Seller));
 
-    expect(Seller::firstWhere('business_name', 'Roti Lane Bakery')->hasApprovedHalalCertificate())->toBeTrue();
+    expect(Seller::firstWhere('business_name', 'Bonda Mawar Cake House')->hasApprovedHalalCertificate())->toBeTrue();
 });
 
 it('creates the three shops waiting for approval from the admin mockup', function () {
@@ -65,7 +69,7 @@ it('creates the three shops waiting for approval from the admin mockup', functio
 it('creates one admin and seven customers', function () {
     expect(User::where('role', UserRole::Admin)->pluck('email')->all())->toBe(['admin@foodloop.test'])
         ->and(User::where('role', UserRole::Customer)->count())->toBe(7)
-        ->and(User::where('role', UserRole::Seller)->count())->toBe(7);
+        ->and(User::where('role', UserRole::Seller)->count())->toBe(8);
 });
 
 it('gives every demo account the documented password and a foodloop.test email', function () {
@@ -83,11 +87,11 @@ it('uses the listings and prices from the mockups', function (string $title, str
         ->and($listing->original_price_formatted)->toBe($was)
         ->and($listing->pickup_end->isFuture())->toBeTrue();
 })->with([
-    ['Curry puffs × 4', 'Mak Long’s Kuih', 'RM3', 'RM6'],
-    ['Iced latte', 'Daily Grind Café', 'RM4.50', 'RM9'],
-    ['Bakery Surprise Bundle', 'Roti Lane Bakery', 'RM8', 'RM20'],
-    ['Nasi ayam set (2 pax)', 'Kafe Seri Ilmu', 'RM6.50', 'RM13'],
-    ['Sandwich & pastry pack', 'Daily Grind Café', 'RM9', 'RM24'],
+    ['Curry puffs × 4', 'Kuih Tradisional Tupah', 'RM3', 'RM6'],
+    ['Iced latte', 'Kopi Saigon Merbok', 'RM4.50', 'RM9'],
+    ['Bakery Surprise Bundle', 'Bonda Mawar Cake House', 'RM8', 'RM20'],
+    ['Nasi ayam set (2 pax)', 'Merbok Roasted', 'RM6.50', 'RM13'],
+    ['Sandwich & pastry pack', 'Se.Bunga Kafe UiTM', 'RM9', 'RM24'],
 ]);
 
 it('matches the bakery bundle on the listing mockup', function () {
@@ -102,11 +106,11 @@ it('matches the bakery bundle on the listing mockup', function () {
 });
 
 it('matches the pickups table on the seller mockup', function () {
-    // Tonight's reservations at Roti Lane Bakery, in the order they were made
+    // Tonight's reservations at Bonda Mawar Cake House, in the order they were made
     // (Aina's older, already collected orders are left out).
     $aina = User::firstWhere('email', 'aina@foodloop.test');
 
-    $pickups = Reservation::whereHas('listing.seller', fn ($q) => $q->where('business_name', 'Roti Lane Bakery'))
+    $pickups = Reservation::whereHas('listing.seller', fn ($q) => $q->where('business_name', 'Bonda Mawar Cake House'))
         ->where(fn ($q) => $q->where('customer_id', '!=', $aina->id)->orWhere('status', ReservationStatus::Reserved))
         ->with('customer')
         ->orderBy('id')
@@ -199,11 +203,12 @@ it('uses the drawn pictures when no real photos were provided', function () {
     expect(Listing::firstWhere('title', 'Curry puffs × 4')->photo_path)->toBe('listings/demo/curry-puffs.svg');
 });
 
-it('keeps real-looking details as obvious placeholders', function () {
+it('never makes up registration or phone numbers for the real shops', function () {
     Seller::where('status', SellerStatus::Approved)->get()->each(function (Seller $shop) {
         expect($shop->ssm_no)->toMatch('/^DEMO-\d{4}$/')
             ->and($shop->phone)->toBe('Demo number')
-            ->and($shop->address)->toBe('Demo address near campus');
+            ->and($shop->address)->not->toBe('Demo address near campus')
+            ->and($shop->user->name)->toEndWith('(demo seller)');
     });
 });
 
@@ -211,7 +216,7 @@ it('has a pickup that can be handed over right away, for the live demo', functio
     $ainas = Reservation::firstWhere('pickup_code', '2468');
 
     expect($ainas->customer->email)->toBe('aina@foodloop.test')
-        ->and($ainas->listing->seller->business_name)->toBe('Daily Grind Café')
+        ->and($ainas->listing->seller->business_name)->toBe('Se.Bunga Kafe UiTM')
         ->and($ainas->listing->pickup_start->isPast())->toBeTrue()
         ->and($ainas->listing->pickup_end->isFuture())->toBeTrue();
 
@@ -225,7 +230,7 @@ it('has food-bank donations, so the donation numbers are not all zero', function
     $donations = Donation::with('listing.seller', 'partner')->get();
 
     expect($donations)->toHaveCount(3)
-        ->and($donations->pluck('listing.seller.business_name')->unique()->all())->toBe(['Roti Lane Bakery'])
+        ->and($donations->pluck('listing.seller.business_name')->unique()->all())->toBe(['Bonda Mawar Cake House'])
         ->and($donations->pluck('partner.name')->unique()->all())->toBe(['[FOOD BANK PARTNER NAME]'])
         ->and($donations->where('status', DonationStatus::Collected)->sum('quantity'))->toBe(8)
         ->and($donations->where('status', DonationStatus::Offered)->sum('quantity'))->toBe(1);
@@ -253,7 +258,7 @@ it('fills the inboxes with the messages the demo data would have caused', functi
     $booked = $user('aina')->notifications()->get()->where('data.kind', 'reservation.booked');
     $admin = $user('admin')->notifications()->get();
 
-    expect($booked->pluck('data.body')->implode(' '))->toContain('Pickup code 2468. Collect at Daily Grind Café')
+    expect($booked->pluck('data.body')->implode(' '))->toContain('Pickup code 2468. Collect at Se.Bunga Kafe UiTM')
         // One "you're booked" per reservation still waiting, dated like the reservation.
         ->and($booked->count())->toBe($user('aina')->reservations()->where('status', 'reserved')->count())
         ->and($booked->first()->created_at->equalTo(
@@ -264,8 +269,8 @@ it('fills the inboxes with the messages the demo data would have caused', functi
             'New shop to approve: Kedai Kopi Sinar',
             'New shop to approve: Sweet Crumbs Bakehouse',
         ])
-        ->and($admin->where('data.kind', 'admin.report')->sole()->data['body'])->toBe('Daily Grind Café · Food quality: “Bread was stale at pickup.”')
-        ->and($user('dailygrind')->notifications()->get()->where('data.kind', 'seller.reservation'))->not->toBeEmpty()
+        ->and($admin->where('data.kind', 'admin.report')->sole()->data['body'])->toBe('Se.Bunga Kafe UiTM · Food quality: “Bread was stale at pickup.”')
+        ->and($user('sebunga')->notifications()->get()->where('data.kind', 'seller.reservation'))->not->toBeEmpty()
         // Nothing is marked read yet, so the bells show a number in the demo.
         ->and($user('admin')->unreadNotifications()->count())->toBe($admin->count());
 });

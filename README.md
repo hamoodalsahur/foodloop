@@ -98,16 +98,20 @@ service or another MySQL 8 server. Put its user and password in `.env`.
 (about 5 seconds). Run it again any time to reset, for example right before a demo: pickup times are set
 from the moment you run it, so there are always deals closing soon.
 
-Every account signs in with the password **`password`**. These are made-up people and shops for the demo
-only; never use this data or this password on a real server.
+Every account signs in with the password **`password`**. The people are made up. The approved shops are
+**real food places on and around the UiTM Kedah campus in Merbok** (within 5 km of the main gate), but they
+have not joined FoodLoop: their listings, prices, halal statuses and sales are demo data, and their SSM and
+phone numbers are deliberately fake (`DEMO-0001`, "Demo number"). The three shops waiting for approval are
+made up. Never use this data or this password on a real server.
 
 | Role | Email | Who |
 |---|---|---|
 | Admin | `admin@foodloop.test` | FoodLoop Admin |
-| Seller | `rotilane@foodloop.test` | Roti Lane Bakery (halal certified) |
-| Seller | `kafeseriilmu@foodloop.test` | Kafe Seri Ilmu |
-| Seller | `dailygrind@foodloop.test` | Daily Grind Café |
-| Seller | `maklong@foodloop.test` | Mak Long’s Kuih |
+| Seller | `bondamawar@foodloop.test` | Bonda Mawar Cake House, Sungai Layar, 4.5 km (shown as halal certified) |
+| Seller | `merbokroasted@foodloop.test` | Merbok Roasted, in front of the main gate, 0.1 km |
+| Seller | `sebunga@foodloop.test` | Se.Bunga Kafe UiTM, on campus, 0.3 km (Aina's pickup 2468 for the demo) |
+| Seller | `kopisaigon@foodloop.test` | Kopi Saigon Merbok, Taman Lembah Bujang, 1.5 km |
+| Seller | `kuihtupah@foodloop.test` | Kuih Tradisional Tupah, Kampung Tupah Lama, 2.7 km |
 | Seller, waiting for approval | `kedaikopisinar@foodloop.test` · `dapurbonda@foodloop.test` · `sweetcrumbs@foodloop.test` | Kedai Kopi Sinar · Dapur Bonda · Sweet Crumbs Bakehouse |
 | Customer | `aina@foodloop.test` | Aina Rahman: has a reservation tonight (code 4721) and 14 past pickups |
 | Customer | `hafiz@foodloop.test` · `priya@foodloop.test` · `meiling@foodloop.test` | Hafiz, Priya, Mei Ling: reservations today |
@@ -133,13 +137,14 @@ With `php artisan serve` running and the demo data seeded (about 2 minutes):
 
 To see the other states: reserve everything that's left of a deal and open it again (**Sold out**), open
 <http://localhost:8000/?category=groceries> (**All gone nearby**), or log in as `daniel@foodloop.test`
-(blocked: **You can't reserve until…**). As Aina, **Impact** in the menu shows her rescued meals and money saved; **Map** shows the shops with deals nearby (a simplified drawing, not a street map).
+(blocked: **You can't reserve until…**). As Aina, **Impact** in the menu shows her rescued meals and money saved; **Map** shows the shops with deals on a street map around campus; tap a pin for **See deals** or
+**Directions** (opens Google Maps). With no internet the map falls back to a simplified drawing.
 
 ## Try the seller flow
 
 With `php artisan serve` running and the demo data freshly seeded (about 3 minutes):
 
-1. Log in as `rotilane@foodloop.test` / `password`. You land on **Tonight**: the four number tiles, the
+1. Log in as `bondamawar@foodloop.test` / `password`. You land on **Tonight**: the four number tiles, the
    pickups table, live listings and the "Left over at closing?" card.
 2. Tap **New listing**, fill in a name and prices (FoodLoop price lower than the normal price), keep the
    suggested pickup time and tap **Publish listing**. Open <http://localhost:8000> in a private window:
@@ -173,6 +178,39 @@ Customers can report a listing from its page ("Something wrong? Report this list
 with setup steps and what to do if something goes wrong. Reseed no more than 30 minutes before you
 present: the deals count down for real.
 
+## Open it on your phone (and install it like an app)
+
+FoodLoop can be added to a phone's home screen: it gets its own icon and opens full screen. Phones only
+allow that over **https**, so you give your laptop a temporary https link with Cloudflare's free tunnel.
+
+**Once** (about 2 minutes), in Laragon's terminal:
+
+```
+winget install --id Cloudflare.cloudflared
+```
+
+Success looks like `Successfully installed`. Close the terminal and open a new one so it finds the command.
+
+**Each time** (about 1 minute): keep `php artisan serve` running in one terminal, and in a second one run:
+
+```
+cloudflared tunnel --url http://localhost:8000
+```
+
+After a few seconds it prints a box with a link like `https://some-random-words.trycloudflare.com`. Open
+that link on any phone (Wi-Fi or mobile data, it doesn't matter). Then:
+
+- **Android (Chrome):** menu **⋮ → Add to Home screen → Install**.
+- **iPhone (Safari):** **Share → Add to Home Screen**.
+
+Good to know:
+
+- The link changes every time you start the tunnel, and stops working when you press **Ctrl + C**.
+  While it runs, anyone with the link can open the app: it only holds demo data, but don't leave it on.
+- Use `npm run build`, not `npm run dev`, while tunnelling (the dev server only works on the laptop).
+  If the phone shows a page without styling, stop `npm run dev`, run `npm run build` and reload.
+- Without internet the installed app shows a friendly "You're offline" page.
+
 ## See the design system
 
 While `php artisan serve` is running, these pages show the building blocks every screen is made of, with
@@ -203,8 +241,8 @@ The same tests on MySQL, plus the race test where 8 requests go for the last ite
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 595 passed` for the quick run and
-`Tests: 597 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 600 passed` for the quick run and
+`Tests: 602 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout
@@ -228,6 +266,8 @@ every commit.
 | `docs/screenshots/` | Screenshots of the real app, taken when each stage was checked |
 | `docs/demo-food/` | Drawn food pictures used as stand-ins for seller photos; put real photos in `docs/demo-food/real/` (see its README) |
 | `docs/DEMO_SCRIPT.md` | The 2-minute pitch demo, step by step |
+| `public/manifest.webmanifest`, `public/sw.js`, `public/icons/` | What makes FoodLoop installable on a phone |
+| `resources/js/map.js` | The street map (Leaflet + OpenStreetMap) |
 
 ## Stack
 

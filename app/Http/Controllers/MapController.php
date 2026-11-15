@@ -6,13 +6,14 @@ use App\Queries\DealsQuery;
 use App\Support\DealFilters;
 use App\Support\Distance;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * The map page: where the shops with deals are, as a SIMPLIFIED drawing
- * (rings of distance around "you are here"), not a real street map. Real
- * maps are out of scope for the prototype (docs/BUILD_PLAN.md §7).
- * Open to everyone, like the deals page.
+ * The map page: where the shops with deals are. A street map (Leaflet,
+ * resources/js/map.js) around the campus, with a SIMPLIFIED drawing (rings of
+ * distance around "you are here") underneath that shows instead when the map
+ * can't load (no internet, no JavaScript). Open to everyone, like the deals page.
  */
 class MapController extends Controller
 {
@@ -54,6 +55,28 @@ class MapController extends Controller
                 default => [1, 2, 5],
             },
             'dealCount' => $listings->count(),
+            'mapData' => [
+                'origin' => [...Distance::origin(), 'label' => config('foodloop.demo_origin_label')],
+                'shops' => $shops
+                    ->filter(fn (array $shop) => $shop['seller']->lat !== null && $shop['seller']->lng !== null)
+                    ->map(fn (array $shop) => [
+                        'number' => $shop['number'],
+                        'name' => $shop['seller']->business_name,
+                        'lat' => (float) $shop['seller']->lat,
+                        'lng' => (float) $shop['seller']->lng,
+                        'distance' => Distance::label($shop['distanceKm']),
+                        'deals' => $shop['listings']->count().' '.Str::plural('deal', $shop['listings']->count()),
+                        'directions' => self::directions($shop['seller']->lat, $shop['seller']->lng),
+                    ])
+                    ->values()
+                    ->all(),
+            ],
         ]);
+    }
+
+    /** Google Maps directions to a shop, opened in the phone's maps app when it has one. */
+    public static function directions(float|string $lat, float|string $lng): string
+    {
+        return 'https://www.google.com/maps/dir/?api=1&destination='.$lat.','.$lng;
     }
 }

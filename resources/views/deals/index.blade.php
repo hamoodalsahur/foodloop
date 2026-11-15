@@ -150,7 +150,7 @@
             </ul>
         </nav>
 
-            <ul class="mt-4 grid gap-3 lg:grid-cols-2">
+            <ul class="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
                 @foreach ($listings as $listing)
                     <li>
                         <x-deal-row :listing="$listing"

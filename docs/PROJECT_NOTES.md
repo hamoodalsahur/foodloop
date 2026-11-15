@@ -17,6 +17,38 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 
 ---
 
+## 15 Nov 2026 · Real map, real shops around UiTM Kedah, installable on phones
+
+- **Why:** the owner asked for a real map with the food places near their campus, and whether FoodLoop
+  could be a mobile app.
+- **What changed:**
+  - *Pilot location:* "you are here" is now the UiTM Kedah main gate in Merbok (`config/foodloop.php`).
+    There is no GPS, so every student is treated as being on campus. The deals page shows 5 km by
+    default (was 2 km), which covers the shops around campus.
+  - *Real shops:* the four made-up approved shops became five real food places within 5 km, at their
+    real positions (looked up on Google Maps, 15 Nov): Merbok Roasted (0.1 km, nasi ayam), Se.Bunga Kafe
+    UiTM (on campus, 0.3 km, sandwich pack), Kopi Saigon Merbok (1.5 km, iced latte), Kuih Tradisional
+    Tupah (2.7 km, curry puffs), Bonda Mawar Cake House (4.5 km, bakery bundle and croissants). New logins
+    in README. They are labelled as demo everywhere: the shops haven't joined FoodLoop, and their deals,
+    prices, halal statuses and SSM/phone numbers are made up. The three shops waiting for approval stay
+    made up on purpose.
+  - *Street map* (`resources/js/map.js`): Leaflet with OpenStreetMap tiles (free, no account or key;
+    CARTO's nicer tiles now need a key). Numbered pins match the list; tapping one shows **See deals** and
+    **Directions** (Google Maps). Each shop in the list has a Directions button too. If no map tile
+    arrives within 7 seconds (no internet), the page swaps back to the simplified drawing with a note,
+    so it is never empty. Leaflet only downloads on the map page.
+  - *Installable app (PWA):* manifest, FoodLoop icons (the "o." from the wordmark), theme colour, a
+    service worker and a "You're offline" page. The service worker only handles plain page loads and
+    caches nothing personal (deals and codes must be live). To open it on a phone, README → "Open it on
+    your phone" uses a free Cloudflare tunnel for the https link phones need; Laravel now trusts that
+    proxy so links stay on https.
+- **Tested:** 600 passed, 2 skipped on SQLite (new: `InstallableAppTest`, map data and offline tests, all
+  seeded-data tests moved to the real shops). Browser check in Chromium: the street map loads at 390 and
+  1280 px with all pins and the popup; with map tiles blocked it falls back to the drawing; Chrome reports
+  no installability errors; the offline page shows with no network; reserving still works with the
+  service worker running. Not checked: a real phone install over the tunnel (needs the owner's laptop).
+- **Owner must run:** `npm install`, `npm run build`, `php artisan migrate:fresh --seed`.
+
 ## 15 Nov 2026 · Polish pass on the most-used pages
 
 - **Why:** the owner asked for the pages people use most to feel better and look nicer, rather than more

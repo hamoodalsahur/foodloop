@@ -43,3 +43,111 @@
 [x-cloak] {
     display: none !important;
 }
+
+/*
+| Street map (resources/js/map.js): numbered shop pins, the campus marker and
+| the popups, in the FoodLoop colours.
+*/
+.leaflet-marker-icon.fl-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 3px solid #fff;
+    background: var(--color-forest);
+    color: var(--color-cream);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgb(14 42 32 / 0.35);
+}
+
+.leaflet-marker-icon.fl-you {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgb(255 184 0 / 0.35);
+}
+
+.fl-you-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: var(--color-marigold);
+    border: 2.5px solid var(--color-forest);
+}
+
+.leaflet-container .leaflet-tooltip.fl-you-label {
+    background: var(--color-forest);
+    color: var(--color-cream);
+    border: 0;
+    border-radius: 9999px;
+    padding: 2px 10px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.leaflet-container .leaflet-tooltip.fl-you-label::before {
+    display: none;
+}
+
+.leaflet-container .leaflet-popup-content-wrapper {
+    border-radius: 1rem;
+}
+
+.leaflet-container .leaflet-popup-content {
+    margin: 14px 16px;
+    font-family: var(--font-sans);
+}
+
+.fl-popup-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-forest);
+}
+
+.fl-popup-meta {
+    margin: 2px 0 10px;
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+.fl-popup-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.fl-popup-actions a {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    border-radius: 0.75rem;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.leaflet-container a.fl-popup-primary {
+    background: var(--color-forest);
+    color: var(--color-cream);
+}
+
+.leaflet-container a.fl-popup-secondary {
+    border: 2px solid var(--color-forest);
+    color: var(--color-forest);
+}
+
+.leaflet-container.leaflet-container {
+    font-family: var(--font-sans);
+}
+
+/* Calm the map colours down a little, so the pins stand out. */
+.leaflet-container .leaflet-tile-pane {
+    filter: saturate(0.65) contrast(0.95);
+}

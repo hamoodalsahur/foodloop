@@ -63,12 +63,12 @@ it('writes a countdown clock', function (int $seconds, string $clock) {
 })->with([[2530, '00:42:10'], [9730, '02:42:10'], [59, '00:00:59'], [0, '00:00:00'], [-30, '00:00:00']]);
 
 describe('DealFilters', function () {
-    it('starts with closing soon, halal only, within 2 km', function () {
+    it('starts with closing soon, halal only, within 5 km (the shops around campus)', function () {
         $filters = DealFilters::fromRequest(Request::create('/'));
 
         expect($filters->sort)->toBe('closing')
             ->and($filters->halalOnly)->toBeTrue()
-            ->and($filters->withinKm)->toBe(2)
+            ->and($filters->withinKm)->toBe(5)
             ->and($filters->category)->toBeNull()
             ->and($filters->type)->toBeNull();
     });
@@ -94,10 +94,11 @@ describe('DealFilters', function () {
     it('steps the distance 2 km → 5 km → any → 2 km', function () {
         $at = fn (string $query) => DealFilters::fromRequest(Request::create('/'.$query));
 
-        expect($at('')->nextDistance())->toBe(5)
+        expect($at('?within=2')->nextDistance())->toBe(5)
             ->and($at('?within=5')->nextDistance())->toBe('any')
             ->and($at('?within=any')->nextDistance())->toBe(2)
-            ->and($at('')->widerDistance())->toBe(5)
+            ->and($at('')->nextDistance())->toBe('any')
+            ->and($at('?within=2')->widerDistance())->toBe(5)
             ->and($at('?within=5')->widerDistance())->toBe('any')
             ->and($at('?within=any')->widerDistance())->toBeNull()
             ->and($at('?within=any')->distanceLabel())->toBe('Any distance')
