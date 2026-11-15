@@ -17,6 +17,28 @@ Everything shown with shop names, prices or counts in the mockups is **demo data
 
 ---
 
+## 15 Nov 2026 · Notifications, the rest of admin, password reset (built by Fable)
+
+- **What:**
+  - *Notifications* (in-app only): a bell with an unread count for every role and a `/notifications`
+    inbox. Customers hear about bookings, pickups, strikes, limits and takedowns; shops about new
+    reservations, sell-outs, cancellations, no-shows, approval decisions, warnings and food-bank
+    outcomes; admins about new shops and reports. Every message text lives in `App\Services\Notifier`;
+    a message that fails to save never breaks the action. "Notify me next time" (c07) follows a shop;
+    "Turn on deal alerts" (c05) alerts for new deals. Both can be switched off in the inbox.
+  - *Admin, rest of c10:* Ask for info on a waiting shop (the shop answers by saving its profile; a waiting
+    shop can now upload or replace its halal certificate there); `/admin/listings` with a Taken down tab;
+    `/admin/food-banks` to edit the partner and mark offers collected or declined. Menu now matches c10.
+    This reverses two of Fable's earlier calls (no Ask for info, four-item menu).
+  - *Forgot your password:* our own screens, linked from log in. No real email is sent; on a laptop the
+    page shows an "Open the reset link" button so it can be demoed (team to confirm).
+  - *Photos:* two real photos renamed so the seeder uses them; a test now fails if a photo is misnamed.
+    `bakery-bundle.jpeg` is a watermarked Vecteezy preview and should be replaced.
+- **Tested:** 588 passed, 2 skipped on SQLite (rerun when squashing into `main`); 590 passed on MySQL
+  (Fable's run). Browser check at 390 and 1280 px on the main new screens; not checked in a browser:
+  reset-password, the seller profile certificate field, the open Ask for info form.
+- **Owner must run:** `php artisan migrate:fresh --seed` (new migration) and `npm run build`.
+
 ## 14 Nov 2026 · Stages 6–8 · Impact, admin, map, demo prep (built by Fable)
 
 - **What:** built on the `fable-work` branch, squashed into `main` on 15 Nov, one commit per stage.

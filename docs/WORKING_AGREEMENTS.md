@@ -1,7 +1,7 @@
 # FoodLoop · working agreements
 
 How the owner and Claude work on FoodLoop. Read this at the start of every session, then check the
-repo for changes before acting. Last updated: 15 Nov 2026 (prototype complete).
+repo for changes before acting. Last updated: 15 Nov 2026 (notifications, full admin, password reset).
 
 ## Project facts
 
@@ -59,7 +59,7 @@ repo for changes before acting. Last updated: 15 Nov 2026 (prototype complete).
 | 14 Nov | When a customer gets blocked, their waiting reservations are cancelled and the food goes back on sale | Owner's decision |
 | 14 Nov | Every page follows route → controller → form request → service → Blade → feature test (`docs/UI_GUIDE.md`, "How to add a page") | One pattern for the later stages to copy |
 | 14 Nov | Distances are measured from a made-up "you are here" point in `config/foodloop.php` until the pilot campus is chosen | The pilot location is still an open question |
-| 14 Nov | Left out of the prototype: deal alerts, "Notify me next time", password reset | In the mockups but not in the build plan |
+| 14 Nov | ~~Left out of the prototype: deal alerts, "Notify me next time", password reset~~ (all built 15 Nov) | In the mockups but not in the build plan |
 | 14 Nov | Every screen is built from the components and rules in `docs/UI_GUIDE.md`; colours by name, money through the helper, 44 px touch targets, no emoji | Keeps later stages (and other models) on the approved style |
 | 13 Nov | Fortify screens and password reset wait for Stage 4; two-factor and passkeys are not used | Keeps the prototype small; the reset email needs a screen first |
 | 14 Nov | Reservations close when the pickup window **opens**, not when it ends | Team decision on the Stage 4 question; matches the mockup's "Reservations close in" |
@@ -67,7 +67,9 @@ repo for changes before acting. Last updated: 15 Nov 2026 (prototype complete).
 | 14 Nov | Fable trial work ends after Stage 4; Stages 5–8 are built in the owner's main chat | Owner's call |
 | 14 Nov | Once anyone has reserved, a listing's price, portions, pickup time and halal status are locked; name, photo, description and pausing stay editable | Owner's decision: students keep the deal they booked |
 | 14 Nov | Shops sign up on their own "Sell on FoodLoop" page (`/sell`) | Owner's decision: clearer than a role choice on the student sign-up |
-| 14 Nov | Fable's calls in Stages 6–8 (⚠️ team to confirm): no "Ask for info" for admins; admin menu is Overview, Sellers, Reports, Customers; "Warn seller" is one click; suspending a shop keeps its reservations; the impact page says "Everyone on FoodLoop" (computed) instead of "Campus"; the map is a simplified drawing, not a street map; notifications text left out | Kept the prototype small; real maps need internet at the pitch |
+| 15 Nov | Notifications are in-app only (bell and inbox), no email, push or SMS | As the build plan says; nothing to set up for the demo |
+| 15 Nov | ⚠️ Team to confirm: on a laptop (`APP_ENV=local`, no real email) the forgot-password page shows an "Open the reset link" button so the reset can be demoed | The prototype sends no real email; never shown in production |
+| 14 Nov | Fable's calls in Stages 6–8 (⚠️ team to confirm): "Warn seller" is one click; suspending a shop keeps its reservations; the impact page says "Everyone on FoodLoop" (computed) instead of "Campus"; the map is a simplified drawing, not a street map | Kept the prototype small; real maps need internet at the pitch |
 
 ## Current status
 
@@ -114,7 +116,9 @@ repo for changes before acting. Last updated: 15 Nov 2026 (prototype complete).
 12. ✅ Stages 6, 7, map and 8 done by Fable, squashed into `main` 15 Nov (513 tests on SQLite, 515 on MySQL per Fable).
 13. ⏳ Owner rehearses `docs/DEMO_SCRIPT.md` once on the Windows laptop.
 14. ⏳ Team checks Fable's open decisions (below) and adds real food photos if wanted.
-15. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
+15. ✅ 15 Nov (Fable): in-app notifications for every role, "Notify me next time" and deal alerts, the rest of the admin mockup (Ask for info, Listings, Food banks), Forgot your password. 588 tests on SQLite, 590 on MySQL.
+16. ⚠️ Replace `docs/demo-food/real/bakery-bundle.jpeg`: it is a watermarked Vecteezy preview. Use the licensed download or another photo.
+17. Next: the NPD report, written from `docs/PROJECT_NOTES.md`.
 
 ## Commit roles (14 Nov)
 

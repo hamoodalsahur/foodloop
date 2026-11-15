@@ -203,8 +203,8 @@ The same tests on MySQL, plus the race test where 8 requests go for the last ite
 php artisan test -c phpunit.mysql.xml
 ```
 
-Success looks like a list of green ticks ending in `Tests: 2 skipped, 513 passed` for the quick run and
-`Tests: 515 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
+Success looks like a list of green ticks ending in `Tests: 2 skipped, 588 passed` for the quick run and
+`Tests: 590 passed` on MySQL (the 2 skipped ones are the race test, which needs MySQL). Run both before
 every commit.
 
 ## Repo layout
