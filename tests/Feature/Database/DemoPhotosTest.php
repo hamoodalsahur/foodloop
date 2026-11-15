@@ -83,6 +83,20 @@ it('ignores files that are not pictures or not named after a product', function 
     Listing::all()->each(fn (Listing $listing) => Storage::disk('public')->assertExists($listing->photo_path));
 });
 
+it('only has photos in the real folder that are named after a product, so none is silently ignored', function () {
+    $names = ['bakery-bundle', 'croissants', 'curry-puffs', 'iced-latte', 'sandwich-pack', 'nasi-ayam'];
+
+    $unknown = collect(File::files(base_path('docs/demo-food/real')))
+        ->reject(fn ($file) => $file->getFilename() === 'README.md')
+        ->reject(fn ($file) => in_array($file->getFilenameWithoutExtension(), $names, true)
+            && in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'], true))
+        ->map->getFilename()
+        ->values()
+        ->all();
+
+    expect($unknown)->toBe([]);
+});
+
 it('documents the six product names, and each has a drawn picture to fall back on', function () {
     $readme = File::get(base_path('docs/demo-food/real/README.md'));
 

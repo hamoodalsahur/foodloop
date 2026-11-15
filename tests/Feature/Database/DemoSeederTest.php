@@ -14,6 +14,7 @@ use App\Models\Seller;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoSeeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +22,21 @@ beforeEach(function () {
     Storage::fake('public');
     Storage::fake('local');
 
+    // These tests describe the demo data with the DRAWN pictures, whatever real
+    // photos the team has put in docs/demo-food/real (those are covered by
+    // DemoPhotosTest). So seed from a copy of the folder that has no real photos.
+    $this->drawnOnly = storage_path('framework/testing/demo-food-'.uniqid());
+    File::ensureDirectoryExists($this->drawnOnly);
+    foreach (glob(base_path('docs/demo-food/*.svg')) as $picture) {
+        copy($picture, $this->drawnOnly.'/'.basename($picture));
+    }
+    config(['foodloop.demo_photo_dir' => $this->drawnOnly]);
+
     $this->seed(DatabaseSeeder::class);
+});
+
+afterEach(function () {
+    File::deleteDirectory($this->drawnOnly);
 });
 
 it('creates the four approved shops from the mockups, one seller account each', function () {
