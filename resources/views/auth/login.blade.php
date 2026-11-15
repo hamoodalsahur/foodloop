@@ -20,7 +20,11 @@
         <x-button type="submit" size="lg" arrow>Log in</x-button>
     </form>
 
-    <p class="mt-6 text-center text-sm text-muted">
+    <p class="mt-4 text-center text-sm">
+        <a href="{{ route('password.request') }}" class="inline-flex min-h-11 items-center font-semibold text-forest underline underline-offset-4">Forgot your password?</a>
+    </p>
+
+    <p class="mt-2 text-center text-sm text-muted">
         New to FoodLoop?
         <a href="{{ route('register') }}" class="inline-flex min-h-11 items-center font-semibold text-forest underline underline-offset-4">Create an account</a>
     </p>

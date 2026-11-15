@@ -166,10 +166,11 @@ return [
     'features' => [
         Features::registration(),
 
-        // Password reset is left out of the prototype (it needs two more
-        // screens and real email). To add it later: uncomment the next line and
-        // register Fortify::requestPasswordResetLinkView / resetPasswordView.
-        // Features::resetPasswords(),
+        // "Forgot your password?" Our screens are resources/views/auth/
+        // forgot-password and reset-password (see FortifyServiceProvider).
+        // The prototype sends no real email: with MAIL_MAILER=log the link
+        // is written to storage/logs/laravel.log.
+        Features::resetPasswords(),
 
         // Not used in this prototype: profile and password updates,
         // two-factor login, passkeys.
