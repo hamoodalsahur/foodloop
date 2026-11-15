@@ -9,12 +9,13 @@ use App\Models\Seller;
 use App\Queries\AdminOverview;
 use App\Services\AdminService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** Approving, rejecting and suspending shops, and looking at their halal certificate. */
+/** Approving, rejecting and suspending shops, asking them for more info, and looking at their halal certificate. */
 class SellerController extends Controller
 {
     use AttemptsAdminActions;
@@ -43,6 +44,22 @@ class SellerController extends Controller
         return $this->attempt(
             fn () => $this->admin->approveSeller($seller),
             "{$seller->business_name} is approved and can put listings live.",
+        );
+    }
+
+    /** "Ask for info" (mockup c10): send a waiting shop a question before deciding. */
+    public function ask(Request $request, Seller $seller): RedirectResponse
+    {
+        Gate::authorize('review', $seller);
+
+        $question = $request->validate(
+            ['question' => ['required', 'string', 'max:300']],
+            ['question.required' => 'Write what you need from the shop.', 'question.max' => 'Keep the question under 300 characters.'],
+        )['question'];
+
+        return $this->attempt(
+            fn () => $this->admin->askForInfo($seller, $question),
+            "Sent to {$seller->business_name}. You’ll get a notification when they update their details.",
         );
     }
 

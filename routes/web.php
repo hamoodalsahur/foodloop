@@ -95,11 +95,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/sellers', [Admin\SellerController::class, 'index'])->name('sellers.index');
     Route::post('/sellers/{seller}/approve', [Admin\SellerController::class, 'approve'])->name('sellers.approve');
+    Route::post('/sellers/{seller}/ask', [Admin\SellerController::class, 'ask'])->name('sellers.ask');
     Route::post('/sellers/{seller}/reject', [Admin\SellerController::class, 'reject'])->name('sellers.reject');
     Route::post('/sellers/{seller}/suspend', [Admin\SellerController::class, 'suspend'])->name('sellers.suspend');
     Route::get('/sellers/{seller}/certificate', [Admin\SellerController::class, 'certificate'])->name('sellers.certificate');
 
+    Route::get('/listings', Admin\ListingController::class)->name('listings.index');
+
     // Reports are handled per listing: one button deals with every open report on it.
+    // "Hide listing" also works on a listing nobody reported (the Listings page uses it).
     Route::get('/reports', [Admin\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/{listing}/hide', [Admin\ReportController::class, 'hide'])->name('reports.hide');
     Route::post('/reports/{listing}/warn', [Admin\ReportController::class, 'warn'])->name('reports.warn');
@@ -107,6 +111,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/customers', [Admin\CustomerController::class, 'index'])->name('customers.index');
     Route::post('/customers/{user}/lift-limit', [Admin\CustomerController::class, 'liftLimit'])->name('customers.lift-limit');
+
+    Route::get('/food-banks', [Admin\FoodBankController::class, 'index'])->name('food-banks.index');
+    Route::put('/food-banks/{partner}', [Admin\FoodBankController::class, 'update'])->name('food-banks.update');
+    Route::post('/donations/{donation}/settle', [Admin\FoodBankController::class, 'settle'])->name('donations.settle');
 });
 
 /*

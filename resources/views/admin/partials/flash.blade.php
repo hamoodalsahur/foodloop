@@ -2,6 +2,8 @@
 @if (session('status'))
     <x-notice variant="success" class="mb-6">{{ session('status') }}</x-notice>
 @endif
-@error('admin')
-    <x-notice variant="danger" class="mb-6">{{ $message }}</x-notice>
-@enderror
+@foreach (['admin', 'question', 'outcome'] as $field)
+    @error($field)
+        <x-notice variant="danger" class="mb-6">{{ $message }}</x-notice>
+    @enderror
+@endforeach

@@ -3,6 +3,7 @@
 namespace App\Queries;
 
 use App\Enums\DonationStatus;
+use App\Enums\ListingStatus;
 use App\Enums\ReportStatus;
 use App\Enums\ReservationStatus;
 use App\Enums\SellerStatus;
@@ -99,6 +100,48 @@ class AdminOverview
      *
      * @return Collection<int, User>
      */
+    /**
+     * Listings for the admin Listings page.
+     *
+     *   'now'    everything customers can see or reserve tonight (live, sold out)
+     *            plus paused ones, soonest pickup first
+     *   'hidden' listings an admin took down, newest first
+     *
+     * Each comes with its shop and how many reports are still open on it.
+     *
+     * @return Collection<int, Listing>
+     */
+    public function listings(string $show = 'now'): Collection
+    {
+        $query = Listing::query()
+            ->with('seller')
+            ->withCount(['reports as open_reports_count' => fn ($reports) => $reports->where('status', ReportStatus::Open)])
+            ->withSum(['reservations as waiting_portions' => fn ($r) => $r->where('status', ReservationStatus::Reserved)], 'quantity');
+
+        return $show === 'hidden'
+            ? $query->where('status', ListingStatus::Hidden)->latest('closed_at')->limit(50)->get()
+            : $query->whereIn('status', [ListingStatus::Live, ListingStatus::SoldOut, ListingStatus::Paused])
+                ->where('pickup_end', '>', now())
+                ->orderBy('pickup_start')->orderBy('id')
+                ->get();
+    }
+
+    /**
+     * Every leftover offer, the ones still waiting for the food bank first.
+     *
+     * @return Collection<int, Donation>
+     */
+    public function donations(int $limit = 50): Collection
+    {
+        return Donation::query()
+            ->with(['listing.seller', 'partner'])
+            ->latest()
+            ->limit($limit)
+            ->get()
+            ->sortBy(fn (Donation $donation) => $donation->status === DonationStatus::Offered ? 0 : 1)
+            ->values();
+    }
+
     public function customersWithStrikes(): Collection
     {
         return User::where('role', UserRole::Customer)
