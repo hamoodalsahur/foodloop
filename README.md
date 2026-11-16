@@ -18,6 +18,9 @@ Built for the ENT600 Technology Entrepreneurship New Product Development (NPD) a
 All shop names, prices and numbers in the mockups and in the app are **demo data**, not real offers or
 research results. Payments are simulated.
 
+> **Coming back after a break?** `docs/QUICK_START.md` has the short version: closing down, starting
+> again, the pitch-day steps and every login.
+
 ## Run it locally
 
 For Windows with [Laragon](https://laragon.org) (it brings PHP, MySQL, Composer and Node). First time:
